@@ -9,7 +9,7 @@
 	<groupId>org.bitbucket.cowwoc</groupId>
 	<artifactId>maven-cmake-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<version>0.1</version>
+	<version>0.2-SNAPSHOT</version>
 	<name>CMake Maven Plugin</name>
 	<description>Builds native code using CMake makefile generator</description>
 	<url>http://bitbucket.org/cowwoc/maven-cmake-plugin</url>
