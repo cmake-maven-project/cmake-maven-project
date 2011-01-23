@@ -31,76 +31,77 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author Gili Tzabari
  */
 public class CompileMojo
-  extends AbstractMojo
+	extends AbstractMojo
 {
-  /**
-   * The build type (i.e. "debug", "release").
-   *
-   * @parameter
-   */
-  @SuppressWarnings("UWF_UNWRITTEN_FIELD")
-  private String buildType;
-  /**
-   * The makefile generator to use.
-   *
-   * @parameter default-value="debug"
-   * @required
-   */
-  private String generator;
-  /**
-   * The target platform to compile for.
-   *
-   * @parameter
-   */
-  private String platform;
-  /**
-   * The project file to compile.
-   *
-   * @parameter
-   * @required
-   */
-  @SuppressWarnings("UWF_UNWRITTEN_FIELD")
-  private File projectPath;
+	/**
+	 * The build type (i.e. "debug", "release").
+	 *
+	 * @parameter
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	private String buildType;
+	/**
+	 * The makefile generator to use.
+	 *
+	 * @parameter default-value="debug"
+	 * @required
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	private String generator;
+	/**
+	 * The target platform to compile for.
+	 *
+	 * @parameter
+	 */
+	private String platform;
+	/**
+	 * The project file to compile.
+	 *
+	 * @parameter
+	 * @required
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	private File projectPath;
 
-  /**
-   * Returns the platform associated with a makefile generator.
-   *
-   * @param generator the makefile generator
-   * @return the platform associated with the makefile generator
-   */
-  private static String getPlatformFromGenerator(String generator)
-  {
-    if (generator.contains("Win64"))
-      return "x64";
-    return "x86";
-  }
+	/**
+	 * Returns the platform associated with a makefile generator.
+	 *
+	 * @param generator the makefile generator
+	 * @return the platform associated with the makefile generator
+	 */
+	private static String getPlatformFromGenerator(String generator)
+	{
+		if (generator.contains("Win64"))
+			return "x64";
+		return "Win32";
+	}
 
-  @Override
-  @SuppressWarnings("NP_UNWRITTEN_FIELD")
-  public void execute()
-    throws MojoExecutionException, MojoFailureException
-  {
-    try
-    {
-      Compiler compiler = Compiler.fromGenerator(generator, getLog());
+	@Override
+	@SuppressWarnings("NP_UNWRITTEN_FIELD")
+	public void execute()
+		throws MojoExecutionException, MojoFailureException
+	{
+		try
+		{
+			Compiler compiler = Compiler.fromGenerator(generator, getLog());
 
-      if (compiler == null)
-        throw new MojoExecutionException("Cannot find: " + generator);
-      if (!projectPath.exists())
-        throw new MojoExecutionException(projectPath.getAbsolutePath() + " does not exist");
-      if (platform == null)
-        platform = getPlatformFromGenerator(generator);
+			if (compiler == null)
+				throw new MojoExecutionException("Cannot find: " + generator);
+			if (!projectPath.exists())
+				throw new MojoExecutionException(projectPath.getAbsolutePath() + " does not exist");
+			if (platform == null)
+				platform = getPlatformFromGenerator(generator);
 
-      if (!compiler.compile(projectPath, platform, buildType))
-        throw new MojoFailureException("Compilation failed");
-    }
-    catch (InterruptedException e)
-    {
-      throw new MojoExecutionException("", e);
-    }
-    catch (IOException e)
-    {
-      throw new MojoExecutionException("", e);
-    }
-  }
+			if (!compiler.compile(projectPath, platform, buildType))
+				throw new MojoFailureException("Compilation failed");
+		}
+		catch (InterruptedException e)
+		{
+			throw new MojoExecutionException("", e);
+		}
+		catch (IOException e)
+		{
+			throw new MojoExecutionException("", e);
+		}
+	}
 }

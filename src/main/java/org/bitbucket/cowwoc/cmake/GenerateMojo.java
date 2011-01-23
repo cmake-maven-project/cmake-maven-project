@@ -21,6 +21,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
@@ -32,70 +33,81 @@ import org.apache.maven.project.MavenProject;
  * @author Gili Tzabari
  */
 public class GenerateMojo
-  extends AbstractMojo
+	extends AbstractMojo
 {
-  /**
-   * The directory containing CMakeLists.txt
-   *
-   * @parameter
-   * @required
-   */
-  @SuppressWarnings("UWF_UNWRITTEN_FIELD")
-  private File sourcePath;
-  /**
-   * The output directory.
-   *
-   * @parameter
-   * @required
-   */
-  @SuppressWarnings("UWF_UNWRITTEN_FIELD")
-  private File targetPath;
-  /**
-   * The makefile generator to use.
-   *
-   * @parameter
-   * @required
-   */
-  private String generator;
-  /**
-   * The maven project.
-   *
-   * @parameter expression="${project}"
-   * @required
-   * @readonly
-   */
-  @SuppressWarnings("UWF_UNWRITTEN_FIELD")
-  private MavenProject project;
+	/**
+	 * The directory containing CMakeLists.txt
+	 *
+	 * @parameter
+	 * @required
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	private File sourcePath;
+	/**
+	 * The output directory.
+	 *
+	 * @parameter
+	 * @required
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	private File targetPath;
+	/**
+	 * The makefile generator to use.
+	 *
+	 * @parameter
+	 * @required
+	 */
+	private String generator;
+	/**
+	 * The maven project.
+	 *
+	 * @parameter expression="${project}"
+	 * @required
+	 * @readonly
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	private MavenProject project;
+	/**
+	 * The environment variables.
+	 *
+	 * @parameter alias="environment"
+	 * @readonly
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	private Map<String, String> environmentVariables;
 
-  @Override
-  public void execute()
-    throws MojoExecutionException
-  {
-    try
-    {
-      if (!targetPath.exists() && !targetPath.mkdirs())
-        throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
+	@Override
+	public void execute()
+		throws MojoExecutionException
+	{
+		try
+		{
+			if (!targetPath.exists() && !targetPath.mkdirs())
+				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
 
-      Log log = getLog();
-      ProcessBuilder processBuilder = new ProcessBuilder("cmake", sourcePath.getAbsolutePath(), "-G",
-        generator).directory(targetPath);
-      if (log.isDebugEnabled())
-      {
-        log.debug("sourcePath: " + sourcePath.getPath());
-        log.debug("targetPath: " + targetPath.getPath());
-        log.debug("command-line: " + processBuilder.command());
-      }
-      int returnCode = Mojos.waitFor(processBuilder);
-      if (returnCode != 0)
-        throw new MojoExecutionException("Return code: " + returnCode);
-    }
-    catch (InterruptedException e)
-    {
-      throw new MojoExecutionException("", e);
-    }
-    catch (IOException e)
-    {
-      throw new MojoExecutionException("", e);
-    }
-  }
+			Log log = getLog();
+			@java.lang.SuppressWarnings("unchecked")
+			ProcessBuilder processBuilder = new ProcessBuilder("cmake", sourcePath.getAbsolutePath(), "-G",
+				generator).directory(targetPath);
+			if (environmentVariables != null)
+				processBuilder.environment().putAll(environmentVariables);
+			if (log.isDebugEnabled())
+			{
+				log.debug("sourcePath: " + sourcePath.getPath());
+				log.debug("targetPath: " + targetPath.getPath());
+				log.debug("command-line: " + processBuilder.command());
+			}
+			int returnCode = Mojos.waitFor(processBuilder);
+			if (returnCode != 0)
+				throw new MojoExecutionException("Return code: " + returnCode);
+		}
+		catch (InterruptedException e)
+		{
+			throw new MojoExecutionException("", e);
+		}
+		catch (IOException e)
+		{
+			throw new MojoExecutionException("", e);
+		}
+	}
 }
