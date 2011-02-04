@@ -1,4 +1,4 @@
-package org.bitbucket.cowwoc.cmake;
+package com.googlecode.cmakemavenproject;
 
 import java.io.File;
 import java.io.IOException;

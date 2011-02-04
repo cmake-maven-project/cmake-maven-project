@@ -1,4 +1,4 @@
-package org.bitbucket.cowwoc.cmake;
+package com.googlecode.cmakemavenproject;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -23,13 +23,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
 
 /**
  * Goal which generates project files.
  *
  * @goal generate
- * @phase compile
+ * @phase process-sources
  * @author Gili Tzabari
  */
 public class GenerateMojo
@@ -41,7 +40,10 @@ public class GenerateMojo
 	 * @parameter
 	 * @required
 	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressWarnings(
+	{
+		"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"
+	})
 	private File sourcePath;
 	/**
 	 * The output directory.
@@ -49,7 +51,10 @@ public class GenerateMojo
 	 * @parameter
 	 * @required
 	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressWarnings(
+	{
+		"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"
+	})
 	private File targetPath;
 	/**
 	 * The makefile generator to use.
@@ -57,21 +62,12 @@ public class GenerateMojo
 	 * @parameter
 	 * @required
 	 */
-	private String generator;
-	/**
-	 * The maven project.
-	 *
-	 * @parameter expression="${project}"
-	 * @required
-	 * @readonly
-	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	private MavenProject project;
+	private String generator;
 	/**
 	 * The environment variables.
 	 *
-	 * @parameter alias="environment"
-	 * @readonly
+	 * @parameter
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	private Map<String, String> environmentVariables;
@@ -84,7 +80,6 @@ public class GenerateMojo
 		{
 			if (!targetPath.exists() && !targetPath.mkdirs())
 				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
-
 			Log log = getLog();
 			@java.lang.SuppressWarnings("unchecked")
 			ProcessBuilder processBuilder = new ProcessBuilder("cmake", sourcePath.getAbsolutePath(), "-G",
@@ -96,6 +91,7 @@ public class GenerateMojo
 				log.debug("sourcePath: " + sourcePath.getPath());
 				log.debug("targetPath: " + targetPath.getPath());
 				log.debug("command-line: " + processBuilder.command());
+				log.debug("environment: " + processBuilder.environment());
 			}
 			int returnCode = Mojos.waitFor(processBuilder);
 			if (returnCode != 0)

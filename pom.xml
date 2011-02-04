@@ -6,13 +6,13 @@
 		<artifactId>oss-parent</artifactId>
 		<version>5</version>
 	</parent>
-	<groupId>org.bitbucket.cowwoc</groupId>
-	<artifactId>maven-cmake-plugin</artifactId>
+	<groupId>com.googlecode.cmake-maven-project</groupId>
+	<artifactId>cmake-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 	<version>0.2-SNAPSHOT</version>
 	<name>CMake Maven Plugin</name>
 	<description>Builds native code using CMake makefile generator</description>
-	<url>http://bitbucket.org/cowwoc/maven-cmake-plugin</url>
+	<url>http://code.google.com/p/cmake-maven-project/</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -21,9 +21,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://bitbucket.org/cowwoc/maven-cmake-plugin</url>
-		<connection>scm:hg:https://bitbucket.org/cowwoc/maven-cmake-plugin</connection>
-		<developerConnection>scm:hg:https://bitbucket.org/cowwoc/maven-cmake-plugin</developerConnection>
+		<url>https://cmake-maven-project.googlecode.com/hg/</url>
+		<connection>scm:hg:https://cmake-maven-project.googlecode.com/hg/</connection>
+		<developerConnection>scm:hg:https://cmake-maven-project.googlecode.com/hg/</developerConnection>
 	</scm>
 	<developers>
 		<developer>

@@ -1,4 +1,4 @@
-package org.bitbucket.cowwoc.cmake;
+package com.googlecode.cmakemavenproject;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.File;

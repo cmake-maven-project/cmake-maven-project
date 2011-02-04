@@ -1,4 +1,4 @@
-package org.bitbucket.cowwoc.cmake;
+package com.googlecode.cmakemavenproject;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -43,7 +43,7 @@ public class CompileMojo
 	/**
 	 * The makefile generator to use.
 	 *
-	 * @parameter default-value="debug"
+	 * @parameter
 	 * @required
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
@@ -86,7 +86,7 @@ public class CompileMojo
 			Compiler compiler = Compiler.fromGenerator(generator, getLog());
 
 			if (compiler == null)
-				throw new MojoExecutionException("Cannot find: " + generator);
+				throw new MojoExecutionException("Cannot find generator: " + generator);
 			if (!projectPath.exists())
 				throw new MojoExecutionException(projectPath.getAbsolutePath() + " does not exist");
 			if (platform == null)
