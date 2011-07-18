@@ -41,6 +41,7 @@ public class Mojos
 	 * Launches and waits for a process to complete.
 	 *
 	 * @param processBuilder the process builder
+	 * @return the process exit code
 	 * @throws IOException if an I/O error occurs while running the process
 	 * @throws InterruptedException if the thread was interrupted
 	 */

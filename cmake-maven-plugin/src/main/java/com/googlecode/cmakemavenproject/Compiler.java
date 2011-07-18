@@ -1,9 +1,7 @@
 package com.googlecode.cmakemavenproject;
 
-import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import org.apache.maven.plugin.logging.Log;
 
 /**
@@ -72,20 +70,17 @@ public abstract class Compiler
 		ECLIPSE
 	}
 	private final Type type;
-	private final File path;
 	private final Log log;
 
 	/**
 	 * Creates a new Compiler.
 	 *
 	 * @param type the compiler type
-	 * @param path the compiler path
 	 * @param log Maven log
 	 */
-	protected Compiler(Type type, File path, Log log)
+	protected Compiler(Type type, Log log)
 	{
 		this.type = type;
-		this.path = path;
 		this.log = log;
 	}
 
@@ -94,37 +89,11 @@ public abstract class Compiler
 	 *
 	 * @param name the makefile generator
 	 * @param log the Maven log
-	 * @return the Compiler associated with the makefile generator
+	 * @return null if the name does not map to a known compiler
 	 */
 	public static Compiler fromGenerator(String name, Log log)
 	{
-		VisualStudioCompiler vs6 = new VisualStudioCompiler(VisualStudioCompiler.Version.V6, log);
-		VisualStudioCompiler vs70 = new VisualStudioCompiler(VisualStudioCompiler.Version.V7_0, log);
-		VisualStudioCompiler vs71 = new VisualStudioCompiler(VisualStudioCompiler.Version.V7_1, log);
-		VisualStudioCompiler vs8 = new VisualStudioCompiler(VisualStudioCompiler.Version.V8, log);
-		VisualStudioCompiler vs9 = new VisualStudioCompiler(VisualStudioCompiler.Version.V9, log);
-		VisualStudioCompiler vs10 = new VisualStudioCompiler(VisualStudioCompiler.Version.V10, log);
-		Map<String, Compiler> compilerNameToType = new ImmutableMap.Builder<String, Compiler>().put(
-			"Visual Studio 6", vs6).
-			put("Visual Studio 7", vs70).
-			put("Visual Studio 7 .NET 2003", vs71).
-			put("Visual Studio 8", vs8).
-			put("Visual Studio 8 Win64", vs8).
-			put("Visual Studio 9", vs9).
-			put("Visual Studio 9 Win64", vs9).
-			put("Visual Studio 10", vs10).
-			put("Visual Studio 10 Win64", vs10).build();
-		return compilerNameToType.get(name);
-	}
-
-	/**
-	 * Returns the compiler path.
-	 *
-	 * @return the compiler path
-	 */
-	public File getPath()
-	{
-		return path;
+		return VisualStudioCompiler.fromGenerator(name, log);
 	}
 
 	/**
@@ -148,13 +117,6 @@ public abstract class Compiler
 	}
 
 	/**
-	 * Returns cmake's name for this compiler.
-	 *
-	 * @return cmake's name for this compiler
-	 */
-	public abstract String getName();
-
-	/**
 	 * Compiles a project.
 	 *
 	 * @param projectPath the project file
@@ -166,10 +128,4 @@ public abstract class Compiler
 	 */
 	public abstract boolean compile(File projectPath, String platform, String buildType)
 		throws IOException, InterruptedException;
-
-	@Override
-	public String toString()
-	{
-		return getClass().getName() + "[path=" + getPath() + "]";
-	}
 }
