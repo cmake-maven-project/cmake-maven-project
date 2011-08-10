@@ -182,7 +182,6 @@ public final class VisualStudioCompiler extends Compiler
 				throw new AssertionError(version);
 		}
 
-		System.out.println("commandLine: " + commandLine);
 		ProcessBuilder processBuilder = new ProcessBuilder(commandLine).directory(projectPath.
 			getParentFile());
 		Log log = getLog();
