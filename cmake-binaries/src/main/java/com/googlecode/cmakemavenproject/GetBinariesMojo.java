@@ -1,6 +1,7 @@
 package com.googlecode.cmakemavenproject;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
 import de.schlichtherle.truezip.fs.FsSyncOptions;
 import de.schlichtherle.truezip.nio.file.TPath;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
@@ -10,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.maven.artifact.Artifact;
@@ -19,7 +21,6 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
@@ -93,7 +94,7 @@ public class GetBinariesMojo
 	@Override
 	@SuppressWarnings("NP_UNWRITTEN_FIELD")
 	public void execute()
-		throws MojoExecutionException, MojoFailureException
+		throws MojoExecutionException
 	{
 		final String groupId = "com.googlecode.cmake-maven-project";
 		final String artifactId = "cmake-binaries";
@@ -123,7 +124,7 @@ public class GetBinariesMojo
 		if (artifact != null)
 			return;
 
-		File file;
+		Path file;
 		String cmakeVersion = getCMakeVersion(version);
 		try
 		{
@@ -137,7 +138,7 @@ public class GetBinariesMojo
 		}
 		Plugin installPlugin = MojoExecutor.plugin("org.apache.maven.plugins",
 			"maven-install-plugin", "2.3.1");
-		Element fileElement = new Element("file", file.getAbsolutePath());
+		Element fileElement = new Element("file", file.toAbsolutePath().toString());
 		Element groupIdElement = new Element("groupId", groupId);
 		Element artifactIdElement = new Element("artifactId", artifactId);
 		Element versionElement = new Element("version", version);
@@ -191,23 +192,6 @@ public class GetBinariesMojo
 	}
 
 	/**
-	 * Returns a filename extension.
-	 *
-	 * @param path the path
-	 * @return an empty string if no extension is found
-	 */
-	private String getFileExtension(String path)
-	{
-		Preconditions.checkNotNull(path, "path may not be null");
-
-		Pattern pattern = Pattern.compile(".*?[^\\.]([\\p{Alnum}]+[\\.]?)+$");
-		Matcher matcher = pattern.matcher(path);
-		if (!matcher.find())
-			return "";
-		return matcher.group(1);
-	}
-
-	/**
 	 * Returns a local artifact.
 	 *
 	 * @param groupId the artifact group id
@@ -237,44 +221,46 @@ public class GetBinariesMojo
 	 * Converts a compressed file to JAR format, removing the top-level directory at the same
 	 * time.
 	 *
-	 * @param file the file to convert
+	 * @param path the file to convert
 	 * @return the JAR file
 	 * @throws IOException if an I/O error occurs
 	 */
-	private File convertToJar(File file) throws IOException
+	private Path convertToJar(Path path) throws IOException
 	{
-		final TPath sourceFile = new TPath(file);
-		String extension = getFileExtension(file.getName());
-		String nameWithoutExtension = file.getName().substring(0,
-			file.getName().length() - extension.length());
-		File result = new File(project.getBuild().getDirectory(), nameWithoutExtension + "jar");
-		Files.deleteIfExists(result.toPath());
-		final TPath targetFile = new TPath(result);		
-		final Path[] rootPath = new Path[1];
-		
-		// Locate path relative-to-which binaries are available for all platforms
-		Files.walkFileTree(sourceFile, new SimpleFileVisitor<Path>()
+		final TPath sourceFile = new TPath(path);
+		String filename = path.getFileName().toString();
+		String extension = getFileExtension(filename);
+		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
+		String nextExtension = getFileExtension(nameWithoutExtension);
+		if (!nextExtension.isEmpty())
 		{
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
+			if (nextExtension.equals("tar"))
 			{
-				if (dir.getFileName().toString().equals("bin"))
+				Iterator<Path> files = Files.newDirectoryStream(path).iterator();
+				Path tarFile;
+				try
 				{
-					rootPath[0] = dir.getParent();
-					return FileVisitResult.TERMINATE;
+					tarFile = Iterators.getOnlyElement(files);
 				}
-				return super.preVisitDirectory(dir, attrs);
-			}			
-		});
-		if (rootPath[0] == null)
-			throw new IOException("Could not locate bin directory: " + file);
-		
+				catch (IllegalArgumentException e)
+				{
+					throw new IOException("File contained multiple TAR files: " + path);
+				}
+				return convertToJar(tarFile);
+			}
+			else
+				throw new IllegalArgumentException("Unsupported extension: " + path);
+		}
+		Path result = Paths.get(project.getBuild().getDirectory(), nameWithoutExtension + "jar");
+		Files.deleteIfExists(result);
+		final TPath targetFile = new TPath(result);
+
 		Files.walkFileTree(sourceFile, new SimpleFileVisitor<Path>()
 		{
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
 			{
-				Files.copy(file, targetFile.resolve(rootPath[0].relativize(file)), 
+				Files.copy(file, targetFile.resolve(sourceFile.relativize(file)),
 					StandardCopyOption.COPY_ATTRIBUTES);
 				return super.visitFile(file, attrs);
 			}
@@ -284,13 +270,32 @@ public class GetBinariesMojo
 	}
 
 	/**
+	 * Returns a filename extension.
+	 *
+	 * @param filename the filename
+	 * @return an empty string if no extension is found
+	 * @throws NullArgumentException if filename is null
+	 */
+	private String getFileExtension(String filename)
+	{
+		Preconditions.checkNotNull(filename, "filename may not be null");
+
+		int index = filename.lastIndexOf('.');
+
+		// Unix-style ".hidden" files have no extension
+		if (index <= 0)
+			return "";
+		return filename.substring(index + 1);
+	}
+
+	/**
 	 * Downloads a file.
 	 *
 	 * @param url the file to download
 	 * @return the downloaded File
 	 * @throws MojoExecutionException if an error occurs downloading the file
 	 */
-	private File download(URL url) throws MojoExecutionException
+	private Path download(URL url) throws MojoExecutionException
 	{
 		Log log = getLog();
 		if (log.isInfoEnabled())
@@ -298,13 +303,16 @@ public class GetBinariesMojo
 		try
 		{
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			File result;
+			Path result;
 			try
 			{
 				BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+				
+				Files.createDirectories(Paths.get(project.getBuild().getDirectory()));
 				String filename = new File(url.getPath()).getName();
-				result = new File(project.getBuild().getDirectory(), filename);
-				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(result));
+				result = Paths.get(project.getBuild().getDirectory(), filename);
+				
+				BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(result));
 				byte[] buffer = new byte[10 * 1024];
 				try
 				{
