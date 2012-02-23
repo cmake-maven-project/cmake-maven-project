@@ -5,7 +5,10 @@ import com.google.common.collect.Iterators;
 import de.schlichtherle.truezip.fs.FsSyncOptions;
 import de.schlichtherle.truezip.nio.file.TPath;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,7 +37,6 @@ import org.twdata.maven.mojoexecutor.MojoExecutor.ExecutionEnvironment;
  *
  * @goal get-binaries
  * @phase generate-resources
- *
  * @author Gili Tzabari
  */
 public class GetBinariesMojo
@@ -218,7 +220,7 @@ public class GetBinariesMojo
 	}
 
 	/**
-	 * Converts a compressed file to JAR format, removing the top-level directory at the same
+	 * Converts a compressed file to JAR format, removing top-level directories at the same
 	 * time.
 	 *
 	 * @param path the file to convert
@@ -255,12 +257,31 @@ public class GetBinariesMojo
 		Files.deleteIfExists(result);
 		final TPath targetFile = new TPath(result);
 
+		// Locate path relative-to-which binaries are available for all platforms
+		final Path[] rootPath = new Path[1];
+		Files.walkFileTree(sourceFile, new SimpleFileVisitor<Path>()
+		{
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws
+				IOException
+			{
+				if (dir.getFileName().toString().equals("bin"))
+				{
+					rootPath[0] = dir.getParent();
+					return FileVisitResult.TERMINATE;
+				}
+				return super.preVisitDirectory(dir, attrs);
+			}
+		});
+		if (rootPath[0] == null)
+			throw new IOException("Could not locate bin directory: " + path);
+
 		Files.walkFileTree(sourceFile, new SimpleFileVisitor<Path>()
 		{
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
 			{
-				Files.copy(file, targetFile.resolve(sourceFile.relativize(file)),
+				Files.copy(file, targetFile.resolve(rootPath[0].relativize(file)),
 					StandardCopyOption.COPY_ATTRIBUTES);
 				return super.visitFile(file, attrs);
 			}
@@ -307,11 +328,11 @@ public class GetBinariesMojo
 			try
 			{
 				BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-				
+
 				Files.createDirectories(Paths.get(project.getBuild().getDirectory()));
 				String filename = new File(url.getPath()).getName();
 				result = Paths.get(project.getBuild().getDirectory(), filename);
-				
+
 				BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(result));
 				byte[] buffer = new byte[10 * 1024];
 				try
