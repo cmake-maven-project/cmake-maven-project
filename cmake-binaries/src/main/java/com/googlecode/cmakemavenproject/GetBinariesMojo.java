@@ -1,7 +1,6 @@
 package com.googlecode.cmakemavenproject;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
 import de.schlichtherle.truezip.fs.FsSyncOptions;
 import de.schlichtherle.truezip.nio.file.TPath;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
@@ -14,7 +13,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.maven.artifact.Artifact;
@@ -233,26 +231,6 @@ public class GetBinariesMojo
 		String filename = path.getFileName().toString();
 		String extension = getFileExtension(filename);
 		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
-		String nextExtension = getFileExtension(nameWithoutExtension);
-		if (!nextExtension.isEmpty())
-		{
-			if (nextExtension.equals("tar"))
-			{
-				Iterator<Path> files = Files.newDirectoryStream(path).iterator();
-				Path tarFile;
-				try
-				{
-					tarFile = Iterators.getOnlyElement(files);
-				}
-				catch (IllegalArgumentException e)
-				{
-					throw new IOException("File contained multiple TAR files: " + path);
-				}
-				return convertToJar(tarFile);
-			}
-			else
-				throw new IllegalArgumentException("Unsupported extension: " + path);
-		}
 		Path result = Paths.get(project.getBuild().getDirectory(), nameWithoutExtension + "jar");
 		Files.deleteIfExists(result);
 		final TPath targetFile = new TPath(result);
@@ -291,7 +269,8 @@ public class GetBinariesMojo
 	}
 
 	/**
-	 * Returns a filename extension.
+	 * Returns a filename extension. For example, {@code getFileExtension("foo.tar.gz")} returns
+	 * {@code .tar.gz}. Unix hidden files (e.g. ".hidden") have no extension.
 	 *
 	 * @param filename the filename
 	 * @return an empty string if no extension is found
@@ -301,12 +280,11 @@ public class GetBinariesMojo
 	{
 		Preconditions.checkNotNull(filename, "filename may not be null");
 
-		int index = filename.lastIndexOf('.');
-
-		// Unix-style ".hidden" files have no extension
-		if (index <= 0)
+		Pattern pattern = Pattern.compile("[^\\.]+(\\.[\\p{Alnum}\\.]+)$");
+		Matcher matcher = pattern.matcher(filename);
+		if (!matcher.find())
 			return "";
-		return filename.substring(index + 1);
+		return matcher.group(1);
 	}
 
 	/**
