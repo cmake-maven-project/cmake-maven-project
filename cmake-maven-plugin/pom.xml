@@ -128,6 +128,12 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>mac</id>
+			<properties>
+				<cmake.classifier>mac</cmake.classifier>
+			</properties>
+		</profile>
+		<profile>
 			<id>sonatype-oss-release</id>
 			<build>
 				<plugins>
