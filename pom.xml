@@ -33,6 +33,7 @@
     </developers>
     
     <modules>
+        <module>cmake-binaries-plugin</module>
         <module>cmake-binaries</module>
         <module>cmake-maven-plugin</module>
     </modules>

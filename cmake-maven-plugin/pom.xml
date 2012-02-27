@@ -49,22 +49,6 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>com.googlecode.cmake-maven-project</groupId>
-				<artifactId>cmake-binaries</artifactId>
-				<version>${project.version}</version>
-				<executions>
-					<execution>
-						<id>cmake-binaries</id>
-						<goals>
-							<goal>get-binaries</goal>
-						</goals>
-						<configuration>
-							<classifier>${cmake.classifier}</classifier>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -132,29 +116,6 @@
 			<properties>
 				<cmake.classifier>mac</cmake.classifier>
 			</properties>
-		</profile>
-		<profile>
-			<id>sonatype-oss-release</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<passphrase>${gpg.passphrase}</passphrase>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 </project>
