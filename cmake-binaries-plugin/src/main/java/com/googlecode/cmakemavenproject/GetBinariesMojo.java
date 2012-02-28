@@ -24,15 +24,10 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 
 /**
  * Downloads and installs the CMake binaries into the local Maven repository.
@@ -61,47 +56,18 @@ public class GetBinariesMojo
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	private String version;
 	/**
-	 * The maven plugin manager.
-	 *
-	 * @component
-	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	private BuildPluginManager pluginManager;
-	/**
-	 * The local maven repository.
-	 *
-	 * @parameter expression="${localRepository}"
-	 * @required
-	 * @readonly
-	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	private ArtifactRepository localRepository;
-	/**
-	 * @component
-	 */
-	private RepositorySystem repositorySystem;
-	/**
 	 * @parameter expression="${project}"
 	 * @required
 	 * @readonly
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	private MavenProject project;
-	/**
-	 * @parameter expression="${session}"
-	 * @required
-	 * @readonly
-	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	private MavenSession session;
 
 	@Override
 	@SuppressWarnings("NP_UNWRITTEN_FIELD")
 	public void execute()
 		throws MojoExecutionException
 	{
-		final String groupId = "com.googlecode.cmake-maven-project";
-		final String artifactId = "cmake-binaries";
 		String suffix;
 		switch (classifier)
 		{
@@ -124,20 +90,19 @@ public class GetBinariesMojo
 				throw new MojoExecutionException("Unsupported classifier: " + classifier);
 		}
 
-		Artifact artifact = getArtifact(groupId, artifactId, version, classifier);
-		if (artifact != null)
-			return;
-
 		String cmakeVersion = getCMakeVersion(version);
 		final Path target = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
 		try
 		{
-			deleteRecursively(target);
 			String majorVersion = getMajorVersion(cmakeVersion);
 			Path result = download(new URL("http://www.cmake.org/files/v" + majorVersion + "/cmake-"
 																		 + cmakeVersion + "-" + suffix));
-			extract(result, target);
-			normalizeDirectories(target);
+			if (Files.notExists(target.resolve("bin")))
+			{
+				// Directories not normalized
+				extract(result, target);
+				normalizeDirectories(target);
+			}
 		}
 		catch (IOException e)
 		{
@@ -183,32 +148,6 @@ public class GetBinariesMojo
 		if (!matcher.find())
 			throw new IllegalArgumentException("Unexpected version format: " + version);
 		return matcher.group();
-	}
-
-	/**
-	 * Returns a local artifact.
-	 *
-	 * @param groupId the artifact group id
-	 * @param artifactId the artifact id
-	 * @param version the artifact version
-	 * @param classifier the artifact classifier, empty string if there is none
-	 * @return null if the artifact is not installed
-	 * @throws MojoExecutionException if an error occurs while resolving the artifact
-	 */
-	private Artifact getArtifact(String groupId, String artifactId, String version,
-															 String classifier)
-		throws MojoExecutionException
-	{
-		Artifact artifact = repositorySystem.createArtifactWithClassifier(groupId, artifactId, version,
-			"jar", classifier);
-		artifact.setFile(new File(localRepository.getBasedir(), localRepository.pathOf(artifact)));
-		if (!artifact.getFile().exists())
-			return null;
-
-		Log log = getLog();
-		if (log.isDebugEnabled())
-			log.debug("Artifact already installed: " + artifact.getFile().getAbsolutePath());
-		return artifact;
 	}
 
 	/**
@@ -283,6 +222,7 @@ public class GetBinariesMojo
 		String nextExtension = getFileExtension(nameWithoutExtension);
 		switch (extension)
 		{
+			case ".jar":
 			case ".zip":
 			{
 				if (!nextExtension.isEmpty())
@@ -327,23 +267,51 @@ public class GetBinariesMojo
 	private void extractZip(Path source, Path target) throws IOException
 	{
 		ZipFile zipFile = new ZipFile(source.toFile());
+		ByteBuffer buffer = ByteBuffer.allocate(10 * 1024);
 		try
 		{
-			final byte[] buffer = new byte[10 * 1024];
 			Enumeration<ZipArchiveEntry> entries = zipFile.getEntriesInPhysicalOrder();
 			while (entries.hasMoreElements())
 			{
 				ZipArchiveEntry entry = entries.nextElement();
-				try (InputStream in = zipFile.getInputStream(entry))
+				FileAttribute<Set<PosixFilePermission>> attribute =
+																								PosixFilePermissions.
+					asFileAttribute(getPosixPermissions(entry.getUnixMode()));
+				if (entry.isDirectory())
 				{
-					try (OutputStream out = Files.newOutputStream(target.resolve(entry.getName())))
+					Path directory = target.resolve(entry.getName());
+					Files.createDirectories(directory);
+
+					Files.setPosixFilePermissions(directory, attribute.value());
+					continue;
+				}
+				try (ReadableByteChannel reader = Channels.newChannel(zipFile.getInputStream(entry)))
+				{
+					Path targetFile = target.resolve(entry.getName());
+
+					// Omitted directories are created using the default permissions
+					Files.createDirectories(targetFile.getParent());
+
+					try (SeekableByteChannel out = Files.newByteChannel(targetFile,
+							ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+							StandardOpenOption.WRITE), attribute))
 					{
-						while (true)
+						long bytesLeft = entry.getSize();
+						while (bytesLeft > 0)
 						{
-							int count = in.read(buffer);
+							if (bytesLeft < buffer.limit())
+								buffer.limit((int) bytesLeft);
+							int count = reader.read(buffer);
 							if (count == -1)
 								break;
-							out.write(buffer, 0, count);
+							buffer.flip();
+							do
+							{
+								out.write(buffer);
+							}
+							while (buffer.hasRemaining());
+							buffer.clear();
+							bytesLeft -= count;
 						}
 					}
 				}
@@ -373,8 +341,8 @@ public class GetBinariesMojo
 				if (entry == null)
 					break;
 				FileAttribute<Set<PosixFilePermission>> attribute =
-																								PosixFilePermissions.asFileAttribute(getPosixPermissions(entry.
-					getMode()));
+																								PosixFilePermissions.
+					asFileAttribute(getPosixPermissions(entry.getMode()));
 				if (entry.isDirectory())
 				{
 					Path directory = target.resolve(entry.getName());

@@ -93,7 +93,13 @@ public abstract class Compiler
 	 */
 	public static Compiler fromGenerator(String name, Log log)
 	{
-		return VisualStudioCompiler.fromGenerator(name, log);
+		Compiler result = VisualStudioCompiler.fromGenerator(name, log);
+		if (result != null)
+			return result;
+		result = GccCompiler.fromGenerator(name, log);
+		if (result != null)
+			return result;
+		return null;
 	}
 
 	/**

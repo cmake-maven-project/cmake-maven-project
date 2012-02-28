@@ -68,7 +68,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.3.1</version>
 				<configuration>
-					<classifier>${boost.classifier}</classifier>
+					<classifier>${cmake.classifier}</classifier>
 					<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
 				</configuration>
 			</plugin>
