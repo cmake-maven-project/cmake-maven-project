@@ -9,25 +9,6 @@
 	<artifactId>cmake-binaries</artifactId>
 	<name>CMake Binaries</name>
 	<description>CMake Binaries</description>
-	<url>http://code.google.com/p/cmake-maven-project/</url>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-	<scm>
-		<url>https://cmake-maven-project.googlecode.com/hg/</url>
-		<connection>scm:hg:https://cmake-maven-project.googlecode.com/hg/</connection>
-		<developerConnection>scm:hg:https://cmake-maven-project.googlecode.com/hg/</developerConnection>
-	</scm>
-	<developers>
-		<developer>
-			<id>cowwoc</id>
-			<name>Gili Tzabari</name>
-		</developer>
-	</developers>
 	<build>
 		<plugins>
 			<plugin>
@@ -43,7 +24,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.4.3</version>
+				<version>2.5</version>
 				<configuration>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
@@ -66,7 +47,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
+				<version>2.4</version>
 				<configuration>
 					<classifier>${cmake.classifier}</classifier>
 					<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>

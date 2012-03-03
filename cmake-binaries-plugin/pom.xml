@@ -10,7 +10,6 @@
 	<packaging>maven-plugin</packaging>
 	<name>CMake Binaries Plugin</name>
 	<description>Downloads the CMake binaries</description>
-	<url>http://code.google.com/p/cmake-maven-project/</url>
 	<build>
 		<plugins>
 			<plugin>
@@ -26,7 +25,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.4.3</version>
+				<version>2.5</version>
 				<configuration>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
