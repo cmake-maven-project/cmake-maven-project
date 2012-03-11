@@ -30,9 +30,7 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -56,7 +54,6 @@ import org.twdata.maven.mojoexecutor.MojoExecutor;
  *
  * @goal generate
  * @phase process-sources
- *
  * @author Gili Tzabari
  */
 public class GenerateMojo
@@ -129,6 +126,7 @@ public class GenerateMojo
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	private MavenSession session;
+	private final boolean isPosix = !System.getProperty("os.name").toLowerCase().startsWith("windows");
 
 	@Override
 	public void execute()
@@ -284,15 +282,22 @@ public class GenerateMojo
 			while (entries.hasMoreElements())
 			{
 				ZipArchiveEntry entry = entries.nextElement();
-				FileAttribute<Set<PosixFilePermission>> attribute =
-																								PosixFilePermissions.
-					asFileAttribute(getPosixPermissions(entry.getUnixMode()));
+				List<FileAttribute<?>> attributes = new ArrayList<>();
+				if (isPosix)
+				{
+					attributes.add(PosixFilePermissions.asFileAttribute(getPosixPermissions(
+						entry.getUnixMode())));
+				}
 				if (entry.isDirectory())
 				{
 					Path directory = target.resolve(entry.getName());
 					Files.createDirectories(directory);
 
-					Files.setPosixFilePermissions(directory, attribute.value());
+					if (isPosix)
+					{
+						Files.setPosixFilePermissions(directory,
+							(Set<PosixFilePermission>) attributes.get(0).value());
+					}
 					continue;
 				}
 				try (ReadableByteChannel reader = Channels.newChannel(zipFile.getInputStream(entry)))
@@ -304,7 +309,7 @@ public class GenerateMojo
 
 					try (SeekableByteChannel out = Files.newByteChannel(targetFile,
 							ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-							StandardOpenOption.WRITE), attribute))
+							StandardOpenOption.WRITE), attributes.toArray(new FileAttribute[0])))
 					{
 						long bytesLeft = entry.getSize();
 						while (bytesLeft > 0)
@@ -350,15 +355,22 @@ public class GenerateMojo
 				TarArchiveEntry entry = in.getNextTarEntry();
 				if (entry == null)
 					break;
-				FileAttribute<Set<PosixFilePermission>> attribute =
-																								PosixFilePermissions.
-					asFileAttribute(getPosixPermissions(entry.getMode()));
+				List<FileAttribute<?>> attributes = new ArrayList<>();
+				if (isPosix)
+				{
+					attributes.add(PosixFilePermissions.asFileAttribute(getPosixPermissions(
+						entry.getMode())));
+				}
 				if (entry.isDirectory())
 				{
 					Path directory = target.resolve(entry.getName());
 					Files.createDirectories(directory);
 
-					Files.setPosixFilePermissions(directory, attribute.value());
+					if (isPosix)
+					{
+						Files.setPosixFilePermissions(directory,
+							(Set<PosixFilePermission>) attributes.get(0).value());
+					}
 					continue;
 				}
 				ReadableByteChannel reader = Channels.newChannel(in);
@@ -369,7 +381,7 @@ public class GenerateMojo
 
 				try (SeekableByteChannel out = Files.newByteChannel(targetFile,
 						ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-						StandardOpenOption.WRITE), attribute))
+						StandardOpenOption.WRITE), attributes.toArray(new FileAttribute[0])))
 				{
 					long bytesLeft = entry.getSize();
 					while (bytesLeft > 0)
