@@ -1,0 +1,1 @@
+This file is used to generate a fake sources JAR, otherwise Maven Central will reject the artifact.
