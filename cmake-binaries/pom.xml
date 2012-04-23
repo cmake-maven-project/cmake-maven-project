@@ -48,10 +48,26 @@
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.4</version>
-				<configuration>
-					<classifier>${cmake.classifier}</classifier>
-					<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
-				</configuration>
+				<executions>
+					<execution>
+						<id>main-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+					<execution> 
+						<id>attachment-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>${cmake.classifier}</classifier>
+							<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
