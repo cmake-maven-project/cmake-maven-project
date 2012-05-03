@@ -54,6 +54,7 @@ import org.twdata.maven.mojoexecutor.MojoExecutor;
  *
  * @goal generate
  * @phase process-sources
+ *
  * @author Gili Tzabari
  */
 public class GenerateMojo
@@ -199,10 +200,10 @@ public class GenerateMojo
 			Log log = getLog();
 			if (log.isDebugEnabled())
 			{
-				log.debug("sourcePath: " + sourcePath.getPath());
-				log.debug("targetPath: " + targetPath.getPath());
-				log.debug("command-line: " + processBuilder.command());
+				log.debug("sourcePath: " + sourcePath);
+				log.debug("targetPath: " + targetPath);
 				log.debug("environment: " + processBuilder.environment());
+				log.debug("command-line: " + processBuilder.command());
 			}
 			int returnCode = Mojos.waitFor(processBuilder);
 			if (returnCode != 0)
