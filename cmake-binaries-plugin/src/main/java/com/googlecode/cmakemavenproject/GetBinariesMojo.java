@@ -1,35 +1,31 @@
 package com.googlecode.cmakemavenproject;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.UnArchiver;
+import org.codehaus.plexus.archiver.manager.ArchiverManager;
+import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
 
 /**
  * Downloads and installs the CMake binaries into the local Maven repository.
@@ -64,7 +60,14 @@ public class GetBinariesMojo
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	private MavenProject project;
-	private final boolean isPosix = !System.getProperty("os.name").toLowerCase().startsWith("windows");
+	/**
+	 * To look up Archiver/UnArchiver implementations.
+	 *
+	 * @component role="org.codehaus.plexus.archiver.manager.ArchiverManager"
+	 * @required
+	 */
+	@Component
+	private ArchiverManager archiverManager;
 
 	@Override
 	@SuppressWarnings("NP_UNWRITTEN_FIELD")
@@ -102,8 +105,33 @@ public class GetBinariesMojo
 																		 + cmakeVersion + "-" + suffix));
 			if (Files.notExists(target.resolve("bin")))
 			{
-				// Directories not normalized
-				extract(result, target);
+				Files.createDirectories(target);
+				// Directories not normalized, begin by unpacking the binaries
+				try
+				{
+					// Based on AbstractDependencyMojo.java in maven-dependency-plugin revision 1403449
+					UnArchiver unArchiver;
+					try
+					{
+						unArchiver = archiverManager.getUnArchiver(result.toFile());
+						getLog().debug("Found unArchiver by type: " + unArchiver);
+					}
+					catch (NoSuchArchiverException e)
+					{
+						getLog().debug("Unknown archiver type", e);
+						return;
+					}
+
+					unArchiver.setUseJvmChmod(true);
+					unArchiver.setSourceFile(result.toFile());
+					unArchiver.setDestDirectory(target.toFile());
+					unArchiver.extract();
+				}
+				catch (ArchiverException e)
+				{
+					throw new MojoExecutionException("Error unpacking file: " + result + " to: " + target
+																					 + "\r\n" + e.toString(), e);
+				}
 				normalizeDirectories(target);
 			}
 		}
@@ -207,283 +235,6 @@ public class GetBinariesMojo
 		{
 			throw new MojoExecutionException("", e);
 		}
-	}
-
-	/**
-	 * Extracts the contents of an archive.
-	 *
-	 * @param source the file to extract
-	 * @param target the directory to extract to
-	 * @throws IOException if an I/O error occurs
-	 */
-	private void extract(Path source, Path target) throws IOException
-	{
-		Files.createDirectories(target);
-		String filename = source.getFileName().toString();
-		String extension = getFileExtension(filename);
-		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
-		String nextExtension = getFileExtension(nameWithoutExtension);
-		switch (extension)
-		{
-			case ".jar":
-			case ".zip":
-			{
-				if (!nextExtension.isEmpty())
-					throw new UnsupportedOperationException("Unsupported file type: " + source);
-
-				extractZip(source, target);
-				break;
-			}
-			case ".gz":
-			{
-				if (!nextExtension.isEmpty())
-				{
-					Path outputDir = Files.createTempDirectory("cmake");
-					Path result = extractGzip(source, outputDir);
-					extract(result, target);
-					Files.deleteIfExists(result);
-					Files.deleteIfExists(outputDir);
-				}
-				else
-					extractGzip(source, target);
-				break;
-			}
-			case ".tar":
-			{
-				if (!nextExtension.isEmpty())
-					throw new UnsupportedOperationException("Unsupported file type: " + source);
-				extractTar(source, target);
-				break;
-			}
-			default:
-				throw new UnsupportedOperationException("Unsupported file type: " + source);
-		}
-	}
-
-	/**
-	 * Extracts a zip file.
-	 *
-	 * @param source the source file
-	 * @param target the target directory
-	 * @throws IOException if an I/O error occurs
-	 */
-	private void extractZip(Path source, Path target) throws IOException
-	{
-		ZipFile zipFile = new ZipFile(source.toFile());
-		ByteBuffer buffer = ByteBuffer.allocate(10 * 1024);
-		try
-		{
-			Enumeration<ZipArchiveEntry> entries = zipFile.getEntriesInPhysicalOrder();
-			while (entries.hasMoreElements())
-			{
-				ZipArchiveEntry entry = entries.nextElement();
-				List<FileAttribute<?>> attributes = new ArrayList<>();
-				if (isPosix)
-				{
-					attributes.add(PosixFilePermissions.asFileAttribute(getPosixPermissions(
-						entry.getUnixMode())));
-				}
-				if (entry.isDirectory())
-				{
-					Path directory = target.resolve(entry.getName());
-					Files.createDirectories(directory);
-
-					if (isPosix)
-					{
-						Files.setPosixFilePermissions(directory, 
-							(Set<PosixFilePermission>) attributes.get(0).value());
-					}
-					continue;
-				}
-				try (ReadableByteChannel reader = Channels.newChannel(zipFile.getInputStream(entry)))
-				{
-					Path targetFile = target.resolve(entry.getName());
-
-					// Omitted directories are created using the default permissions
-					Files.createDirectories(targetFile.getParent());
-
-					try (SeekableByteChannel out = Files.newByteChannel(targetFile,
-							ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-							StandardOpenOption.WRITE), attributes.toArray(new FileAttribute[0])))
-					{
-						long bytesLeft = entry.getSize();
-						while (bytesLeft > 0)
-						{
-							if (bytesLeft < buffer.limit())
-								buffer.limit((int) bytesLeft);
-							int count = reader.read(buffer);
-							if (count == -1)
-								break;
-							buffer.flip();
-							do
-							{
-								out.write(buffer);
-							}
-							while (buffer.hasRemaining());
-							buffer.clear();
-							bytesLeft -= count;
-						}
-					}
-				}
-			}
-		}
-		finally
-		{
-			zipFile.close();
-		}
-	}
-
-	/**
-	 * Extracts a tar file.
-	 *
-	 * @param source the source file
-	 * @param target the target directory
-	 * @throws IOException if an I/O error occurs
-	 */
-	private void extractTar(Path source, Path target) throws IOException
-	{
-		ByteBuffer buffer = ByteBuffer.allocate(10 * 1024);
-		try (TarArchiveInputStream in = new TarArchiveInputStream(Files.newInputStream(source)))
-		{
-			while (true)
-			{
-				TarArchiveEntry entry = in.getNextTarEntry();
-				if (entry == null)
-					break;
-				List<FileAttribute<?>> attributes = new ArrayList<>();
-				if (isPosix)
-				{
-					attributes.add(PosixFilePermissions.asFileAttribute(getPosixPermissions(
-						entry.getMode())));
-				}
-				if (entry.isDirectory())
-				{
-					Path directory = target.resolve(entry.getName());
-					Files.createDirectories(directory);
-
-					if (isPosix)
-					{
-						Files.setPosixFilePermissions(directory, 
-							(Set<PosixFilePermission>) attributes.get(0).value());
-					}
-					continue;
-				}
-				ReadableByteChannel reader = Channels.newChannel(in);
-				Path targetFile = target.resolve(entry.getName());
-
-				// Omitted directories are created using the default permissions
-				Files.createDirectories(targetFile.getParent());
-
-				try (SeekableByteChannel out = Files.newByteChannel(targetFile,
-						ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-						StandardOpenOption.WRITE), attributes.toArray(new FileAttribute[0])))
-				{
-					long bytesLeft = entry.getSize();
-					while (bytesLeft > 0)
-					{
-						if (bytesLeft < buffer.limit())
-							buffer.limit((int) bytesLeft);
-						int count = reader.read(buffer);
-						if (count == -1)
-							break;
-						buffer.flip();
-						do
-						{
-							out.write(buffer);
-						}
-						while (buffer.hasRemaining());
-						buffer.clear();
-						bytesLeft -= count;
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Converts an integer mode to a set of PosixFilePermissions.
-	 *
-	 * @param mode the integer mode
-	 * @return the PosixFilePermissions
-	 * @see http://stackoverflow.com/a/9445853/14731
-	 */
-	private Set<PosixFilePermission> getPosixPermissions(int mode)
-	{
-		StringBuilder result = new StringBuilder(9);
-
-		// Extract digits from left to right
-		//
-		// REFERENCE: http://stackoverflow.com/questions/203854/how-to-get-the-nth-digit-of-an-integer-with-bit-wise-operations
-		for (int i = 3; i >= 1; --i)
-		{
-			// Octal is base-8
-			mode %= Math.pow(8, i);
-			int digit = (int) (mode / Math.pow(8, i - 1));
-			if ((digit & 0b0000_0100) != 0)
-				result.append("r");
-			else
-				result.append("-");
-			if ((digit & 0b0000_0010) != 0)
-				result.append("w");
-			else
-				result.append("-");
-			if ((digit & 0b0000_0001) != 0)
-				result.append("x");
-			else
-				result.append("-");
-		}
-		return PosixFilePermissions.fromString(result.toString());
-	}
-
-	/**
-	 * Extracts a Gzip file.
-	 *
-	 * @param source the source file
-	 * @param target the target directory
-	 * @return the output file
-	 * @throws IOException if an I/O error occurs
-	 */
-	private Path extractGzip(Path source, Path target) throws IOException
-	{
-		String filename = source.getFileName().toString();
-		String extension = getFileExtension(filename);
-		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
-		Path outPath = target.resolve(nameWithoutExtension);
-		try (GzipCompressorInputStream in = new GzipCompressorInputStream(Files.newInputStream(
-				source)))
-		{
-			try (OutputStream out = Files.newOutputStream(outPath))
-			{
-				final byte[] buffer = new byte[10 * 1024];
-				while (true)
-				{
-					int count = in.read(buffer);
-					if (count == -1)
-						break;
-					out.write(buffer, 0, count);
-				}
-			}
-		}
-		return outPath;
-	}
-
-	/**
-	 * Returns a filename extension. For example, {@code getFileExtension("foo.tar.gz")} returns
-	 * {@code .gz}. Unix hidden files (e.g. ".hidden") have no extension.
-	 *
-	 * @param filename the filename
-	 * @return an empty string if no extension is found
-	 * @throws NullArgumentException if filename is null
-	 */
-	private String getFileExtension(String filename)
-	{
-		Preconditions.checkNotNull(filename, "filename may not be null");
-
-		Pattern pattern = Pattern.compile("[^\\.]+(\\.[\\p{Alnum}]+)$");
-		Matcher matcher = pattern.matcher(filename);
-		if (!matcher.find())
-			return "";
-		return matcher.group(1);
 	}
 
 	/**

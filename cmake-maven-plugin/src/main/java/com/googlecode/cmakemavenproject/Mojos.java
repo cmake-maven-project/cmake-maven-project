@@ -3,11 +3,6 @@ package com.googlecode.cmakemavenproject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Iterator;
-import java.util.List;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 /**
  * Mojo helper functions.
@@ -16,27 +11,6 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
  */
 public class Mojos
 {
-	/**
-	 * Looks up a plugin configuration by its name.
-	 *
-	 * @param project the maven project
-	 * @param key the plugin key (groupId:artifactId)
-	 * @return null if the plugin was not found
-	 */
-	public static Xpp3Dom getPluginConfiguration(MavenProject project, String key)
-	{
-		@java.lang.SuppressWarnings("unchecked")
-		List<Plugin> plugins = project.getBuildPlugins();
-
-		for (Iterator<Plugin> i = plugins.iterator(); i.hasNext();)
-		{
-			Plugin plugin = i.next();
-			if (key.equalsIgnoreCase(plugin.getKey()))
-				return (Xpp3Dom) plugin.getConfiguration();
-		}
-		return null;
-	}
-
 	/**
 	 * Launches and waits for a process to complete.
 	 *
@@ -60,5 +34,12 @@ public class Mojos
 			}
 		}
 		return process.waitFor();
+	}
+
+	/**
+	 * Prevent construction.
+	 */
+	private Mojos()
+	{
 	}
 }
