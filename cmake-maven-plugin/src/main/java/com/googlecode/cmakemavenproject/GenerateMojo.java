@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
@@ -94,7 +95,7 @@ public class GenerateMojo
 	 * @parameter
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	private String options;
+	private List<String> options;
 	/**
 	 * @component
 	 */
@@ -167,7 +168,7 @@ public class GenerateMojo
 			ProcessBuilder processBuilder = new ProcessBuilder(cmakeDir.resolve("bin/cmake").toString(),
 				"-G", generator).directory(targetPath);
 			if (options != null)
-				processBuilder.command().add(options);
+				processBuilder.command().addAll(options);
 			processBuilder.command().add(sourcePath.getAbsolutePath());
 			Map<String, String> env = processBuilder.environment();
 
