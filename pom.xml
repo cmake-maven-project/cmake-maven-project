@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <prerequisites>
         <maven>2.2.0</maven>
-    </prerequisites>    
+    </prerequisites>
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
@@ -39,11 +39,23 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.0</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.4</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.plexus</groupId>
+                        <artifactId>plexus-utils</artifactId>
+                        <version>3.0.10</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
@@ -52,7 +64,7 @@
         <module>cmake-binaries</module>
         <module>cmake-maven-plugin</module>
     </modules>
-	
+
     <profiles>
         <profile>
             <id>windows</id>
