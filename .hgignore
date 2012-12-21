@@ -1,1 +1,4 @@
-glob:nbactions-sonatype-oss-release.xml
+syntax: glob
+target
+release.properties
+pom.xml.releaseBackup
