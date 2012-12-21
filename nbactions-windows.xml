@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>clean</actionName>
+            <goals>
+                <goal>clean:clean</goal>
+            </goals>
+        </action>
+    </actions>
