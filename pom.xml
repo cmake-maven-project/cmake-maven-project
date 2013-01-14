@@ -50,7 +50,8 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.4</version>
+				<!-- @see https://jira.codehaus.org/browse/MRELEASE-742 -->
+				<version>2.2.1</version>
 				<dependencies>
 					<!-- @see https://jira.codehaus.org/browse/PLXUTILS-156 -->
 					<dependency>
