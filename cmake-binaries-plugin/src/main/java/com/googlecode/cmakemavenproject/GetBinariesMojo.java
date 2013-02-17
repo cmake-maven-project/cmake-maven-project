@@ -1,35 +1,53 @@
 package com.googlecode.cmakemavenproject;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.CopyOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.UnArchiver;
-import org.codehaus.plexus.archiver.manager.ArchiverManager;
-import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
 
 /**
  * Downloads and installs the CMake binaries into the local Maven repository.
- *
+ * <p/>
  * @goal get-binaries
  * @phase generate-resources
  * @author Gili Tzabari
@@ -39,7 +57,7 @@ public class GetBinariesMojo
 {
 	/**
 	 * The release platform.
-	 *
+	 * <p/>
 	 * @parameter expression="${classifier}"
 	 * @required
 	 * @readonly
@@ -48,7 +66,7 @@ public class GetBinariesMojo
 	private String classifier;
 	/**
 	 * The project version.
-	 *
+	 * <p/>
 	 * @parameter expression="${project.version}"
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
@@ -60,14 +78,6 @@ public class GetBinariesMojo
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	private MavenProject project;
-	/**
-	 * To look up Archiver/UnArchiver implementations.
-	 *
-	 * @component role="org.codehaus.plexus.archiver.manager.ArchiverManager"
-	 * @required
-	 */
-	@Component
-	private ArchiverManager archiverManager;
 
 	@Override
 	@SuppressWarnings("NP_UNWRITTEN_FIELD")
@@ -101,37 +111,14 @@ public class GetBinariesMojo
 		try
 		{
 			String majorVersion = getMajorVersion(cmakeVersion);
-			Path result = download(new URL("http://www.cmake.org/files/v" + majorVersion + "/cmake-"
-																		 + cmakeVersion + "-" + suffix));
+			Path archive = download(new URL("http://www.cmake.org/files/v" + majorVersion + "/cmake-" +
+				cmakeVersion + "-" + suffix));
 			if (Files.notExists(target.resolve("bin")))
 			{
-				Files.createDirectories(target);
+				deleteRecursively(target);
+				
 				// Directories not normalized, begin by unpacking the binaries
-				try
-				{
-					// Based on AbstractDependencyMojo.java in maven-dependency-plugin revision 1403449
-					UnArchiver unArchiver;
-					try
-					{
-						unArchiver = archiverManager.getUnArchiver(result.toFile());
-						getLog().debug("Found unArchiver by type: " + unArchiver);
-					}
-					catch (NoSuchArchiverException e)
-					{
-						getLog().debug("Unknown archiver type", e);
-						return;
-					}
-
-					unArchiver.setUseJvmChmod(true);
-					unArchiver.setSourceFile(result.toFile());
-					unArchiver.setDestDirectory(target.toFile());
-					unArchiver.extract();
-				}
-				catch (ArchiverException e)
-				{
-					throw new MojoExecutionException("Error unpacking file: " + result + " to: " + target
-																					 + "\r\n" + e.toString(), e);
-				}
+				extract(archive, target);
 				normalizeDirectories(target);
 			}
 		}
@@ -143,10 +130,10 @@ public class GetBinariesMojo
 
 	/**
 	 * Returns the cmake version associated with the project.
-	 *
+	 * <p/>
 	 * @param version the project version
 	 * @return the cmake version
-	 * @throws NullPointerException if version is null
+	 * @throws NullPointerException     if version is null
 	 * @throws IllegalArgumentException if version is empty or has an unexpected format
 	 */
 	private String getCMakeVersion(String version)
@@ -163,10 +150,10 @@ public class GetBinariesMojo
 
 	/**
 	 * Returns the major version number of a version.
-	 *
+	 * <p/>
 	 * @param version the full version number
 	 * @return the major version number
-	 * @throws NullPointerException if version is null
+	 * @throws NullPointerException     if version is null
 	 * @throws IllegalArgumentException if version is empty or has an unexpected format
 	 */
 	private String getMajorVersion(String version)
@@ -183,7 +170,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Downloads a file.
-	 *
+	 * <p/>
 	 * @param url the file to download
 	 * @return the path of the downloaded file
 	 * @throws MojoExecutionException if an error occurs downloading the file
@@ -238,8 +225,180 @@ public class GetBinariesMojo
 	}
 
 	/**
+	 * Extracts the contents of an archive.
+	 * <p/>
+	 * @param source the file to extract
+	 * @param target the directory to extract to
+	 * @throws IOException if an I/O error occurs
+	 */
+	private void extract(Path source, Path target) throws IOException
+	{
+		String filename = source.getFileName().toString();
+		String extension = getFileExtension(filename);
+		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
+		String nextExtension = getFileExtension(nameWithoutExtension);
+		ByteBuffer buffer = ByteBuffer.allocate(10 * 1024);
+		try (ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(
+			new BufferedInputStream(Files.newInputStream(source))))
+		{
+			Path tempDir = Files.createTempDirectory("cmake");
+			FileAttribute<?>[] attributes;
+			if (supportsPosix(in))
+				attributes = new FileAttribute<?>[1];
+			else
+				attributes = new FileAttribute<?>[0];
+			while (true)
+			{
+				ArchiveEntry entry = in.getNextEntry();
+				if (entry == null)
+					break;
+				if (attributes.length > 0)
+					attributes[0] = PosixFilePermissions.asFileAttribute(getPosixPermissions(entry));
+				if (entry.isDirectory())
+				{
+					Path directory = tempDir.resolve(entry.getName());
+					Files.createDirectories(directory);
+
+					if (attributes.length > 0)
+						Files.setPosixFilePermissions(directory, (Set<PosixFilePermission>) attributes[0].
+							value());
+					continue;
+				}
+				ReadableByteChannel reader = Channels.newChannel(in);
+				Path targetFile = tempDir.resolve(entry.getName());
+
+				// Omitted directories are created using the default permissions
+				Files.createDirectories(targetFile.getParent());
+
+				try (SeekableByteChannel out = Files.newByteChannel(targetFile,
+					ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+					StandardOpenOption.WRITE), attributes))
+				{
+					long bytesLeft = entry.getSize();
+					while (bytesLeft > 0)
+					{
+						if (bytesLeft < buffer.limit())
+							buffer.limit((int) bytesLeft);
+						int count = reader.read(buffer);
+						if (count == -1)
+							break;
+						buffer.flip();
+						do
+						{
+							out.write(buffer);
+						}
+						while (buffer.hasRemaining());
+						buffer.clear();
+						bytesLeft -= count;
+					}
+				}
+			}
+			if (!nextExtension.isEmpty())
+			{
+				extract(tempDir.resolve(nameWithoutExtension), target);
+				Files.deleteIfExists(tempDir);
+			}
+			else
+			{
+				Files.createDirectories(target.getParent());
+				Files.move(tempDir, target);
+			}
+		}
+		catch (ArchiveException e)
+		{
+			Logger.getLogger(GetBinariesMojo.class.getName()).log(Level.SEVERE, null, e);
+		}
+	}
+
+	/**
+	 * @param in the InputStream associated with the archive
+	 * @return true if the platform and archive supports POSIX attributes
+	 */
+	private boolean supportsPosix(InputStream in)
+	{
+		return !System.getProperty("os.name").toLowerCase().startsWith("windows") &&
+			(in instanceof ArchiveInputStream || in instanceof ZipArchiveInputStream ||
+			in instanceof TarArchiveInputStream);
+	}
+
+	/**
+	 * Converts an integer mode to a set of PosixFilePermissions.
+	 * <p/>
+	 * @param entry the archive entry
+	 * @return the PosixFilePermissions, or null if the default permissions should be used
+	 * @see http://stackoverflow.com/a/9445853/14731
+	 */
+	private Set<PosixFilePermission> getPosixPermissions(ArchiveEntry entry)
+	{
+		int mode;
+		if (entry instanceof ArArchiveEntry)
+		{
+			ArArchiveEntry arEntry = (ArArchiveEntry) entry;
+			mode = arEntry.getMode();
+		}
+		else if (entry instanceof ZipArchiveEntry)
+		{
+			ZipArchiveEntry zipEntry = (ZipArchiveEntry) entry;
+			mode = zipEntry.getUnixMode();
+		}
+		else if (entry instanceof TarArchiveEntry)
+		{
+			TarArchiveEntry tarEntry = (TarArchiveEntry) entry;
+			mode = tarEntry.getMode();
+		}
+		else
+		{
+			throw new IllegalArgumentException(entry.getClass().getName() +
+				" does not support POSIX permissions");
+		}
+		StringBuilder result = new StringBuilder(9);
+
+		// Extract digits from left to right
+		//
+		// REFERENCE: http://stackoverflow.com/questions/203854/how-to-get-the-nth-digit-of-an-integer-with-bit-wise-operations
+		for (int i = 3; i >= 1; --i)
+		{
+			// Octal is base-8
+			mode %= Math.pow(8, i);
+			int digit = (int) (mode / Math.pow(8, i - 1));
+			if ((digit & 0b0000_0100) != 0)
+				result.append("r");
+			else
+				result.append("-");
+			if ((digit & 0b0000_0010) != 0)
+				result.append("w");
+			else
+				result.append("-");
+			if ((digit & 0b0000_0001) != 0)
+				result.append("x");
+			else
+				result.append("-");
+		}
+		return PosixFilePermissions.fromString(result.toString());
+	}
+
+	/**
+	 * Returns a filename extension. For example, {@code getFileExtension("foo.tar.gz")} returns
+	 * {@code .gz}. Unix hidden files (e.g. ".hidden") have no extension.
+	 * <p/>
+	 * @param filename the filename
+	 * @return an empty string if no extension is found
+	 * @throws NullArgumentException if filename is null
+	 */
+	private String getFileExtension(String filename)
+	{
+		Preconditions.checkNotNull(filename, "filename may not be null");
+
+		Pattern pattern = Pattern.compile("[^\\.]+(\\.[\\p{Alnum}]+)$");
+		Matcher matcher = pattern.matcher(filename);
+		if (!matcher.find())
+			return "";
+		return matcher.group(1);
+	}
+
+	/**
 	 * Normalize the directory structure across all platforms.
-	 *
+	 * <p/>
 	 * @param source the binary path
 	 * @throws IOException if an I/O error occurs
 	 */
@@ -297,7 +456,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Deletes a path recursively.
-	 *
+	 * <p/>
 	 * @param path the path to delete
 	 * @throws IOException if an I/O error occurs
 	 */

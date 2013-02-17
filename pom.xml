@@ -50,16 +50,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<!-- @see https://jira.codehaus.org/browse/MRELEASE-742 -->
-				<version>2.2.1</version>
-				<dependencies>
-					<!-- @see https://jira.codehaus.org/browse/PLXUTILS-156 -->
-					<dependency>
-						<groupId>org.codehaus.plexus</groupId>
-						<artifactId>plexus-utils</artifactId>
-						<version>3.0.10</version>
-					</dependency>
-				</dependencies>
+				<version>2.4</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
