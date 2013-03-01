@@ -14,7 +14,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.CopyOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,8 +26,6 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -40,6 +37,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -116,7 +116,7 @@ public class GetBinariesMojo
 			if (Files.notExists(target.resolve("bin")))
 			{
 				deleteRecursively(target);
-				
+
 				// Directories not normalized, begin by unpacking the binaries
 				extract(archive, target);
 				normalizeDirectories(target);
@@ -233,16 +233,36 @@ public class GetBinariesMojo
 	 */
 	private void extract(Path source, Path target) throws IOException
 	{
-		String filename = source.getFileName().toString();
-		String extension = getFileExtension(filename);
-		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
-		String nextExtension = getFileExtension(nameWithoutExtension);
 		ByteBuffer buffer = ByteBuffer.allocate(10 * 1024);
+		try
+		{
+			extractCompressor(source, target, buffer);
+		}
+		catch (IOException e)
+		{
+			if (!(e.getCause() instanceof CompressorException))
+				throw e;
+
+			// Perhaps the file is an archive
+			extractArchive(source, target, buffer);
+		}
+	}
+
+	/**
+	 * Extracts the contents of an archive.
+	 * <p/>
+	 * @param source the file to extract
+	 * @param target the directory to extract to
+	 * @param buffer the buffer used to transfer data from source to target
+	 * @throws IOException if an I/O error occurs
+	 */
+	private void extractArchive(Path source, Path target, ByteBuffer buffer) throws IOException
+	{
+		Path tempDir = Files.createTempDirectory("cmake");
+		FileAttribute<?>[] attributes;
 		try (ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(
 			new BufferedInputStream(Files.newInputStream(source))))
 		{
-			Path tempDir = Files.createTempDirectory("cmake");
-			FileAttribute<?>[] attributes;
 			if (supportsPosix(in))
 				attributes = new FileAttribute<?>[1];
 			else
@@ -252,6 +272,12 @@ public class GetBinariesMojo
 				ArchiveEntry entry = in.getNextEntry();
 				if (entry == null)
 					break;
+				if (!in.canReadEntryData(entry))
+				{
+					getLog().warn("Unsupported entry type for " + entry.getName() + ", skipping...");
+					in.skip(entry.getSize());
+					continue;
+				}
 				if (attributes.length > 0)
 					attributes[0] = PosixFilePermissions.asFileAttribute(getPosixPermissions(entry));
 				if (entry.isDirectory())
@@ -274,11 +300,8 @@ public class GetBinariesMojo
 					ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
 					StandardOpenOption.WRITE), attributes))
 				{
-					long bytesLeft = entry.getSize();
-					while (bytesLeft > 0)
+					while (true)
 					{
-						if (bytesLeft < buffer.limit())
-							buffer.limit((int) bytesLeft);
 						int count = reader.read(buffer);
 						if (count == -1)
 							break;
@@ -289,14 +312,60 @@ public class GetBinariesMojo
 						}
 						while (buffer.hasRemaining());
 						buffer.clear();
-						bytesLeft -= count;
 					}
+				}
+			}
+			Files.createDirectories(target.getParent());
+			Files.move(tempDir, target);
+		}
+		catch (ArchiveException e)
+		{
+			throw new IOException("Could not uncompress: " + source, e);
+		}
+	}
+
+	/**
+	 * Extracts the contents of an archive.
+	 * <p/>
+	 * @param source the file to extract
+	 * @param target the directory to extract to
+	 * @throws IOException if an I/O error occurs
+	 */
+	private void extractCompressor(Path source, Path target, ByteBuffer buffer) throws IOException
+	{
+		String filename = source.getFileName().toString();
+		String extension = getFileExtension(filename);
+		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
+		String nextExtension = getFileExtension(nameWithoutExtension);
+		try (CompressorInputStream in = new CompressorStreamFactory().createCompressorInputStream(
+			new BufferedInputStream(Files.newInputStream(source))))
+		{
+			Path tempDir = Files.createTempDirectory("cmake");
+			ReadableByteChannel reader = Channels.newChannel(in);
+			Path intermediateTarget = tempDir.resolve(nameWithoutExtension);
+
+			try (SeekableByteChannel out = Files.newByteChannel(intermediateTarget,
+				ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+				StandardOpenOption.WRITE)))
+			{
+				while (true)
+				{
+					int count = reader.read(buffer);
+					if (count == -1)
+						break;
+					buffer.flip();
+					do
+					{
+						out.write(buffer);
+					}
+					while (buffer.hasRemaining());
+					buffer.clear();
 				}
 			}
 			if (!nextExtension.isEmpty())
 			{
-				extract(tempDir.resolve(nameWithoutExtension), target);
-				Files.deleteIfExists(tempDir);
+				extract(intermediateTarget, target);
+				deleteRecursively(tempDir);
 			}
 			else
 			{
@@ -304,9 +373,9 @@ public class GetBinariesMojo
 				Files.move(tempDir, target);
 			}
 		}
-		catch (ArchiveException e)
+		catch (CompressorException e)
 		{
-			Logger.getLogger(GetBinariesMojo.class.getName()).log(Level.SEVERE, null, e);
+			throw new IOException("Could not uncompress: " + source, e);
 		}
 	}
 
