@@ -46,40 +46,34 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 /**
  * Downloads and installs the CMake binaries into the local Maven repository.
  * <p/>
- * @goal get-binaries
- * @phase generate-resources
  * @author Gili Tzabari
  */
+@Mojo(name = "get-binaries", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class GetBinariesMojo
 	extends AbstractMojo
 {
 	/**
 	 * The release platform.
-	 * <p/>
-	 * @parameter expression="${classifier}"
-	 * @required
-	 * @readonly
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@Parameter(property = "classifier", required = true, readonly = true)
 	private String classifier;
 	/**
 	 * The project version.
-	 * <p/>
-	 * @parameter expression="${project.version}"
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@Parameter(property = "project.version")
 	private String version;
-	/**
-	 * @parameter expression="${project}"
-	 * @required
-	 * @readonly
-	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
 
 	@Override
