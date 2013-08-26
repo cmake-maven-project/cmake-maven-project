@@ -24,10 +24,10 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://cmake-maven-project.googlecode.com/hg/</url>
-		<connection>scm:hg:https://cmake-maven-project.googlecode.com/hg/</connection>
-		<developerConnection>scm:hg:https://cmake-maven-project.googlecode.com/hg/</developerConnection>
-		<tag>release-2.8.10.2-b5</tag>
+		<url>https://code.google.com/p/cmake-maven-project/</url>
+		<connection>scm:hg:https://code.google.com/p/cmake-maven-project/</connection>
+		<developerConnection>scm:hg:https://code.google.com/p/cmake-maven-project/</developerConnection>
+		<tag>HEAD</tag>
 	</scm>
 	<developers>
 		<developer>
