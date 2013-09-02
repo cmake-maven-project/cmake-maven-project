@@ -283,8 +283,11 @@ public class GetBinariesMojo
 					Files.createDirectories(directory);
 
 					if (attributes.length > 0)
-						Files.setPosixFilePermissions(directory, (Set<PosixFilePermission>) attributes[0].
-							value());
+					{
+						@java.lang.SuppressWarnings("unchecked")
+						Set<PosixFilePermission> permissions = (Set<PosixFilePermission>) attributes[0].value();
+						Files.setPosixFilePermissions(directory, permissions);
+					}
 					continue;
 				}
 				ReadableByteChannel reader = Channels.newChannel(in);
@@ -295,7 +298,7 @@ public class GetBinariesMojo
 
 				try (SeekableByteChannel out = Files.newByteChannel(targetFile,
 					ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-					StandardOpenOption.WRITE), attributes))
+						StandardOpenOption.WRITE), attributes))
 				{
 					while (true)
 					{
@@ -350,7 +353,7 @@ public class GetBinariesMojo
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
 				{
 					Files.copy(file, target.resolve(source.relativize(file)),
-					StandardCopyOption.COPY_ATTRIBUTES);
+						StandardCopyOption.COPY_ATTRIBUTES);
 					return FileVisitResult.CONTINUE;
 				}
 
@@ -392,7 +395,7 @@ public class GetBinariesMojo
 
 			try (SeekableByteChannel out = Files.newByteChannel(intermediateTarget,
 				ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-				StandardOpenOption.WRITE)))
+					StandardOpenOption.WRITE)))
 			{
 				while (true)
 				{

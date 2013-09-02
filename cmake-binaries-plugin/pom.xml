@@ -17,7 +17,7 @@
 				<artifactId>maven-plugin-plugin</artifactId>
 				<version>3.2</version>
 				<configuration>
-					<goalPrefix>cmake</goalPrefix>
+					<goalPrefix>cmake-binaries</goalPrefix>
 				</configuration>
 				<executions>
 					<execution>
