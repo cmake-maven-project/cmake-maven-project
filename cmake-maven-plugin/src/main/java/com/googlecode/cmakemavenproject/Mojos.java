@@ -6,17 +6,17 @@ import java.io.InputStreamReader;
 
 /**
  * Mojo helper functions.
- *
+ * <p>
  * @author Gili Tzabari
  */
 public class Mojos
 {
 	/**
 	 * Launches and waits for a process to complete.
-	 *
+	 * <p>
 	 * @param processBuilder the process builder
 	 * @return the process exit code
-	 * @throws IOException if an I/O error occurs while running the process
+	 * @throws IOException          if an I/O error occurs while running the process
 	 * @throws InterruptedException if the thread was interrupted
 	 */
 	public static int waitFor(ProcessBuilder processBuilder)

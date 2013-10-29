@@ -71,7 +71,7 @@ public class GetBinariesMojo
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "project.version")
-	private String version;
+	private String projectVersion;
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
@@ -103,7 +103,7 @@ public class GetBinariesMojo
 				throw new MojoExecutionException("Unsupported classifier: " + classifier);
 		}
 
-		String cmakeVersion = getCMakeVersion(version);
+		String cmakeVersion = getCMakeVersion(projectVersion);
 		final Path target = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
 		try
 		{
@@ -115,6 +115,9 @@ public class GetBinariesMojo
 				deleteRecursively(target);
 
 				// Directories not normalized, begin by unpacking the binaries
+				Log log = getLog();
+				if (log.isInfoEnabled())
+					log.info("Extracting " + archive + " to " + target);
 				extract(archive, target);
 				normalizeDirectories(target);
 			}
@@ -138,7 +141,7 @@ public class GetBinariesMojo
 		Preconditions.checkNotNull(version, "version may not be null");
 		Preconditions.checkArgument(!version.isEmpty(), "version may not be empty");
 
-		Pattern pattern = Pattern.compile("^(.*?)-.*");
+		Pattern pattern = Pattern.compile("^(.*?)-.+");
 		Matcher matcher = pattern.matcher(version);
 		if (!matcher.find())
 			throw new IllegalArgumentException("Unexpected version format: " + version);
@@ -184,12 +187,11 @@ public class GetBinariesMojo
 				if (log.isInfoEnabled())
 					log.info("Downloading: " + url.toString());
 				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
 				try
 				{
 					BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-
 					Files.createDirectories(Paths.get(project.getBuild().getDirectory()));
-
 					BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(result));
 					byte[] buffer = new byte[10 * 1024];
 					try
@@ -316,7 +318,7 @@ public class GetBinariesMojo
 				}
 			}
 
-			// Move extracted filess from tempDir to target.
+			// Copy extracted files from tempDir to target.
 			// Can't use Files.move() because tempDir might reside on a different drive than target
 			copyDirectory(tempDir, target);
 			deleteRecursively(tempDir);
