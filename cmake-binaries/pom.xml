@@ -53,21 +53,44 @@
 			</plugin>
 		</plugins>
 	</build>
+	<!--
+		OS profile activation is triggered by the system's operating system.
+		This can be overridden by substracting a profile on the command line.
+		
+		For instance: mvn -Pwindows,-linux install
+		
+		To accept the OS activated profile, just use: mvn install
+	-->
 	<profiles>
 		<profile>
 			<id>windows</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>windows</cmake.classifier>
 			</properties>
 		</profile>
 		<profile>
 			<id>linux</id>
+			<activation>
+				<os>
+					<name>Linux</name>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>linux</cmake.classifier>
 			</properties>
 		</profile>
 		<profile>
 			<id>mac</id>
+			<activation>
+				<os>
+					<name>Mac OS X</name>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>mac</cmake.classifier>
 			</properties>
