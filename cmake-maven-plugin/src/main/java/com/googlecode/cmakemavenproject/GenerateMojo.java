@@ -25,6 +25,7 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -96,18 +97,6 @@ public class GenerateMojo
 		})
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
-	/**
-	 * The project groupId.
-	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	@Parameter(property = "project.groupId")
-	private String projectGroupId;
-	/**
-	 * The project version.
-	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	@Parameter(property = "project.version")
-	private String projectVersion;
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "session", required = true, readonly = true)
 	private MavenSession session;
@@ -118,6 +107,10 @@ public class GenerateMojo
 	{
 		try
 		{
+			PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
+				get("pluginDescriptor");
+			String groupId = pluginDescriptor.getGroupId();
+			String version = pluginDescriptor.getVersion();
 			if (!targetPath.exists() && !targetPath.mkdirs())
 				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
 
@@ -137,9 +130,9 @@ public class GenerateMojo
 				toAbsolutePath();
 			String binariesArtifact = "cmake-binaries";
 
-			Element groupIdElement = new Element("groupId", projectGroupId);
+			Element groupIdElement = new Element("groupId", groupId);
 			Element artifactIdElement = new Element("artifactId", binariesArtifact);
-			Element versionElement = new Element("version", projectVersion);
+			Element versionElement = new Element("version", version);
 			Element classifierElement = new Element("classifier", classifier);
 			Element outputDirectoryElement = new Element("outputDirectory", cmakeDir.toString());
 			Element artifactItemElement = new Element("artifactItem", groupIdElement, artifactIdElement,
