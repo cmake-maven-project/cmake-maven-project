@@ -23,8 +23,10 @@ public class Mojos
 		throws IOException, InterruptedException
 	{
 		Process process = processBuilder.redirectErrorStream(true).start();
-		try (BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream())))
+		BufferedReader in = null;
+		try
 		{
+			in = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			while (true)
 			{
 				String line = in.readLine();
@@ -32,6 +34,11 @@ public class Mojos
 					break;
 				System.out.println(line);
 			}
+		}
+		finally
+		{
+			if (in != null)
+				in.close();
 		}
 		return process.waitFor();
 	}

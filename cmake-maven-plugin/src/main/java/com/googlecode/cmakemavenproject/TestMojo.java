@@ -54,143 +54,151 @@ import org.apache.maven.project.MavenProject;
 
 /**
  * Goal which runs CMake/CTest tests.
- * <p/> 
+ * <p/>
  * @author Kevin S. Clarke <ksclarke@gmail.com>
  */
 @Mojo(name = "test", defaultPhase = LifecyclePhase.TEST)
 public class TestMojo extends AbstractMojo
 {
-    /**
-     * The directory containing the DartConfiguration.tcl file.
-     */
-    @Parameter(property = "ctest.build.dir", required = true)
-    private File buildDirectory;
-    /**
-     * The Maven project directory.
-     */
-    @Component
-    private MavenProject project;
-    /**
-     * Value that lets Maven tests fail without causing the build to fail.
-     */
-    @Parameter(property = "maven.test.failure.ignore", defaultValue = "false")
-    private boolean testFailureIgnore;
-    /**
-     * Maven tests value that indicates just the ctest tests are to be skipped.
-     */
-    @Parameter(property = "ctest.skip.tests", defaultValue = "false")
-    private boolean ctestSkip;
-    /**
-     * Standard Maven tests value that indicates all tests are to be skipped.
-     */
-    @Parameter(property = "maven.test.skip", defaultValue = "false")
-    private boolean skipTests;
-    /**
-     * Number of threads to use; if not specified, uses
-     * <code>Runtime.getRuntime().availableProcessors()</code>.
-     */
-    @Parameter(property = "threadCount", defaultValue = "0")
-    private int threadCount;
-    /**
-     * The dashboard to which results should be submitted. This is configured
-     * through the optional CTestConfig.cmake file.
-     */
-    @Parameter(property = "dashboard")
-    private String dashboard;
-    /**
-     * Executes the CTest run.
-     */
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
-        Log log = getLog();
+	/**
+	 * The directory containing the DartConfiguration.tcl file.
+	 */
+	@Parameter(property = "ctest.build.dir", required = true)
+	private File buildDirectory;
+	/**
+	 * The Maven project directory.
+	 */
+	@Component
+	private MavenProject project;
+	/**
+	 * Value that lets Maven tests fail without causing the build to fail.
+	 */
+	@Parameter(property = "maven.test.failure.ignore", defaultValue = "false")
+	private boolean testFailureIgnore;
+	/**
+	 * Maven tests value that indicates just the ctest tests are to be skipped.
+	 */
+	@Parameter(property = "ctest.skip.tests", defaultValue = "false")
+	private boolean ctestSkip;
+	/**
+	 * Standard Maven tests value that indicates all tests are to be skipped.
+	 */
+	@Parameter(property = "maven.test.skip", defaultValue = "false")
+	private boolean skipTests;
+	/**
+	 * Number of threads to use; if not specified, uses
+	 * <code>Runtime.getRuntime().availableProcessors()</code>.
+	 */
+	@Parameter(property = "threadCount", defaultValue = "0")
+	private int threadCount;
+	/**
+	 * The dashboard to which results should be submitted. This is configured
+	 * through the optional CTestConfig.cmake file.
+	 */
+	@Parameter(property = "dashboard")
+	private String dashboard;
+	/**
+	 * Executes the CTest run.
+	 */
+	public void execute() throws MojoExecutionException, MojoFailureException
+	{
+		Log log = getLog();
 
-        // Surefire skips tests with properties so we'll do it this way too
-        if (skipTests || ctestSkip)
-        {
-            if (log.isInfoEnabled()) log.info("Tests are skipped.");
-            return;
-        }
+		// Surefire skips tests with properties so we'll do it this way too
+		if (skipTests || ctestSkip)
+		{
+			if (log.isInfoEnabled()) log.info("Tests are skipped.");
+			return;
+		}
 
-        if (threadCount == 0)
-            threadCount = Runtime.getRuntime().availableProcessors();
+		if (threadCount == 0)
+			threadCount = Runtime.getRuntime().availableProcessors();
 
-        try
-        {
-            String threadCountString = Integer.toString(threadCount);
-            String projBuildDir = project.getBuild().getDirectory();
-            String buildDir = buildDirectory.getAbsolutePath();
-            List<String> args;
-            Path path;
+		try
+		{
+			String threadCountString = Integer.toString(threadCount);
+			String projBuildDir = project.getBuild().getDirectory();
+			String buildDir = buildDirectory.getAbsolutePath();
+			List<String> args;
+			Path path;
 
-            if (!buildDirectory.exists())
-                throw new MojoExecutionException(buildDir + " does not exist");
-            if (!buildDirectory.isDirectory())
-                throw new MojoExecutionException(buildDir + " isn't directory");
+			if (!buildDirectory.exists())
+				throw new MojoExecutionException(buildDir + " does not exist");
+			if (!buildDirectory.isDirectory())
+				throw new MojoExecutionException(buildDir + " isn't directory");
 
-            path = Paths.get(projBuildDir, "dependency/cmake").toAbsolutePath();
-            args = new ArrayList<String>(Arrays.asList(path.resolve("bin/ctest")
-                    .toString(), "-T", "Test", "-j", threadCountString));
+			path = Paths.get(projBuildDir, "dependency/cmake").toAbsolutePath();
+			args = new ArrayList<String>(Arrays.asList(path.resolve("bin/ctest")
+					.toString(), "-T", "Test", "-j", threadCountString));
 
-            // If set, this will post results to a preconfigured dashboard
-            if (dashboard != null) args.addAll(Arrays.asList("-D", dashboard));
+			// If set, this will post results to a preconfigured dashboard
+			if (dashboard != null) args.addAll(Arrays.asList("-D", dashboard));
 
-            ProcessBuilder processBuilder = new ProcessBuilder(args);
+			ProcessBuilder processBuilder = new ProcessBuilder(args);
 
-            // Set the directory with the DartConfiguration.tcl config file
-            processBuilder.directory(buildDirectory);
+			// Set the directory with the DartConfiguration.tcl config file
+			processBuilder.directory(buildDirectory);
 
-            if (log.isDebugEnabled())
-            {
-                log.debug("CTest build directory: " + buildDir);
-                log.debug("Number of threads used: " + threadCount);
-                log.debug("Command-line: " + processBuilder.command());
-            }
+			if (log.isDebugEnabled())
+			{
+				log.debug("CTest build directory: " + buildDir);
+				log.debug("Number of threads used: " + threadCount);
+				log.debug("Command-line: " + processBuilder.command());
+			}
 
-            // Run the ctest suite of tests
-            int returnCode = Mojos.waitFor(processBuilder);
+			// Run the ctest suite of tests
+			int returnCode = Mojos.waitFor(processBuilder);
 
-            // Convert ctest xml output to junit xml for better integration
-            InputStream stream = getClass().getResourceAsStream("/ct2ju.xslt");
-            TransformerFactory tf = TransformerFactory.newInstance();
-            StreamSource xsltSource = new StreamSource(stream);
-            Transformer transformer = tf.newTransformer(xsltSource);
+			// Convert ctest xml output to junit xml for better integration
+			InputStream stream = getClass().getResourceAsStream("/ct2ju.xslt");
+			TransformerFactory tf = TransformerFactory.newInstance();
+			StreamSource xsltSource = new StreamSource(stream);
+			Transformer transformer = tf.newTransformer(xsltSource);
 
-            // Read the ctest TAG file to find out what current run was called
-            File tagFile = new File(buildDirectory, "/Testing/TAG");
-            Charset charset = Charset.defaultCharset();
-            FileInputStream fis = new FileInputStream(tagFile);
-            InputStreamReader isr = new InputStreamReader(fis, charset);
-            BufferedReader tagReader = new BufferedReader(isr);
+			// Read the ctest TAG file to find out what current run was called
+			File tagFile = new File(buildDirectory, "/Testing/TAG");
+			Charset charset = Charset.defaultCharset();
+			FileInputStream fis = new FileInputStream(tagFile);
+			InputStreamReader isr = new InputStreamReader(fis, charset);
+			BufferedReader tagReader = new BufferedReader(isr);
 
-            String tag = tagReader.readLine();
-            tagReader.close();
+			String tag = tagReader.readLine();
+			tagReader.close();
 
-            if (tag == null || tag.trim().length() == 0)
-                throw new IOException("Couldn't read ctest TAG file");
+			if (tag == null || tag.trim().length() == 0)
+				throw new IOException("Couldn't read ctest TAG file");
 
-            // Get the current run's test data for reformatting
-            String xmlTestFilePath = "/Testing/" + tag + "/Test.xml";
-            File xmlSource = new File(buildDirectory, xmlTestFilePath);
-            StreamSource source = new StreamSource(xmlSource);
-            File reportsDir = new File(projBuildDir, "surefire-reports");
-            File xmlReport = new File(reportsDir, "CTestResults.xml");
-            StreamResult result = new StreamResult(xmlReport);
+			// Get the current run's test data for reformatting
+			String xmlTestFilePath = "/Testing/" + tag + "/Test.xml";
+			File xmlSource = new File(buildDirectory, xmlTestFilePath);
+			StreamSource source = new StreamSource(xmlSource);
+			File reportsDir = new File(projBuildDir, "surefire-reports");
+			File xmlReport = new File(reportsDir, "CTestResults.xml");
+			StreamResult result = new StreamResult(xmlReport);
 
-            // We have to create if there aren't other Surefire tests
-            if (!reportsDir.exists())
-                if (!reportsDir.mkdirs())
-                    throw new IOException("Couldn't create " + reportsDir);
+			// We have to create if there aren't other Surefire tests
+			if (!reportsDir.exists())
+				if (!reportsDir.mkdirs())
+					throw new IOException("Couldn't create " + reportsDir);
 
-            // Transform CTest output into Surefire style test output
-            transformer.transform(source, result);
+			// Transform CTest output into Surefire style test output
+			transformer.transform(source, result);
 
-            if (returnCode != 0 && !testFailureIgnore)
-                throw new MojoExecutionException("Return code: " + returnCode);
-        }
-        catch (InterruptedException | IOException | TransformerException e)
-        {
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
-    }
+			if (returnCode != 0 && !testFailureIgnore)
+				throw new MojoExecutionException("Return code: " + returnCode);
+		}
+		catch (InterruptedException e)
+		{
+			throw new MojoExecutionException(e.getMessage(), e);
+		}
+		catch (IOException e)
+		{
+			throw new MojoExecutionException(e.getMessage(), e);
+		}
+		catch (TransformerException e)
+		{
+			throw new MojoExecutionException(e.getMessage(), e);
+		}
+	}
 
 }

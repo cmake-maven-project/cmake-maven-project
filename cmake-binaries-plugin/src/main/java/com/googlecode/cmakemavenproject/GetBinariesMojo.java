@@ -82,26 +82,15 @@ public class GetBinariesMojo
 		throws MojoExecutionException
 	{
 		String suffix;
-		switch (classifier)
-		{
-			case "windows":
-			{
-				suffix = "win32-x86.zip";
-				break;
-			}
-			case "linux":
-			{
-				suffix = "Linux-i386.tar.gz";
-				break;
-			}
-			case "mac":
-			{
-				suffix = "Darwin64-universal.tar.gz";
-				break;
-			}
-			default:
-				throw new MojoExecutionException("Unsupported classifier: " + classifier);
-		}
+
+		if (classifier.equals("windows"))
+			suffix = "win32-x86.zip";
+		else if (classifier.equals("linux"))
+			suffix = "Linux-i386.tar.gz";
+		else if (classifier.equals("mac"))
+			suffix = "Darwin64-universal.tar.gz";
+		else
+			throw new MojoExecutionException("Unsupported classifier: " + classifier);
 
 		String cmakeVersion = getCMakeVersion(projectVersion);
 		final Path target = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
@@ -259,9 +248,11 @@ public class GetBinariesMojo
 	{
 		Path tempDir = Files.createTempDirectory("cmake");
 		FileAttribute<?>[] attributes;
-		try (ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(
-			new BufferedInputStream(Files.newInputStream(source))))
+		ArchiveInputStream in = null;
+		try
 		{
+			in = new ArchiveStreamFactory().createArchiveInputStream(
+				new BufferedInputStream(Files.newInputStream(source)));
 			if (supportsPosix(in))
 				attributes = new FileAttribute<?>[1];
 			else
@@ -297,11 +288,13 @@ public class GetBinariesMojo
 
 				// Omitted directories are created using the default permissions
 				Files.createDirectories(targetFile.getParent());
-
-				try (SeekableByteChannel out = Files.newByteChannel(targetFile,
-					ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-						StandardOpenOption.WRITE), attributes))
+				SeekableByteChannel out = null;
+				try
 				{
+					out = Files.newByteChannel(targetFile,
+						ImmutableSet.of(StandardOpenOption.CREATE,
+						StandardOpenOption.TRUNCATE_EXISTING,
+						StandardOpenOption.WRITE), attributes);
 					while (true)
 					{
 						int count = reader.read(buffer);
@@ -316,6 +309,11 @@ public class GetBinariesMojo
 						buffer.clear();
 					}
 				}
+				finally
+				{
+					if (out != null)
+						out.close();
+				}
 			}
 
 			// Copy extracted files from tempDir to target.
@@ -326,6 +324,11 @@ public class GetBinariesMojo
 		catch (ArchiveException e)
 		{
 			throw new IOException("Could not uncompress: " + source, e);
+		}
+		finally
+		{
+			if (in != null)
+				in.close();
 		}
 	}
 
@@ -388,17 +391,21 @@ public class GetBinariesMojo
 		String extension = getFileExtension(filename);
 		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
 		String nextExtension = getFileExtension(nameWithoutExtension);
-		try (CompressorInputStream in = new CompressorStreamFactory().createCompressorInputStream(
-			new BufferedInputStream(Files.newInputStream(source))))
+		CompressorInputStream in = null;
+		try
 		{
+			in = new CompressorStreamFactory().createCompressorInputStream(
+				new BufferedInputStream(Files.newInputStream(source)));
 			Path tempDir = Files.createTempDirectory("cmake");
 			ReadableByteChannel reader = Channels.newChannel(in);
 			Path intermediateTarget = tempDir.resolve(nameWithoutExtension);
-
-			try (SeekableByteChannel out = Files.newByteChannel(intermediateTarget,
-				ImmutableSet.of(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-					StandardOpenOption.WRITE)))
+			SeekableByteChannel out = null;
+			try
 			{
+				out = Files.newByteChannel(intermediateTarget,
+					ImmutableSet.of(StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING,
+					StandardOpenOption.WRITE));
 				while (true)
 				{
 					int count = reader.read(buffer);
@@ -412,6 +419,11 @@ public class GetBinariesMojo
 					while (buffer.hasRemaining());
 					buffer.clear();
 				}
+			}
+			finally
+			{
+				if (out != null)
+					out.close();
 			}
 			if (!nextExtension.isEmpty())
 			{
@@ -427,6 +439,11 @@ public class GetBinariesMojo
 		catch (CompressorException e)
 		{
 			throw new IOException("Could not uncompress: " + source, e);
+		}
+		finally
+		{
+			if (in != null)
+				in.close();
 		}
 	}
 
@@ -481,15 +498,15 @@ public class GetBinariesMojo
 			// Octal is base-8
 			mode %= Math.pow(8, i);
 			int digit = (int) (mode / Math.pow(8, i - 1));
-			if ((digit & 0b0000_0100) != 0)
+			if ((digit & 0x04) != 0)
 				result.append("r");
 			else
 				result.append("-");
-			if ((digit & 0b0000_0010) != 0)
+			if ((digit & 0x02) != 0)
 				result.append("w");
 			else
 				result.append("-");
-			if ((digit & 0b0000_0001) != 0)
+			if ((digit & 0x01) != 0)
 				result.append("x");
 			else
 				result.append("-");
