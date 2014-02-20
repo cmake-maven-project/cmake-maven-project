@@ -16,8 +16,6 @@ package com.googlecode.cmakemavenproject;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import org.apache.maven.execution.MavenSession;
@@ -126,15 +124,14 @@ public class GenerateMojo
 				else
 					throw new MojoExecutionException("Unsupported os.name: " + os);
 			}
-			Path cmakeDir = Paths.get(project.getBuild().getDirectory(), "dependency/cmake").
-				toAbsolutePath();
+			File cmakeDir = new File(project.getBuild().getDirectory(), "dependency/cmake");
 			String binariesArtifact = "cmake-binaries";
 
 			Element groupIdElement = new Element("groupId", groupId);
 			Element artifactIdElement = new Element("artifactId", binariesArtifact);
 			Element versionElement = new Element("version", version);
 			Element classifierElement = new Element("classifier", classifier);
-			Element outputDirectoryElement = new Element("outputDirectory", cmakeDir.toString());
+			Element outputDirectoryElement = new Element("outputDirectory", cmakeDir.getAbsolutePath());
 			Element artifactItemElement = new Element("artifactItem", groupIdElement, artifactIdElement,
 				versionElement, classifierElement, outputDirectoryElement);
 			Element artifactItemsItem = new Element("artifactItems", artifactItemElement);
@@ -145,7 +142,7 @@ public class GenerateMojo
 				"maven-dependency-plugin", "2.8");
 			MojoExecutor.executeMojo(dependencyPlugin, "unpack", configuration, environment);
 
-			ProcessBuilder processBuilder = new ProcessBuilder(cmakeDir.resolve("bin/cmake").toString(),
+			ProcessBuilder processBuilder = new ProcessBuilder(new File(cmakeDir, "bin/cmake").getAbsolutePath(),
 				"-G", generator).directory(targetPath);
 			if (options != null)
 				processBuilder.command().addAll(options);
