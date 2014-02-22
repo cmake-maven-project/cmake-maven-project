@@ -18,6 +18,7 @@ package com.googlecode.cmakemavenproject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,6 +47,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import org.apache.maven.project.MavenProject;
+
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 /**
  * Goal which runs CMake/CTest tests.
@@ -93,6 +96,16 @@ public class TestMojo extends AbstractMojo
 	@Parameter(property = "dashboard")
 	private String dashboard;
 	/**
+	 * The environment variables.
+	 */
+	@Parameter
+	private Map<String, String> environmentVariables;
+	/**
+	 * Extra command-line options to pass to ctest.
+	 */
+	@Parameter
+	private List<String> options;
+	/**
 	 * Executes the CTest run.
 	 */
 	public void execute() throws MojoExecutionException, MojoFailureException
@@ -126,7 +139,7 @@ public class TestMojo extends AbstractMojo
 			args = new ArrayList<String>(Arrays.asList(new File(path, "bin/ctest")
 				.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 
-			// If set, this will post results to a preconfigured dashboard
+			// If set, this will post results to a pre-configured dashboard
 			if (dashboard != null) args.addAll(Arrays.asList("-D", dashboard));
 
 			ProcessBuilder processBuilder = new ProcessBuilder(args);
@@ -134,10 +147,19 @@ public class TestMojo extends AbstractMojo
 			// Set the directory with the DartConfiguration.tcl config file
 			processBuilder.directory(buildDirectory);
 
+			if (options != null)
+				processBuilder.command().addAll(options);
+
+			Map<String, String> env = processBuilder.environment();
+
+			if (environmentVariables != null)
+				env.putAll(environmentVariables);
+
 			if (log.isDebugEnabled())
 			{
 				log.debug("CTest build directory: " + buildDir);
 				log.debug("Number of threads used: " + threadCount);
+				log.debug("Environment: " + processBuilder.environment());
 				log.debug("Command-line: " + processBuilder.command());
 			}
 
