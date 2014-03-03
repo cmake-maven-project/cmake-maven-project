@@ -6,7 +6,7 @@
 
     <groupId>com.cmaketest</groupId>
     <artifactId>hello-world-test</artifactId>
-    <version>${cmake.project.version}</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
     <name>Hello World Test for CMake Maven Plugin</name>
 

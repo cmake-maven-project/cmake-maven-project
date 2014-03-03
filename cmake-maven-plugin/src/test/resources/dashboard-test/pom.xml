@@ -6,7 +6,7 @@
 
     <groupId>com.cmaketest</groupId>
     <artifactId>dashboard-test</artifactId>
-    <version>${cmake.project.version}</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
     <name>Dashboard Test for CMake Maven Plugin</name>
 
