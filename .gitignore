@@ -1,0 +1,12 @@
+target
+
+# Ignore NetBeans files
+nb-configuration.xml
+nbactions-windows.xml
+nbactions.xml
+
+# Ignore Eclipse files
+.settings
+.classpath
+.project
+.checkstyle
