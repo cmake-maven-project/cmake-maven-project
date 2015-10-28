@@ -1,0 +1,37 @@
+language: java
+
+sudo: false
+
+# CMake is 32 bit and Travis VMs are 64 bit; install 32 bit libs before testing
+matrix:
+  include:
+   - os: linux
+     jdk: oraclejdk8
+     addons:
+       apt:
+         packages:
+           - gcc-multilib
+   - os: linux
+     jdk: openjdk7
+     addons:
+       apt:
+         packages:
+           - gcc-multilib
+   # Travis only supports jdk7 on OS X at the moment (and needs JAVA_HOME set)
+   - os: osx
+     env: JAVA_HOME=$(/usr/libexec/java_home)
+
+script:
+  - mvn install
+
+notifications:
+  irc:
+    channels:
+      - irc.freenode.org#freelibrary
+    on_failure: always
+    on_success: always
+  email:
+    recipients:
+      - ksclarke@ksclarke.io
+    on_failure: change
+    on_success: change
