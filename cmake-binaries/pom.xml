@@ -89,6 +89,7 @@
 			<activation>
 				<os>
 					<name>Mac OS X</name>
+					<arch>x86_64</arch>
 				</os>
 			</activation>
 			<properties>

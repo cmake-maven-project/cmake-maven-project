@@ -115,12 +115,15 @@ public class GenerateMojo
 			if (classifier == null)
 			{
 				String os = System.getProperty("os.name");
+				String arch = System.getProperty("os.arch");
 				if (os.toLowerCase().startsWith("windows"))
 					classifier = "windows";
 				else if (os.toLowerCase().startsWith("linux"))
 					classifier = "linux";
 				else if (os.toLowerCase().startsWith("mac"))
-					classifier = "mac";
+					if (arch.equals("x86_64"))
+						classifier = "mac";
+					else throw new MojoExecutionException("Unsupported Mac arch: " + arch);
 				else
 					throw new MojoExecutionException("Unsupported os.name: " + os);
 			}
