@@ -97,7 +97,7 @@ public class GetBinariesMojo
 		try
 		{
 			String majorVersion = getMajorVersion(cmakeVersion);
-			Path archive = download(new URL("http://www.cmake.org/files/v" + majorVersion + "/cmake-" +
+			Path archive = download(new URL("https://cmake.org/files/v" + majorVersion + "/cmake-" +
 				cmakeVersion + "-" + suffix));
 			if (Files.notExists(target.resolve("bin")))
 			{
