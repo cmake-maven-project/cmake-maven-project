@@ -85,9 +85,11 @@ public class GetBinariesMojo
 
 		if (classifier.equals("windows"))
 			suffix = "win32-x86.zip";
-		else if (classifier.equals("linux"))
+		else if (classifier.equals("linux32"))
 			suffix = "Linux-i386.tar.gz";
-		else if (classifier.equals("mac"))
+		else if (classifier.equals("linux64"))
+			suffix = "Linux-x86_64.tar.gz";
+		else if (classifier.equals("mac64"))
 			suffix = "Darwin-x86_64.tar.gz";
 		else
 			throw new MojoExecutionException("Unsupported classifier: " + classifier);

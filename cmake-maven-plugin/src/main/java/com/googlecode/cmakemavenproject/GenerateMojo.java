@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -44,12 +45,6 @@ import org.twdata.maven.mojoexecutor.MojoExecutor.ExecutionEnvironment;
 public class GenerateMojo
 	extends AbstractMojo
 {
-	/**
-	 * The release platform.
-	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	@Parameter(property = "classifier", readonly = true)
-	private String classifier;
 	/**
 	 * The directory containing CMakeLists.txt.
 	 */
@@ -109,6 +104,7 @@ public class GenerateMojo
 				get("pluginDescriptor");
 			String groupId = pluginDescriptor.getGroupId();
 			String version = pluginDescriptor.getVersion();
+			String classifier = getClassifier();
 			if (!targetPath.exists() && !targetPath.mkdirs())
 				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
 
@@ -119,10 +115,14 @@ public class GenerateMojo
 				if (os.toLowerCase().startsWith("windows"))
 					classifier = "windows";
 				else if (os.toLowerCase().startsWith("linux"))
-					classifier = "linux";
+					if (arch.equals("x86_64") || arch.equals("amd64"))
+						classifier = "linux64";
+					else if (arch.equals("i386"))
+						classifier = "linux32";
+					else throw new MojoExecutionException("Unsupported Linux arch: " + arch);
 				else if (os.toLowerCase().startsWith("mac"))
 					if (arch.equals("x86_64"))
-						classifier = "mac";
+						classifier = "mac64";
 					else throw new MojoExecutionException("Unsupported Mac arch: " + arch);
 				else
 					throw new MojoExecutionException("Unsupported os.name: " + os);
@@ -174,5 +174,17 @@ public class GenerateMojo
 		{
 			throw new MojoExecutionException("", e);
 		}
+	}
+
+	private String getClassifier() {
+		for (Profile profile : project.getActiveProfiles())
+		{
+			final String id = profile.getId();
+			if (id.equals("linux32") || id.equals("linux64") || id.equals("mac64") || id.equals("windows"))
+			{
+				return id;
+			}
+		}
+		return null;
 	}
 }

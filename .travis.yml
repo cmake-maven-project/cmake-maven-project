@@ -2,16 +2,33 @@ language: java
 
 sudo: false
 
-# CMake is 32 bit and Travis VMs are 64 bit; install 32 bit libs before testing
 matrix:
   include:
    - os: linux
+     env: MAVEN_PROFILE=""
      jdk: oraclejdk8
      addons:
        apt:
          packages:
            - gcc-multilib
    - os: linux
+     # Travis by default is 64 bit so we toggle to use the 32 bit libs
+     env: MAVEN_PROFILE="-Plinux32,-linux64"
+     jdk: oraclejdk8
+     addons:
+       apt:
+         packages:
+           - gcc-multilib
+   - os: linux
+     env: MAVEN_PROFILE=""
+     jdk: openjdk7
+     addons:
+       apt:
+         packages:
+           - gcc-multilib
+   - os: linux
+     # Travis by default is 64 bit so we toggle to use the 32 bit libs
+     env: MAVEN_PROFILE="-Plinux32,-linux64"
      jdk: openjdk7
      addons:
        apt:
@@ -22,7 +39,7 @@ matrix:
      env: JAVA_HOME=$(/usr/libexec/java_home)
 
 script:
-  - mvn install
+  - mvn install $MAVEN_PROFILE
 
 notifications:
   irc:
