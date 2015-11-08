@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
-	<url>http://code.google.com/p/cmake-maven-project/</url>
+	<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -24,15 +24,18 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://code.google.com/p/cmake-maven-project/</url>
-		<connection>scm:hg:https://code.google.com/p/cmake-maven-project/</connection>
-		<developerConnection>scm:hg:https://code.google.com/p/cmake-maven-project/</developerConnection>
-		<tag>HEAD</tag>
+		<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
+		<connection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git</connection>
+		<developerConnection>scm:git:git@github.com:cmake-maven-project/cmake-maven-project.git</developerConnection>
 	</scm>
 	<developers>
 		<developer>
 			<id>cowwoc</id>
 			<name>Gili Tzabari</name>
+		</developer>
+		<developer>
+			<id>ksclarke</id>
+			<name>Kevin S. Clarke</name>
 		</developer>
 	</developers>
 	<build>
