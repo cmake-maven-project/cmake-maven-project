@@ -27,7 +27,7 @@ import org.apache.maven.it.util.ResourceExtractor;
 /**
  * An abstract test class that handles <code>Verifier</code> configuration.
  * <p/>
- * 
+ *
  * @author Kevin S. Clarke <ksclarke@gmail.com>
  */
 public abstract class CMakeMojoIntegrationTest
@@ -36,14 +36,17 @@ public abstract class CMakeMojoIntegrationTest
     // Maven settings.xml file to be used for the test projects
     private static final String SETTINGS = "/settings.xml";
 
-    // CMake-Maven-Plugin version (so we don't have to manually keep in sync) 
+    // CMake-Maven-Plugin version (so we don't have to manually keep in sync)
     private static final String CMP_VERSION = "cmake.project.version";
+
+    // Get the classifier configured by our build process
+    private static final String CMAKE_CLASSIFIER = "cmake.classifier";
 
     /**
      * Returns a <code>Verifier</code> that has been configured to use the test
      * repository along with the test project that was passed in as a variable.
      * <p/>
-     * 
+     *
      * @param testName The CMake Maven project to test
      * @return A configured <code>Verifier</code>
      * @throws IOException If there is a problem with configuration.
@@ -66,6 +69,9 @@ public abstract class CMakeMojoIntegrationTest
         // We need to pass along the version number of our parent project
         sysProperties.setProperty(CMP_VERSION, System.getProperty(CMP_VERSION));
 
+        // Set the profile that's being used in the running of the tests
+        verifier.addCliOption(getActivatedProfile());
+
         // use.mavenRepoLocal instructs forked tests to use the local repo
         verProperties.setProperty("use.mavenRepoLocal", "true");
 
@@ -74,4 +80,22 @@ public abstract class CMakeMojoIntegrationTest
         return verifier;
     }
 
+    /**
+     * Gets the profile that's been trigger via the testing process.
+     */
+    private String getActivatedProfile() throws VerificationException {
+        String classifier = System.getProperty(CMAKE_CLASSIFIER);
+
+        if (classifier.equals("linux64")) {
+            return "-Plinux64,-linux32,-windows,-mac64";
+        } else if (classifier.equals("linux32")) {
+            return "-Plinux32,-linux64,-windows,-mac64";
+        } else if (classifier.equals("windows")) {
+            return "-Pwindows,-linux32,-linux64,-mac64";
+        } else if (classifier.equals("mac64")) {
+            return "-Pmac64,-windows,-linux32,-linux64";
+        } else {
+            throw new VerificationException("Unexpected test profile: " + classifier);
+        }
+    }
 }

@@ -85,10 +85,12 @@ public class GetBinariesMojo
 
 		if (classifier.equals("windows"))
 			suffix = "win32-x86.zip";
-		else if (classifier.equals("linux"))
+		else if (classifier.equals("linux32"))
 			suffix = "Linux-i386.tar.gz";
-		else if (classifier.equals("mac"))
-			suffix = "Darwin64-universal.tar.gz";
+		else if (classifier.equals("linux64"))
+			suffix = "Linux-x86_64.tar.gz";
+		else if (classifier.equals("mac64"))
+			suffix = "Darwin-x86_64.tar.gz";
 		else
 			throw new MojoExecutionException("Unsupported classifier: " + classifier);
 
@@ -97,7 +99,7 @@ public class GetBinariesMojo
 		try
 		{
 			String majorVersion = getMajorVersion(cmakeVersion);
-			Path archive = download(new URL("http://www.cmake.org/files/v" + majorVersion + "/cmake-" +
+			Path archive = download(new URL("https://cmake.org/files/v" + majorVersion + "/cmake-" +
 				cmakeVersion + "-" + suffix));
 			if (Files.notExists(target.resolve("bin")))
 			{

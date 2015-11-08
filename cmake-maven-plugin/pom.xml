@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>2.8.12.2-b1-SNAPSHOT</version>
+		<version>3.3.2-b1-SNAPSHOT</version>
 	</parent>
 	<artifactId>cmake-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
@@ -141,6 +141,8 @@
 					<systemPropertyVariables>
 						<!-- So we keep test dependencies in sync with this project -->
 						<cmake.project.version>${project.version}</cmake.project.version>
+						<!-- This passes the testing profile onto our test projects -->
+						<cmake.classifier>${cmake.classifier}</cmake.classifier>
 					</systemPropertyVariables>
 				</configuration>
 				<executions>
@@ -212,7 +214,7 @@
 		OS profile activation is triggered by the system's operating system.
 		This can be overridden by substracting a profile on the command line.
 
-		For instance: mvn -Pwindows,-linux install
+		For instance: mvn -Pwindows,-linux64 install
 
 		To accept the OS activated profile, just use: mvn install
 	-->
@@ -229,25 +231,39 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>linux</id>
+			<id>linux32</id>
 			<activation>
 				<os>
 					<name>Linux</name>
+					<arch>i386</arch>
 				</os>
 			</activation>
 			<properties>
-				<cmake.classifier>linux</cmake.classifier>
+				<cmake.classifier>linux32</cmake.classifier>
 			</properties>
 		</profile>
 		<profile>
-			<id>mac</id>
+			<id>linux64</id>
 			<activation>
 				<os>
-					<name>Mac OS X</name>
+					<name>Linux</name>
+					<arch>!i386</arch>
 				</os>
 			</activation>
 			<properties>
-				<cmake.classifier>mac</cmake.classifier>
+				<cmake.classifier>linux64</cmake.classifier>
+			</properties>
+		</profile>
+		<profile>
+			<id>mac64</id>
+			<activation>
+				<os>
+					<name>Mac OS X</name>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<properties>
+				<cmake.classifier>mac64</cmake.classifier>
 			</properties>
 		</profile>
 	</profiles>
