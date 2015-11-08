@@ -71,7 +71,6 @@
             </activation>
             <properties>
                 <cmake.generator>Unix Makefiles</cmake.generator>
-                <cmake.classifier>linux32</cmake.classifier>
             </properties>
         </profile>
         <profile>
@@ -84,7 +83,6 @@
             </activation>
             <properties>
                 <cmake.generator>Unix Makefiles</cmake.generator>
-                <cmake.classifier>linux64</cmake.classifier>
             </properties>
         </profile>
         <profile>
@@ -99,7 +97,6 @@
                 <cmake.generator>Unix Makefiles</cmake.generator>
                 <!-- with xcode -->
                 <!-- <cmake.generator>xcode</cmake.generator> -->
-                <cmake.classifier>mac64</cmake.classifier>
             </properties>
         </profile>
         <profile>
@@ -116,7 +113,6 @@
                 <!-- <cmake.generator>MinGW Makefiles</cmake.generator> -->
                 <!-- with MSYS -->
                 <!-- <cmake.generator>MSYS Makefiles</cmake.generator> -->
-                <cmake.classifier>windows</cmake.classifier>
             </properties>
         </profile>
 
