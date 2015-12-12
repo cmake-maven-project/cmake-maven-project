@@ -13,7 +13,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.3.2-b1</version>
+      <version>3.4.1-b1</version>
       <executions>
         <execution>
           <id>cmake-generate</id>
@@ -50,7 +50,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.3.2-b1</version>
+      <version>3.4.1-b1</version>
       <executions>
         <execution>
           <id>cmake-compile</id>
@@ -80,7 +80,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.3.2-b1</version>
+      <version>3.4.1-b1</version>
       <executions>
         <execution>
           <id>cmake-test</id>
