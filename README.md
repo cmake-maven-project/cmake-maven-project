@@ -176,12 +176,18 @@ OS profile activation can be overridden (if you have a Windows cross-compiling s
 
 This removes the 'linux64' profile and adds the 'windows' one.
 
-The following profiles are supported:
+Since version 3.4.1-b1, the following profiles are supported:
 
 * windows
 * linux64
 * linux32
 * mac64
+
+Between versions 2.8.11-b4 and 3.4.1-b1, the supported build profiles were:
+
+* windows
+* linux
+* mac
 
 To clean an old build, run:
 
