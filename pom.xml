@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
-	<version>3.4.1-b2-SNAPSHOT</version>
+	<version>3.4.1-b1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
