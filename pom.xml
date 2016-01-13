@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
-	<version>3.4.1-b1-SNAPSHOT</version>
+	<version>3.4.1-b1</version>
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
@@ -27,7 +27,7 @@
 		<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
 		<connection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git</connection>
 		<developerConnection>scm:git:git@github.com:cmake-maven-project/cmake-maven-project.git</developerConnection>
-	  <tag>HEAD</tag>
+	  <tag>release-3.4.1-b1</tag>
   </scm>
 	<developers>
 		<developer>
