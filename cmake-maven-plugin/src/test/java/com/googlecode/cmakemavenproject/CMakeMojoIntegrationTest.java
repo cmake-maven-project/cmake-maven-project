@@ -16,12 +16,9 @@ package com.googlecode.cmakemavenproject;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.util.Properties;
-
 import org.apache.maven.it.VerificationException;
 import org.apache.maven.it.Verifier;
-
 import org.apache.maven.it.util.ResourceExtractor;
 
 /**
@@ -41,6 +38,8 @@ public abstract class CMakeMojoIntegrationTest
 
     // Get the classifier configured by our build process
     private static final String CMAKE_CLASSIFIER = "cmake.classifier";
+
+    private static final String CMAKE_NATIVE = "use.native.cmake";
 
     /**
      * Returns a <code>Verifier</code> that has been configured to use the test
@@ -69,6 +68,10 @@ public abstract class CMakeMojoIntegrationTest
         // We need to pass along the version number of our parent project
         sysProperties.setProperty(CMP_VERSION, System.getProperty(CMP_VERSION));
 
+        if (System.getProperty(CMAKE_NATIVE) != null
+                && System.getProperty(CMAKE_NATIVE).equals("true")){
+            sysProperties.setProperty(CMAKE_NATIVE, "true");
+        }
         // Set the profile that's being used in the running of the tests
         verifier.addCliOption(getActivatedProfile());
 
