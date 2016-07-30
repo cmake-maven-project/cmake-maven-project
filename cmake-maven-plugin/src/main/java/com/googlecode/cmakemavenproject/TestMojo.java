@@ -15,40 +15,31 @@ package com.googlecode.cmakemavenproject;
  * the License.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.BufferedReader;
 import java.io.InputStreamReader;
-
 import java.nio.charset.Charset;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
-
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-
 import org.apache.maven.project.MavenProject;
-
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 /**
  * Goal which runs CMake/CTest tests.
@@ -105,6 +96,19 @@ public class TestMojo extends AbstractMojo
 	 */
 	@Parameter
 	private List<String> options;
+
+	@Parameter(property = "download.cmake", defaultValue = "true")
+	private boolean downloadBinaries;
+
+	@Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
+	private String cmakeRootDir;
+
+	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake", required = false)
+	private String cmakeChildDir;
+
+	@Parameter(property = "cmake.ctest.dir", defaultValue = "/", required = false)
+	private String ctestChildDir;
+
 	/**
 	 * Executes the CTest run.
 	 */
@@ -135,9 +139,20 @@ public class TestMojo extends AbstractMojo
 			if (!buildDirectory.isDirectory())
 				throw new MojoExecutionException(buildDir + " isn't directory");
 
-			path = new File(projBuildDir, "dependency/cmake").getAbsoluteFile();
-			args = new ArrayList<String>(Arrays.asList(new File(path, "bin/ctest")
-				.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
+			if (downloadBinaries)
+			{
+				path = new File(projBuildDir, "dependency/cmake").getAbsoluteFile();
+				args = new ArrayList<String>(Arrays.asList(
+					new File(new File(projBuildDir, "dependency/cmake").getAbsoluteFile(), "bin/ctest")
+					.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
+			}
+			else
+			{
+				path = new File(cmakeRootDir, cmakeChildDir).getAbsoluteFile();
+				args = new ArrayList<String>(Arrays.asList(
+					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), "bin/ctest")
+					.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
+			}
 
 			// If set, this will post results to a pre-configured dashboard
 			if (dashboard != null) args.addAll(Arrays.asList("-D", dashboard));

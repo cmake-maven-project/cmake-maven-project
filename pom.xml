@@ -28,7 +28,7 @@
 		<connection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git</connection>
 		<developerConnection>scm:git:git@github.com:cmake-maven-project/cmake-maven-project.git</developerConnection>
 	  <tag>HEAD</tag>
-  </scm>
+	</scm>
 	<developers>
 		<developer>
 			<id>cowwoc</id>

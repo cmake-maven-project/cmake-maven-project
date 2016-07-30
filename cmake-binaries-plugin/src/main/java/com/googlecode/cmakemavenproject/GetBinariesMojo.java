@@ -76,11 +76,20 @@ public class GetBinariesMojo
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
 
+        @Parameter(property = "download.cmake", defaultValue = "true")
+        private boolean downloadBinaries;
+
 	@Override
 	@SuppressWarnings("NP_UNWRITTEN_FIELD")
 	public void execute()
 		throws MojoExecutionException
 	{
+                if (!downloadBinaries)
+                {
+                    getLog().info("Configured to use native CMake, skipping download");
+                    return;
+                } // Use native cmake
+
 		String suffix;
 
 		if (classifier.equals("windows"))
