@@ -68,7 +68,7 @@ public abstract class CMakeMojoIntegrationTest
         // We need to pass along the version number of our parent project
         sysProperties.setProperty(CMP_VERSION, System.getProperty(CMP_VERSION));
 
-        if (!Boolean.getBoolean(DOWNLOAD_CMAKE)) {
+        if (System.getProperty(DOWNLOAD_CMAKE, "true").equals("false")) {
             sysProperties.setProperty(DOWNLOAD_CMAKE, "false");
         }
         // Set the profile that's being used in the running of the tests
