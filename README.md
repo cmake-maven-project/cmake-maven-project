@@ -213,9 +213,9 @@ The following profiles are supported:
 
 Your CMake project can be built with cmake-maven-project on a Raspberry Pi with just a couple of additional steps. CMake doesn't offer a pre-built version of their software for ARM machines, but Raspberry Pi distributions like Raspbian offer CMake as a part of the system's software packages. Since cmake-maven-project version 3.4.1-b2, a Maven build can be configured to use the system's CMake on a Raspberry Pi system by supplying additional arguments at the point of running the build.
 
-The only required additional argument to tell cmake-maven-project to use the local CMake instead of a profile in the build's pom.xml file is: `-Duse.native.cmake=true`. For instance, to build a clean version of a project on a Raspberry Pi, you'd run:
+The only required additional argument to tell cmake-maven-project to use the local CMake instead of a profile in the build's pom.xml file is: `-Ddownload.cmake=false`. For instance, to build a clean version of a project on a Raspberry Pi with CMake already installed locally, you'd run:
 
-    mvn -Duse.native.cmake=true clean install
+    mvn -Ddownload.cmake=false clean install
 
 There are some optional additional arguments that can also be used if needed: `-Dcmake.root.dir`, `-Dcmake.child.dir` and `-Dcmake.ctest.dir`. These are useful if your project wants to define different CMake root, child, or test directories for a build. Their values would be directory locations for each of those parameters (which would be specific to your project).
 

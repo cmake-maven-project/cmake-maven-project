@@ -94,8 +94,8 @@ public class GenerateMojo
 	@Parameter(property = "session", required = true, readonly = true)
 	private MavenSession session;
 
-        @Parameter(property = "use.native.cmake", defaultValue = "false", required = false)
-        private boolean useNativeCmake;
+        @Parameter(property = "download.cmake", defaultValue = "true", required = false)
+        private boolean downloadBinaries;
 
         @Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
         private String cmakeRootDir;
@@ -109,7 +109,9 @@ public class GenerateMojo
 	{
 		try
 		{
-			getLog().info(" **** Using Native CMAKE:" + useNativeCmake);
+                        if (!downloadBinaries) {
+				getLog().info(" **** Using Native CMake");
+			}
 			PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
 				get("pluginDescriptor");
 			String groupId = pluginDescriptor.getGroupId();
@@ -137,9 +139,10 @@ public class GenerateMojo
 				else
 					throw new MojoExecutionException("Unsupported os.name: " + os);
 			}
-			File cmakeDir = useNativeCmake ? new File(cmakeRootDir)
-				: new File(project.getBuild().getDirectory(), "dependency/cmake");
-			if (useNativeCmake) getLog().info("*** Using NATIVE CMake.");
+			File cmakeDir = downloadBinaries ? new File(project.getBuild().getDirectory(), "dependency/cmake") : new File(cmakeRootDir);
+			if (!downloadBinaries) {
+				getLog().info(" **** Using Native CMake");
+			}
 
 			String binariesArtifact = "cmake-binaries";
 
@@ -152,7 +155,7 @@ public class GenerateMojo
 				versionElement, classifierElement, outputDirectoryElement);
 			Element artifactItemsItem = new Element("artifactItems", artifactItemElement);
 			Xpp3Dom configuration = MojoExecutor.configuration(artifactItemsItem);
-			if (!useNativeCmake)
+			if (downloadBinaries)
 			{
 				ExecutionEnvironment environment = MojoExecutor.executionEnvironment(project, session,
 					pluginManager);

@@ -97,8 +97,8 @@ public class TestMojo extends AbstractMojo
 	@Parameter
 	private List<String> options;
 
-	@Parameter(property = "use.native.cmake", defaultValue = "false")
-	private boolean useNativeCmake;
+	@Parameter(property = "download.cmake", defaultValue = "true")
+	private boolean downloadBinaries;
 
 	@Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
 	private String cmakeRootDir;
@@ -139,18 +139,18 @@ public class TestMojo extends AbstractMojo
 			if (!buildDirectory.isDirectory())
 				throw new MojoExecutionException(buildDir + " isn't directory");
 
-			if (useNativeCmake)
-			{
-				path = new File(cmakeRootDir, cmakeChildDir).getAbsoluteFile();
-				args = new ArrayList<String>(Arrays.asList(
-					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), "bin/ctest")
-					.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
-			}
-			else
+			if (downloadBinaries)
 			{
 				path = new File(projBuildDir, "dependency/cmake").getAbsoluteFile();
 				args = new ArrayList<String>(Arrays.asList(
 					new File(new File(projBuildDir, "dependency/cmake").getAbsoluteFile(), "bin/ctest")
+					.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
+			}
+			else
+			{
+				path = new File(cmakeRootDir, cmakeChildDir).getAbsoluteFile();
+				args = new ArrayList<String>(Arrays.asList(
+					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), "bin/ctest")
 					.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 			}
 

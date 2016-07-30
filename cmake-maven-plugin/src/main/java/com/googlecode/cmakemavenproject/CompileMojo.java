@@ -73,8 +73,8 @@ public class CompileMojo
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
 
-        @Parameter(property = "use.native.cmake", defaultValue = "false")
-        private boolean useNativeCmake;
+        @Parameter(property = "download.cmake", defaultValue = "true")
+        private boolean downloadBinaries;
 
         @Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
         private String cmakeRootDir;
@@ -94,9 +94,11 @@ public class CompileMojo
 			if (!projectDirectory.isDirectory())
 				throw new MojoExecutionException(projectDirectory.getAbsolutePath() + " must be a directory");
 
-			File cmakeFile = useNativeCmake ? new File(cmakeRootDir + "/" + cmakeChildDir)
-                                : new File(project.getBuild().getDirectory(), "dependency/cmake/bin/cmake");
-                        if (useNativeCmake) getLog().info("Configured to use native CMake.");
+			File cmakeFile = downloadBinaries ? new File(project.getBuild().getDirectory(), "dependency/cmake/bin/cmake")
+				: new File(cmakeRootDir + "/" + cmakeChildDir);
+			if (!downloadBinaries) {
+				getLog().info("Configured to use native CMake");
+			}
 
 			ProcessBuilder processBuilder = new ProcessBuilder(cmakeFile.getAbsolutePath(),
 				"--build", projectDirectory.getPath());
