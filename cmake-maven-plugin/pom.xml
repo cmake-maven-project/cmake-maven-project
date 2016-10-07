@@ -266,5 +266,16 @@
 				<cmake.classifier>mac64</cmake.classifier>
 			</properties>
 		</profile>
+		<profile>
+			<id>sunos</id>
+			<activation>
+				<os>
+					<name>sunos</name>
+				</os>
+			</activation>
+			<properties>
+				<cmake.classifier>sunos</cmake.classifier>
+			</properties>
+		</profile>
 	</profiles>
 </project>

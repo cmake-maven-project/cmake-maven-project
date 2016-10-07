@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6.4)
-project(DashboardTest)
+project(DashboardTest LANGUAGES C)
 add_executable(dashboard-test main.c)
 
 # Turn on testing

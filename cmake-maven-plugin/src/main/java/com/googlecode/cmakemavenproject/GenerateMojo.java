@@ -109,59 +109,61 @@ public class GenerateMojo
 	{
 		try
 		{
-                        if (!downloadBinaries) {
-				getLog().info(" **** Using Native CMake");
-			}
-			PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
-				get("pluginDescriptor");
-			String groupId = pluginDescriptor.getGroupId();
-			String version = pluginDescriptor.getVersion();
-			String classifier = getClassifier();
 			if (!targetPath.exists() && !targetPath.mkdirs())
 				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
 
-			if (classifier == null)
-			{
-				String os = System.getProperty("os.name");
-				String arch = System.getProperty("os.arch");
-				if (os.toLowerCase().startsWith("windows"))
-					classifier = "windows";
-				else if (os.toLowerCase().startsWith("linux"))
-					if (arch.equals("x86_64") || arch.equals("amd64"))
-						classifier = "linux64";
-					else if (arch.equals("i386") || arch.equals("arm"))
-						classifier = "linux32";
-					else throw new MojoExecutionException("Unsupported Linux arch: " + arch);
-				else if (os.toLowerCase().startsWith("mac"))
-					if (arch.equals("x86_64"))
-						classifier = "mac64";
-					else throw new MojoExecutionException("Unsupported Mac arch: " + arch);
-				else
-					throw new MojoExecutionException("Unsupported os.name: " + os);
-			}
 			File cmakeDir = downloadBinaries ? new File(project.getBuild().getDirectory(), "dependency/cmake") : new File(cmakeRootDir);
-			if (!downloadBinaries) {
-				getLog().info(" **** Using Native CMake");
-			}
 
-			String binariesArtifact = "cmake-binaries";
-
-			Element groupIdElement = new Element("groupId", groupId);
-			Element artifactIdElement = new Element("artifactId", binariesArtifact);
-			Element versionElement = new Element("version", version);
-			Element classifierElement = new Element("classifier", classifier);
-			Element outputDirectoryElement = new Element("outputDirectory", cmakeDir.getAbsolutePath());
-			Element artifactItemElement = new Element("artifactItem", groupIdElement, artifactIdElement,
-				versionElement, classifierElement, outputDirectoryElement);
-			Element artifactItemsItem = new Element("artifactItems", artifactItemElement);
-			Xpp3Dom configuration = MojoExecutor.configuration(artifactItemsItem);
 			if (downloadBinaries)
 			{
+				PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
+						get("pluginDescriptor");
+				String groupId = pluginDescriptor.getGroupId();
+				String version = pluginDescriptor.getVersion();
+				String classifier = getClassifier();
+			
+				if (classifier == null)
+				{
+					String os = System.getProperty("os.name");
+					String arch = System.getProperty("os.arch");
+					if (os.toLowerCase().startsWith("windows"))
+						classifier = "windows";
+					else if (os.toLowerCase().startsWith("linux"))
+						if (arch.equals("x86_64") || arch.equals("amd64"))
+							classifier = "linux64";
+						else if (arch.equals("i386") || arch.equals("arm"))
+							classifier = "linux32";
+						else throw new MojoExecutionException("Unsupported Linux arch: " + arch);
+					else if (os.toLowerCase().startsWith("mac"))
+						if (arch.equals("x86_64"))
+							classifier = "mac64";
+						else throw new MojoExecutionException("Unsupported Mac arch: " + arch);
+					else if (os.toLowerCase().startsWith("sunos"))
+							classifier = "sunos";
+					else
+						throw new MojoExecutionException("Unsupported os.name: " + os);
+				}
+
+				String binariesArtifact = "cmake-binaries";
+
+				Element groupIdElement = new Element("groupId", groupId);
+				Element artifactIdElement = new Element("artifactId", binariesArtifact);
+				Element versionElement = new Element("version", version);
+				Element classifierElement = new Element("classifier", classifier);
+				Element outputDirectoryElement = new Element("outputDirectory", cmakeDir.getAbsolutePath());
+				Element artifactItemElement = new Element("artifactItem", groupIdElement, artifactIdElement,
+					versionElement, classifierElement, outputDirectoryElement);
+				Element artifactItemsItem = new Element("artifactItems", artifactItemElement);
+				Xpp3Dom configuration = MojoExecutor.configuration(artifactItemsItem);
+
 				ExecutionEnvironment environment = MojoExecutor.executionEnvironment(project, session,
 					pluginManager);
 				Plugin dependencyPlugin = MojoExecutor.plugin("org.apache.maven.plugins",
 					"maven-dependency-plugin", "2.8");
 				MojoExecutor.executeMojo(dependencyPlugin, "unpack", configuration, environment);
+			}
+			else {
+				getLog().info(" **** Using Native CMake");
 			}
 
 			ProcessBuilder processBuilder = new ProcessBuilder(new File(cmakeDir, cmakeChildDir).getAbsolutePath(),
