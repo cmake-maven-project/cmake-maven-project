@@ -115,7 +115,32 @@
                 <!-- <cmake.generator>MSYS Makefiles</cmake.generator> -->
             </properties>
         </profile>
-
+		<profile>
+			<id>sunos</id>
+			<activation>
+				<os>
+					<name>sunos</name>
+				</os>
+			</activation>
+			<properties>
+				 <cmake.generator>Unix Makefiles</cmake.generator>
+				 <download.cmake>false</download.cmake>
+				 <cmake.root.dir>${cmake.root.dir}</cmake.root.dir>
+			</properties>
+		</profile>
+		<profile>
+			<id>aix</id>
+			<activation>
+				<os>
+					<name>aix</name>
+				</os>
+			</activation>
+			<properties>
+				 <cmake.generator>Unix Makefiles</cmake.generator>
+				 <download.cmake>false</download.cmake>
+				 <cmake.root.dir>${cmake.root.dir}</cmake.root.dir>
+			</properties>
+		</profile>
         <!--
           Other cmake.generators
           http://www.cmake.org/cmake/help/v2.8.8/cmake.html#section_Generators

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6.4)
-project(HelloTest)
+project(HelloTest LANGUAGES C)
 add_executable(hello-test main.c)
 
 # Turn on testing
