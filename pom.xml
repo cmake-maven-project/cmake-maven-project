@@ -163,6 +163,14 @@
 			</activation>
 		</profile>
 		<profile>
+			<id>aix</id>
+			<activation>
+				<os>
+					<name>aix</name>
+				</os>
+			</activation>
+		</profile>
+		<profile>
 			<id>sonatype-oss-release</id>
 			<build>
 				<plugins>

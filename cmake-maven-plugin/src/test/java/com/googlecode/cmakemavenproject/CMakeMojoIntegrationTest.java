@@ -92,15 +92,17 @@ public abstract class CMakeMojoIntegrationTest
         String classifier = System.getProperty(CMAKE_CLASSIFIER);
 
         if (classifier.equals("linux64")) {
-            return "-Plinux64,-linux32,-windows,-mac64,-sunos";
+            return "-Plinux64,-linux32,-windows,-mac64,-sunos,-aix";
         } else if (classifier.equals("linux32")) {
-            return "-Plinux32,-linux64,-windows,-mac64,-sunos";
+            return "-Plinux32,-linux64,-windows,-mac64,-sunos,-aix";
         } else if (classifier.equals("windows")) {
-            return "-Pwindows,-linux32,-linux64,-mac64,-sunos";
+            return "-Pwindows,-linux32,-linux64,-mac64,-sunos,-aix";
         } else if (classifier.equals("mac64")) {
-            return "-Pmac64,-windows,-linux32,-linux64,-sunos";
+            return "-Pmac64,-windows,-linux32,-linux64,-sunos,-aix";
         } else if (classifier.equals("sunos")) {
-            return "-Psunos,-mac64,-windows,-linux32,-linux64";
+            return "-Psunos,-mac64,-windows,-linux32,-linux64,-aix";
+        } else if (classifier.equals("aix")) {
+            return "-Paix,-sunos,-mac64,-windows,-linux32,-linux64";
         } else {
             throw new VerificationException("Unexpected test profile: " + classifier);
         }

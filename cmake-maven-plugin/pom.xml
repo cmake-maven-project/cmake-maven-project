@@ -277,5 +277,16 @@
 				<cmake.classifier>sunos</cmake.classifier>
 			</properties>
 		</profile>
+		<profile>
+			<id>aix</id>
+			<activation>
+				<os>
+					<name>aix</name>
+				</os>
+			</activation>
+			<properties>
+				<cmake.classifier>aix</cmake.classifier>
+			</properties>
+		</profile>
 	</profiles>
 </project>

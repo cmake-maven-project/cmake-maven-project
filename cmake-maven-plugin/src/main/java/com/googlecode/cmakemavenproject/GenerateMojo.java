@@ -140,6 +140,8 @@ public class GenerateMojo
 						else throw new MojoExecutionException("Unsupported Mac arch: " + arch);
 					else if (os.toLowerCase().startsWith("sunos"))
 							classifier = "sunos";
+					else if (os.toLowerCase().startsWith("aix"))
+							classifier = "aix";
 					else
 						throw new MojoExecutionException("Unsupported os.name: " + os);
 				}
