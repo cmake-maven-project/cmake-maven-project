@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.4.1-b3-SNAPSHOT</version>
+		<version>3.6.2-b1-SNAPSHOT</version>
 	</parent>
 	<artifactId>cmake-binaries-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
@@ -15,7 +15,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.2</version>
+				<version>3.5</version>
 				<configuration>
 					<goalPrefix>cmake-binaries</goalPrefix>
 				</configuration>
@@ -42,22 +42,22 @@
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
-			<version>3.1.0</version>
+			<version>3.3.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>annotations</artifactId>
-			<version>2.0.1</version>
+			<version>3.0.1u2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>
 			<artifactId>maven-plugin-annotations</artifactId>
-			<version>3.2</version>
+			<version>3.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>1.5</version>
+			<version>1.12</version>
 		</dependency>
 	</dependencies>
 </project>

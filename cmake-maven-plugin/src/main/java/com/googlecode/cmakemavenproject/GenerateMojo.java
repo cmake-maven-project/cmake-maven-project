@@ -13,10 +13,11 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
@@ -48,7 +49,7 @@ public class GenerateMojo
 	/**
 	 * The directory containing CMakeLists.txt.
 	 */
-	@SuppressWarnings(
+	@SuppressFBWarnings(
 		{
 			"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"
 		})
@@ -57,7 +58,7 @@ public class GenerateMojo
 	/**
 	 * The output directory.
 	 */
-	@SuppressWarnings(
+	@SuppressFBWarnings(
 		{
 			"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"
 		})
@@ -66,42 +67,42 @@ public class GenerateMojo
 	/**
 	 * The makefile generator to use.
 	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(required = true)
 	private String generator;
 	/**
 	 * The environment variables.
 	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter
 	private Map<String, String> environmentVariables;
 	/**
 	 * Extra command-line options to pass to cmake.
 	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter
 	private List<String> options;
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Component
 	private BuildPluginManager pluginManager;
-	@SuppressWarnings(
+	@SuppressFBWarnings(
 		{
 			"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"
 		})
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "session", required = true, readonly = true)
 	private MavenSession session;
 
-        @Parameter(property = "download.cmake", defaultValue = "true", required = false)
-        private boolean downloadBinaries;
+	@Parameter(property = "download.cmake", defaultValue = "true", required = false)
+	private boolean downloadBinaries;
 
-        @Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
-        private String cmakeRootDir;
+	@Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
+	private String cmakeRootDir;
 
-        @Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake", required = false)
-        private String cmakeChildDir;
+	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake", required = false)
+	private String cmakeChildDir;
 
 	@Override
 	public void execute()
@@ -109,9 +110,8 @@ public class GenerateMojo
 	{
 		try
 		{
-                        if (!downloadBinaries) {
+			if (!downloadBinaries)
 				getLog().info(" **** Using Native CMake");
-			}
 			PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
 				get("pluginDescriptor");
 			String groupId = pluginDescriptor.getGroupId();
@@ -124,25 +124,31 @@ public class GenerateMojo
 			{
 				String os = System.getProperty("os.name");
 				String arch = System.getProperty("os.arch");
-				if (os.toLowerCase().startsWith("windows"))
+				if (os.toLowerCase(Locale.US).startsWith("windows"))
 					classifier = "windows";
-				else if (os.toLowerCase().startsWith("linux"))
+				else if (os.toLowerCase(Locale.US).startsWith("linux"))
+				{
 					if (arch.equals("x86_64") || arch.equals("amd64"))
 						classifier = "linux64";
 					else if (arch.equals("i386") || arch.equals("arm"))
 						classifier = "linux32";
-					else throw new MojoExecutionException("Unsupported Linux arch: " + arch);
-				else if (os.toLowerCase().startsWith("mac"))
+					else
+						throw new MojoExecutionException("Unsupported Linux arch: " + arch);
+				}
+				else if (os.toLowerCase(Locale.US).startsWith("mac"))
+				{
 					if (arch.equals("x86_64"))
 						classifier = "mac64";
-					else throw new MojoExecutionException("Unsupported Mac arch: " + arch);
+					else
+						throw new MojoExecutionException("Unsupported Mac arch: " + arch);
+				}
 				else
 					throw new MojoExecutionException("Unsupported os.name: " + os);
 			}
-			File cmakeDir = downloadBinaries ? new File(project.getBuild().getDirectory(), "dependency/cmake") : new File(cmakeRootDir);
-			if (!downloadBinaries) {
+			File cmakeDir = downloadBinaries ? new File(project.getBuild().getDirectory(),
+				"dependency/cmake") : new File(cmakeRootDir);
+			if (!downloadBinaries)
 				getLog().info(" **** Using Native CMake");
-			}
 
 			String binariesArtifact = "cmake-binaries";
 
@@ -164,7 +170,8 @@ public class GenerateMojo
 				MojoExecutor.executeMojo(dependencyPlugin, "unpack", configuration, environment);
 			}
 
-			ProcessBuilder processBuilder = new ProcessBuilder(new File(cmakeDir, cmakeChildDir).getAbsolutePath(),
+			ProcessBuilder processBuilder = new ProcessBuilder(
+				new File(cmakeDir, cmakeChildDir).getAbsolutePath(),
 				"-G", generator).directory(targetPath);
 			if (options != null)
 				processBuilder.command().addAll(options);
@@ -195,8 +202,9 @@ public class GenerateMojo
 		}
 	}
 
-	private String getClassifier() {
-		for (Profile profile : project.getActiveProfiles())
+	private String getClassifier()
+	{
+		for (Profile profile: project.getActiveProfiles())
 		{
 			final String id = profile.getId();
 			if (id.equals("linux32") || id.equals("linux64") || id.equals("mac64") || id.equals("windows"))
