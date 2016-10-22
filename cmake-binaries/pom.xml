@@ -30,31 +30,44 @@
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.0.2</version>
-				<executions>
-					<execution>
-						<id>attachment-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<classifier>${cmake.classifier}</classifier>
-							<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
-						</configuration>
-					</execution>
-				</executions>
+				<configuration>
+					<classifier>${cmake.classifier}</classifier>
+					<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 	<!--
 		OS profile activation is triggered by the system's operating system.
 		This can be overridden by substracting a profile on the command line.
-		
+
 		For instance: mvn -Pwindows,-linux64 install
-		
+
 		To accept the OS activated profile, just use: mvn install
 	-->
 	<profiles>
+		<profile>
+			<id>pick-a-profile</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-help-plugin</artifactId>
+						<version>2.2</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>all-profiles</goal>
+								</goals>
+								<phase>validate</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>windows</id>
 			<activation>
