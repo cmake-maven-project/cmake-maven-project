@@ -13,22 +13,24 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 import org.junit.runner.RunWith;
-
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * JUnit suite that tests the integration of <code>GenerateMojo</code>,
- * <code>CompileMojo</code>, and <code>TestMojo</code>. Instead of having one
- * massive integration test that does it all, this JUnit suite pulls together
- * three distinct, but interdependent, integration tests in a specific order.
- * <p/>
- * 
- * @author Kevin S. Clarke <ksclarke@gmail.com>
+ * JUnit suite that tests the integration of <code>GenerateMojo</code>, <code>CompileMojo</code>,
+ * and <code>TestMojo</code>. Instead of having one massive integration test that does it all, this
+ * JUnit suite pulls together three distinct, but interdependent, integration tests in a specific
+ * order.
+ *
+ * @author <a href="mailto:ksclarke@gmail.com">Kevin S. Clarke</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({ GenerateMojoIntegrationTest.class,
-		CompileMojoIntegrationTest.class, TestMojoIntegrationTest.class })
-public class CMakeMojoIntegrationSuite {}
+@SuiteClasses(
+{
+	GenerateMojoIntegrationTest.class,
+	CompileMojoIntegrationTest.class, TestMojoIntegrationTest.class
+})
+public class CMakeMojoIntegrationSuite
+{
+}

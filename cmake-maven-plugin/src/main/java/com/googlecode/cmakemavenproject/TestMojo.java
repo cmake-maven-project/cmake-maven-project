@@ -33,7 +33,6 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -41,8 +40,8 @@ import org.apache.maven.project.MavenProject;
 
 /**
  * Goal which runs CMake/CTest tests.
- * <p/>
- * @author Kevin S. Clarke <ksclarke@gmail.com>
+ *
+ * @author <a href="mailto:ksclarke@gmail.com">Kevin S. Clarke</a>
  */
 @Mojo(name = "test", defaultPhase = LifecyclePhase.TEST)
 public class TestMojo extends AbstractMojo
@@ -55,7 +54,7 @@ public class TestMojo extends AbstractMojo
 	/**
 	 * The Maven project directory.
 	 */
-	@Component
+	@Parameter(defaultValue = "${project}", readonly = true)
 	private MavenProject project;
 	/**
 	 * Value that lets Maven tests fail without causing the build to fail.

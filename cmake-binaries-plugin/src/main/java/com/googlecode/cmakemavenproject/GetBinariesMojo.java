@@ -138,7 +138,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Returns the cmake version associated with the project.
-	 * <p/>
+	 * <p>
 	 * @param version the project version
 	 * @return the cmake version
 	 * @throws NullPointerException     if version is null
@@ -158,7 +158,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Returns the major version number of a version.
-	 * <p/>
+	 *
 	 * @param version the full version number
 	 * @return the major version number
 	 * @throws NullPointerException     if version is null
@@ -178,7 +178,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Downloads a file.
-	 * <p/>
+	 * <p>
 	 * @param url the file to download
 	 * @return the path of the downloaded file
 	 * @throws MojoExecutionException if an error occurs downloading the file
@@ -226,7 +226,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Extracts the contents of an archive.
-	 * <p/>
+	 *
 	 * @param source the file to extract
 	 * @param target the directory to extract to
 	 * @throws IOException if an I/O error occurs
@@ -250,7 +250,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Extracts the contents of an archive.
-	 * <p/>
+	 *
 	 * @param source the file to extract
 	 * @param target the directory to extract to
 	 * @param buffer the buffer used to transfer data from source to target
@@ -341,7 +341,7 @@ public class GetBinariesMojo
 	 * Copies a directory.
 	 * <p>
 	 * NOTE: This method is not thread-safe.
-	 * <p>
+	 *
 	 * @param source the directory to copy from
 	 * @param target the directory to copy into
 	 * @throws IOException if an I/O error occurs
@@ -385,7 +385,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Extracts the contents of an archive.
-	 * <p/>
+	 *
 	 * @param source the file to extract
 	 * @param target the directory to extract to
 	 * @throws IOException if an I/O error occurs
@@ -451,7 +451,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Converts an integer mode to a set of PosixFilePermissions.
-	 * <p/>
+	 *
 	 * @param entry the archive entry
 	 * @return the PosixFilePermissions, or null if the default permissions should be used
 	 * @see http://stackoverflow.com/a/9445853/14731
@@ -508,7 +508,7 @@ public class GetBinariesMojo
 	/**
 	 * Returns a filename extension. For example, {@code getFileExtension("foo.tar.gz")} returns
 	 * {@code .gz}. Unix hidden files (e.g. ".hidden") have no extension.
-	 * <p/>
+	 *
 	 * @param filename the filename
 	 * @return an empty string if no extension is found
 	 * @throws NullArgumentException if filename is null
@@ -526,7 +526,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Normalize the directory structure across all platforms.
-	 * <p/>
+	 *
 	 * @param source the binary path
 	 * @throws IOException if an I/O error occurs
 	 */
@@ -584,7 +584,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Deletes a path recursively.
-	 * <p/>
+	 *
 	 * @param path the path to delete
 	 * @throws IOException if an I/O error occurs
 	 */

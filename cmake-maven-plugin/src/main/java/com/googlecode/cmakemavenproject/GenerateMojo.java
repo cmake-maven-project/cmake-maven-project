@@ -27,7 +27,6 @@ import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -83,7 +82,7 @@ public class GenerateMojo
 	@Parameter
 	private List<String> options;
 	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-	@Component
+	@Parameter(defaultValue = "${project}", readonly = true)
 	private BuildPluginManager pluginManager;
 	@SuppressFBWarnings(
 		{

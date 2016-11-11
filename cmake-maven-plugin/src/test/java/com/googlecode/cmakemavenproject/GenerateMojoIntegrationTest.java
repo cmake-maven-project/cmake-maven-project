@@ -19,7 +19,7 @@ import org.junit.Test;
 /**
  * An integration test that runs tests related to generating code using CMake.
  *
- * @author Kevin S. Clarke <ksclarke@gmail.com>
+ * @author <a href="mailto:ksclarke@gmail.com">Kevin S. Clarke</a>
  */
 public class GenerateMojoIntegrationTest extends CMakeMojoIntegrationTest
 {
