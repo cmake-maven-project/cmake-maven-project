@@ -35,24 +35,6 @@
 					<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.6</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-						<configuration>
-							<!-- See https://maven.apache.org/guides/mini/guide-encryption.html -->
-							<passphraseServerId>gpg.passphrase</passphraseServerId>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	<!--

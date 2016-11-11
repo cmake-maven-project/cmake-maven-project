@@ -191,11 +191,12 @@
 								<goals>
 									<goal>sign</goal>
 								</goals>
+								<configuration>
+									<!-- See https://maven.apache.org/guides/mini/guide-encryption.html -->
+									<passphraseServerId>gpg.passphrase</passphraseServerId>
+								</configuration>
 							</execution>
 						</executions>
-						<configuration>
-							<passphrase>${gpg.passphrase}</passphrase>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
