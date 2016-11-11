@@ -32,7 +32,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.2</version>
+				<version>3.6.0</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -144,7 +144,7 @@
 						<!-- This passes the testing profile onto our test projects -->
 						<cmake.classifier>${cmake.classifier}</cmake.classifier>
 					</systemPropertyVariables>
-                                        <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+					<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
 				</configuration>
 				<executions>
 					<execution>
