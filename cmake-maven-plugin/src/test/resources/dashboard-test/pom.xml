@@ -62,6 +62,45 @@
     -->
     <profiles>
         <profile>
+            <id>pick-a-profile</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-help-plugin</artifactId>
+                        <version>2.2</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>all-profiles</goal>
+                                </goals>
+                                <phase>validate</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <cmake.generator>Visual Studio 14 2015</cmake.generator>
+                <!-- with cygwin -->
+                <!-- <cmake.generator>Unix Makefiles</cmake.generator> -->
+                <!-- with MinGW -->
+                <!-- <cmake.generator>MinGW Makefiles</cmake.generator> -->
+                <!-- with MSYS -->
+                <!-- <cmake.generator>MSYS Makefiles</cmake.generator> -->
+            </properties>
+        </profile>
+        <profile>
             <id>linux32</id>
             <activation>
                 <os>
@@ -99,23 +138,6 @@
                 <!-- <cmake.generator>xcode</cmake.generator> -->
             </properties>
         </profile>
-        <profile>
-            <id>windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <properties>
-                <!-- with cygwin -->
-                <cmake.generator>Unix Makefiles</cmake.generator>
-                <!-- with MinGW -->
-                <!-- <cmake.generator>MinGW Makefiles</cmake.generator> -->
-                <!-- with MSYS -->
-                <!-- <cmake.generator>MSYS Makefiles</cmake.generator> -->
-            </properties>
-        </profile>
-
         <!--
           Other cmake.generators
           http://www.cmake.org/cmake/help/v2.8.8/cmake.html#section_Generators

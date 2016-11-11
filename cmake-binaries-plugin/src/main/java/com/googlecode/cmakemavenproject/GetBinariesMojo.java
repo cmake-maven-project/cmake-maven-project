@@ -2,7 +2,7 @@ package com.googlecode.cmakemavenproject;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -28,6 +28,7 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +54,7 @@ import org.apache.maven.project.MavenProject;
 
 /**
  * Downloads and installs the CMake binaries into the local Maven repository.
- * <p/>
+ *
  * @author Gili Tzabari
  */
 @Mojo(name = "get-binaries", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
@@ -63,45 +64,52 @@ public class GetBinariesMojo
 	/**
 	 * The release platform.
 	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "classifier", required = true, readonly = true)
 	private String classifier;
 	/**
 	 * The project version.
 	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "project.version")
 	private String projectVersion;
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
 
-        @Parameter(property = "download.cmake", defaultValue = "true")
-        private boolean downloadBinaries;
+	@Parameter(property = "download.cmake", defaultValue = "true")
+	private boolean downloadBinaries;
 
 	@Override
-	@SuppressWarnings("NP_UNWRITTEN_FIELD")
+	@SuppressFBWarnings("NP_UNWRITTEN_FIELD")
 	public void execute()
 		throws MojoExecutionException
 	{
-                if (!downloadBinaries)
-                {
-                    getLog().info("Configured to use native CMake, skipping download");
-                    return;
-                } // Use native cmake
+		if (!downloadBinaries)
+		{
+			getLog().info("Configured to use native CMake, skipping download");
+			return;
+		} // Use native cmake
 
 		String suffix;
 
-		if (classifier.equals("windows"))
-			suffix = "win32-x86.zip";
-		else if (classifier.equals("linux32"))
-			suffix = "Linux-i386.tar.gz";
-		else if (classifier.equals("linux64"))
-			suffix = "Linux-x86_64.tar.gz";
-		else if (classifier.equals("mac64"))
-			suffix = "Darwin-x86_64.tar.gz";
-		else
-			throw new MojoExecutionException("Unsupported classifier: " + classifier);
+		switch (classifier)
+		{
+			case "windows":
+				suffix = "win32-x86.zip";
+				break;
+			case "linux32":
+				suffix = "Linux-i386.tar.gz";
+				break;
+			case "linux64":
+				suffix = "Linux-x86_64.tar.gz";
+				break;
+			case "mac64":
+				suffix = "Darwin-x86_64.tar.gz";
+				break;
+			default:
+				throw new MojoExecutionException("Unsupported classifier: " + classifier);
+		}
 
 		String cmakeVersion = getCMakeVersion(projectVersion);
 		final Path target = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
@@ -188,14 +196,12 @@ public class GetBinariesMojo
 					log.info("Downloading: " + url.toString());
 				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-				try
+				try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream()))
 				{
-					BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
 					Files.createDirectories(Paths.get(project.getBuild().getDirectory()));
-					BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(result));
-					byte[] buffer = new byte[10 * 1024];
-					try
+					try (BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(result)))
 					{
+						byte[] buffer = new byte[10 * 1024];
 						while (true)
 						{
 							int count = in.read(buffer);
@@ -203,11 +209,6 @@ public class GetBinariesMojo
 								break;
 							out.write(buffer, 0, count);
 						}
-					}
-					finally
-					{
-						in.close();
-						out.close();
 					}
 				}
 				finally
@@ -259,11 +260,9 @@ public class GetBinariesMojo
 	{
 		Path tempDir = Files.createTempDirectory("cmake");
 		FileAttribute<?>[] attributes;
-		ArchiveInputStream in = null;
-		try
+		try (ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(
+			new BufferedInputStream(Files.newInputStream(source))))
 		{
-			in = new ArchiveStreamFactory().createArchiveInputStream(
-				new BufferedInputStream(Files.newInputStream(source)));
 			if (supportsPosix(in))
 				attributes = new FileAttribute<?>[1];
 			else
@@ -276,7 +275,14 @@ public class GetBinariesMojo
 				if (!in.canReadEntryData(entry))
 				{
 					getLog().warn("Unsupported entry type for " + entry.getName() + ", skipping...");
-					in.skip(entry.getSize());
+					long remaining = entry.getSize();
+					while (remaining > 0)
+					{
+						long actual = in.skip(entry.getSize());
+						if (actual <= 0)
+							throw new AssertionError("skip() returned " + actual);
+						remaining -= actual;
+					}
 					continue;
 				}
 				if (attributes.length > 0)
@@ -288,7 +294,7 @@ public class GetBinariesMojo
 
 					if (attributes.length > 0)
 					{
-						@java.lang.SuppressWarnings("unchecked")
+						@SuppressWarnings("unchecked")
 						Set<PosixFilePermission> permissions = (Set<PosixFilePermission>) attributes[0].value();
 						Files.setPosixFilePermissions(directory, permissions);
 					}
@@ -299,13 +305,11 @@ public class GetBinariesMojo
 
 				// Omitted directories are created using the default permissions
 				Files.createDirectories(targetFile.getParent());
-				SeekableByteChannel out = null;
-				try
-				{
-					out = Files.newByteChannel(targetFile,
-						ImmutableSet.of(StandardOpenOption.CREATE,
+				try (SeekableByteChannel out = Files.newByteChannel(targetFile,
+					ImmutableSet.of(StandardOpenOption.CREATE,
 						StandardOpenOption.TRUNCATE_EXISTING,
-						StandardOpenOption.WRITE), attributes);
+						StandardOpenOption.WRITE), attributes))
+				{
 					while (true)
 					{
 						int count = reader.read(buffer);
@@ -320,11 +324,6 @@ public class GetBinariesMojo
 						buffer.clear();
 					}
 				}
-				finally
-				{
-					if (out != null)
-						out.close();
-				}
 			}
 
 			// Copy extracted files from tempDir to target.
@@ -335,11 +334,6 @@ public class GetBinariesMojo
 		catch (ArchiveException e)
 		{
 			throw new IOException("Could not uncompress: " + source, e);
-		}
-		finally
-		{
-			if (in != null)
-				in.close();
 		}
 	}
 
@@ -356,37 +350,37 @@ public class GetBinariesMojo
 	{
 		Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
 			new FileVisitor<Path>()
-			{
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+		{
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
 				throws IOException
-				{
-					Files.createDirectories(target.resolve(source.relativize(dir)));
-					return FileVisitResult.CONTINUE;
-				}
+			{
+				Files.createDirectories(target.resolve(source.relativize(dir)));
+				return FileVisitResult.CONTINUE;
+			}
 
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-				{
-					Files.copy(file, target.resolve(source.relativize(file)),
-						StandardCopyOption.COPY_ATTRIBUTES);
-					return FileVisitResult.CONTINUE;
-				}
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+			{
+				Files.copy(file, target.resolve(source.relativize(file)),
+					StandardCopyOption.COPY_ATTRIBUTES);
+				return FileVisitResult.CONTINUE;
+			}
 
-				@Override
-				public FileVisitResult visitFileFailed(Path file, IOException e) throws IOException
-				{
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException e) throws IOException
+			{
+				throw e;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException
+			{
+				if (e != null)
 					throw e;
-				}
-
-				@Override
-				public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException
-				{
-					if (e != null)
-						throw e;
-					return FileVisitResult.CONTINUE;
-				}
-			});
+				return FileVisitResult.CONTINUE;
+			}
+		});
 	}
 
 	/**
@@ -402,21 +396,17 @@ public class GetBinariesMojo
 		String extension = getFileExtension(filename);
 		String nameWithoutExtension = filename.substring(0, filename.length() - extension.length());
 		String nextExtension = getFileExtension(nameWithoutExtension);
-		CompressorInputStream in = null;
-		try
+		try (CompressorInputStream in = new CompressorStreamFactory().createCompressorInputStream(
+			new BufferedInputStream(Files.newInputStream(source))))
 		{
-			in = new CompressorStreamFactory().createCompressorInputStream(
-				new BufferedInputStream(Files.newInputStream(source)));
 			Path tempDir = Files.createTempDirectory("cmake");
 			ReadableByteChannel reader = Channels.newChannel(in);
 			Path intermediateTarget = tempDir.resolve(nameWithoutExtension);
-			SeekableByteChannel out = null;
-			try
-			{
-				out = Files.newByteChannel(intermediateTarget,
-					ImmutableSet.of(StandardOpenOption.CREATE,
+			try (SeekableByteChannel out = Files.newByteChannel(intermediateTarget,
+				ImmutableSet.of(StandardOpenOption.CREATE,
 					StandardOpenOption.TRUNCATE_EXISTING,
-					StandardOpenOption.WRITE));
+					StandardOpenOption.WRITE)))
+			{
 				while (true)
 				{
 					int count = reader.read(buffer);
@@ -430,11 +420,6 @@ public class GetBinariesMojo
 					while (buffer.hasRemaining());
 					buffer.clear();
 				}
-			}
-			finally
-			{
-				if (out != null)
-					out.close();
 			}
 			if (!nextExtension.isEmpty())
 			{
@@ -451,11 +436,6 @@ public class GetBinariesMojo
 		{
 			throw new IOException("Could not uncompress: " + source, e);
 		}
-		finally
-		{
-			if (in != null)
-				in.close();
-		}
 	}
 
 	/**
@@ -464,7 +444,7 @@ public class GetBinariesMojo
 	 */
 	private boolean supportsPosix(InputStream in)
 	{
-		return !System.getProperty("os.name").toLowerCase().startsWith("windows") &&
+		return !System.getProperty("os.name").toLowerCase(Locale.US).startsWith("windows") &&
 			(in instanceof ArchiveInputStream || in instanceof ZipArchiveInputStream ||
 			in instanceof TarArchiveInputStream);
 	}

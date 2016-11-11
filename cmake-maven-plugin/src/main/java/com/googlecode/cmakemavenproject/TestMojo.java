@@ -1,4 +1,3 @@
-
 package com.googlecode.cmakemavenproject;
 
 /*
@@ -14,7 +13,6 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -81,8 +79,8 @@ public class TestMojo extends AbstractMojo
 	@Parameter(property = "threadCount", defaultValue = "0")
 	private int threadCount;
 	/**
-	 * The dashboard to which results should be submitted. This is configured
-	 * through the optional CTestConfig.cmake file.
+	 * The dashboard to which results should be submitted. This is configured through the optional
+	 * CTestConfig.cmake file.
 	 */
 	@Parameter(property = "dashboard")
 	private String dashboard;
@@ -119,7 +117,8 @@ public class TestMojo extends AbstractMojo
 		// Surefire skips tests with properties so we'll do it this way too
 		if (skipTests || ctestSkip)
 		{
-			if (log.isInfoEnabled()) log.info("Tests are skipped.");
+			if (log.isInfoEnabled())
+				log.info("Tests are skipped.");
 			return;
 		}
 
@@ -132,7 +131,6 @@ public class TestMojo extends AbstractMojo
 			String projBuildDir = project.getBuild().getDirectory();
 			String buildDir = buildDirectory.getAbsolutePath();
 			List<String> args;
-			File path;
 
 			if (!buildDirectory.exists())
 				throw new MojoExecutionException(buildDir + " does not exist");
@@ -141,21 +139,20 @@ public class TestMojo extends AbstractMojo
 
 			if (downloadBinaries)
 			{
-				path = new File(projBuildDir, "dependency/cmake").getAbsoluteFile();
 				args = new ArrayList<String>(Arrays.asList(
 					new File(new File(projBuildDir, "dependency/cmake").getAbsoluteFile(), "bin/ctest")
-					.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
+						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 			}
 			else
 			{
-				path = new File(cmakeRootDir, cmakeChildDir).getAbsoluteFile();
 				args = new ArrayList<String>(Arrays.asList(
 					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), "bin/ctest")
-					.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
+						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 			}
 
 			// If set, this will post results to a pre-configured dashboard
-			if (dashboard != null) args.addAll(Arrays.asList("-D", dashboard));
+			if (dashboard != null)
+				args.addAll(Arrays.asList("-D", dashboard));
 
 			ProcessBuilder processBuilder = new ProcessBuilder(args);
 
@@ -182,7 +179,7 @@ public class TestMojo extends AbstractMojo
 			int returnCode = Mojos.waitFor(processBuilder);
 
 			// Convert ctest xml output to junit xml for better integration
-			InputStream stream = getClass().getResourceAsStream("/ct2ju.xslt");
+			InputStream stream = TestMojo.class.getResourceAsStream("/ct2ju.xslt");
 			TransformerFactory tf = TransformerFactory.newInstance();
 			StreamSource xsltSource = new StreamSource(stream);
 			Transformer transformer = tf.newTransformer(xsltSource);
@@ -193,9 +190,15 @@ public class TestMojo extends AbstractMojo
 			FileInputStream fis = new FileInputStream(tagFile);
 			InputStreamReader isr = new InputStreamReader(fis, charset);
 			BufferedReader tagReader = new BufferedReader(isr);
-
-			String tag = tagReader.readLine();
-			tagReader.close();
+			String tag;
+			try
+			{
+				tag = tagReader.readLine();
+			}
+			finally
+			{
+				tagReader.close();
+			}
 
 			if (tag == null || tag.trim().length() == 0)
 				throw new IOException("Couldn't read ctest TAG file");
