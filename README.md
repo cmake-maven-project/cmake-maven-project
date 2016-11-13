@@ -4,7 +4,7 @@
 
 A Maven project for the CMake build system. It can be used by including it as a plugin within your Maven project's pom.xml file.
 
-This repository [originally lived]((https://code.google.com/p/cmake-maven-project/)) on Google Code and was migrated to GitHub (and Git) after Google Code shut down.
+This repository [originally lived](https://code.google.com/p/cmake-maven-project/) on Google Code and was migrated to GitHub (and Git) after Google Code shut down.
 
 ## Sample Usage
 
@@ -112,7 +112,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
 
 The following projects contain examples of how to use this plugin:
 
-https://bitbucket.org/cowwoc/requirements/src/238f37a385057a640acb8bec5452a425ab8e9ce0/native/pom.xml?at=dev-3.0.0&fileviewer=file-view-default
+requirements API: [maven profiles](https://bitbucket.org/cowwoc/requirements/src/238f37a385057a640acb8bec5452a425ab8e9ce0/pom.xml?at=dev-3.0.0&fileviewer=file-view-default) and [cmake plugin](https://bitbucket.org/cowwoc/requirements/src/238f37a385057a640acb8bec5452a425ab8e9ce0/native/pom.xml?at=dev-3.0.0&fileviewer=file-view-default)
 
 ### Building instructions
 
