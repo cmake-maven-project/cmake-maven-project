@@ -223,8 +223,7 @@
 										<echo>* linux-arm</echo>
 										<echo>* mac-amd64</echo>
 										<echo/>
-										<echo>For instance: mvn -Pwindows64 install</echo>
-										<fail/>
+										<echo>For instance: mvn -Pwindows-amd64 install</echo>
 									</tasks>
 								</configuration>
 							</execution>

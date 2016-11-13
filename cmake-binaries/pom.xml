@@ -12,23 +12,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.googlecode.cmake-maven-project</groupId>
-				<artifactId>cmake-binaries-plugin</artifactId>
-				<version>${project.version}</version>
-				<executions>
-					<execution>
-						<id>cmake-binaries</id>
-						<goals>
-							<goal>get-binaries</goal>
-						</goals>
-						<configuration>
-							<classifier>${cmake.classifier}</classifier>
-							<skip>${cmake.download}</skip>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.0.2</version>
 				<configuration>
@@ -62,8 +45,7 @@
 										<echo>* linux-amd64</echo>
 										<echo>* mac-amd64</echo>
 										<echo/>
-										<echo>For instance: mvn -Pwindows64 install</echo>
-										<fail/>
+										<echo>For instance: mvn -Pwindows-amd64 install</echo>
 									</tasks>
 								</configuration>
 							</execution>
@@ -77,24 +59,108 @@
 			<properties>
 				<cmake.classifier>windows-i386</cmake.classifier>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.googlecode.cmake-maven-project</groupId>
+						<artifactId>cmake-binaries-plugin</artifactId>
+						<version>${project.version}</version>
+						<executions>
+							<execution>
+								<id>cmake-binaries</id>
+								<goals>
+									<goal>get-binaries</goal>
+								</goals>
+								<configuration>
+									<classifier>${cmake.classifier}</classifier>
+									<skip>${cmake.download}</skip>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>windows-amd64</id>
 			<properties>
 				<cmake.classifier>windows-amd64</cmake.classifier>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.googlecode.cmake-maven-project</groupId>
+						<artifactId>cmake-binaries-plugin</artifactId>
+						<version>${project.version}</version>
+						<executions>
+							<execution>
+								<id>cmake-binaries</id>
+								<goals>
+									<goal>get-binaries</goal>
+								</goals>
+								<configuration>
+									<classifier>${cmake.classifier}</classifier>
+									<skip>${cmake.download}</skip>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>linux-amd64</id>
 			<properties>
 				<cmake.classifier>linux-amd64</cmake.classifier>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.googlecode.cmake-maven-project</groupId>
+						<artifactId>cmake-binaries-plugin</artifactId>
+						<version>${project.version}</version>
+						<executions>
+							<execution>
+								<id>cmake-binaries</id>
+								<goals>
+									<goal>get-binaries</goal>
+								</goals>
+								<configuration>
+									<classifier>${cmake.classifier}</classifier>
+									<skip>${cmake.download}</skip>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>mac-amd64</id>
 			<properties>
 				<cmake.classifier>mac-amd64</cmake.classifier>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.googlecode.cmake-maven-project</groupId>
+						<artifactId>cmake-binaries-plugin</artifactId>
+						<version>${project.version}</version>
+						<executions>
+							<execution>
+								<id>cmake-binaries</id>
+								<goals>
+									<goal>get-binaries</goal>
+								</goals>
+								<configuration>
+									<classifier>${cmake.classifier}</classifier>
+									<skip>${cmake.download}</skip>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>

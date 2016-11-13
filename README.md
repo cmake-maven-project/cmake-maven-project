@@ -135,7 +135,7 @@ The following profiles are supported:
 
 For instance, when building for 64-bit Windows machines, use:
 
-    mvn -Pwindows64 install
+    mvn -Pwindows-amd64 install
 
 ### Using a local CMake installation
 
