@@ -108,7 +108,6 @@
 	</build>
 	<modules>
 		<module>cmake-binaries-plugin</module>
-		<module>cmake-binaries</module>
 		<module>cmake-maven-plugin</module>
 	</modules>
 	<properties>
@@ -175,21 +174,33 @@
 		</profile>
 		<profile>
 			<id>windows-i386</id>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>windows-amd64</id>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>linux-i386</id>
 		</profile>
 		<profile>
 			<id>linux-amd64</id>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>linux-arm</id>
 		</profile>
 		<profile>
 			<id>mac-amd64</id>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>sonatype-oss-release</id>
