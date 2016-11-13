@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
-	<version>3.6.2-b1-SNAPSHOT</version>
+	<version>3.7.0-b1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
@@ -108,103 +108,103 @@
 	</build>
 	<modules>
 		<module>cmake-binaries-plugin</module>
-		<module>cmake-binaries</module>
 		<module>cmake-maven-plugin</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<arguments />
 	</properties>
-	<!--
-		OS profile activation is triggered by the system's operating system.
-		This can be overridden by substracting a profile on the command line.
-
-		For instance: mvn -Pwindows,-linux64 install
-
-		To accept the OS activated profile, just use: mvn install
-    -->
-    <profiles>
-        <profile>
-            <id>pick-a-profile</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-help-plugin</artifactId>
-                        <version>2.2</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>all-profiles</goal>
-                                </goals>
-                                <phase>validate</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-        </profile>
-        <profile>
-            <id>linux32</id>
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <arch>i386</arch>
-                </os>
-            </activation>
-        </profile>
-        <profile>
-            <id>linux64</id>
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <arch>!i386</arch>
-                </os>
-            </activation>
-        </profile>
-        <profile>
-            <id>mac64</id>
-            <activation>
-                <os>
-                    <name>Mac OS X</name>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
-        </profile>
-        <profile>
-            <id>sonatype-oss-release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <configuration>
-                                    <!-- See https://maven.apache.org/guides/mini/guide-encryption.html -->
-                                    <passphraseServerId>gpg.passphrase</passphraseServerId>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+	<profiles>
+		<profile>
+			<id>list-profiles</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<echo>Please activate one of the following profiles:</echo>
+										<echo>* windows-i386</echo>
+										<echo>* windows-amd64</echo>
+										<echo>* linux-i386</echo>
+										<echo>* linux-amd64</echo>
+										<echo>* linux-arm</echo>
+										<echo>* mac-amd64</echo>
+										<echo/>
+										<echo>For instance: mvn -Pwindows-amd64 install</echo>
+										<fail/>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>windows-i386</id>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>windows-amd64</id>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>linux-i386</id>
+		</profile>
+		<profile>
+			<id>linux-amd64</id>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>linux-arm</id>
+		</profile>
+		<profile>
+			<id>mac-amd64</id>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>sonatype-oss-release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<!-- See https://maven.apache.org/guides/mini/guide-encryption.html -->
+									<passphraseServerId>gpg.passphrase</passphraseServerId>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

@@ -95,16 +95,16 @@ public class GetBinariesMojo
 
 		switch (classifier)
 		{
-			case "windows":
+			case "windows-i386":
 				suffix = "win32-x86.zip";
 				break;
-			case "linux32":
-				suffix = "Linux-i386.tar.gz";
+			case "windows-amd64":
+				suffix = "win64-x64.zip";
 				break;
-			case "linux64":
+			case "linux-amd64":
 				suffix = "Linux-x86_64.tar.gz";
 				break;
-			case "mac64":
+			case "mac-amd64":
 				suffix = "Darwin-x86_64.tar.gz";
 				break;
 			default:

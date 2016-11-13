@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
     http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -26,6 +26,7 @@
                             <sourcePath>${project.basedir}</sourcePath>
                             <targetPath>${project.build.directory}</targetPath>
                             <generator>${cmake.generator}</generator>
+                            <classifier>${cmake.classifier}</classifier>
                         </configuration>
                     </execution>
                     <execution>
@@ -52,31 +53,37 @@
             </plugin>
         </plugins>
     </build>
-    <!--
-        OS profile activation is triggered by the system's operating system.
-        This can be overridden by substracting a profile on the command line.
-
-        For instance: mvn -Pwindows,-linux64 install
-
-        To accept the OS activated profile, just use: mvn install
-    -->
     <profiles>
         <profile>
-            <id>pick-a-profile</id>
+            <id>list-profiles</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-help-plugin</artifactId>
-                        <version>2.2</version>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
                         <executions>
                             <execution>
-                                <goals>
-                                    <goal>all-profiles</goal>
-                                </goals>
                                 <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo>Please activate one of the following profiles:</echo>
+                                        <echo>* windows-i386</echo>
+                                        <echo>* windows-amd64</echo>
+                                        <echo>* linux-i386</echo>
+                                        <echo>* linux-amd64</echo>
+                                        <echo>* linux-arm</echo>
+                                        <echo>* mac-amd64</echo>
+                                        <echo/>
+                                        <echo>For instance: mvn -Pwindows-amd64 install</echo>
+                                        <fail/>
+                                    </target>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -84,13 +91,9 @@
             </build>
         </profile>
         <profile>
-            <id>windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
+            <id>windows-i386</id>
             <properties>
+                <cmake.classifier>windows-i386</cmake.classifier>
                 <cmake.generator>Visual Studio 14 2015</cmake.generator>
                 <!-- with cygwin -->
                 <!-- <cmake.generator>Unix Makefiles</cmake.generator> -->
@@ -101,38 +104,39 @@
             </properties>
         </profile>
         <profile>
-            <id>linux32</id>
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <arch>i386</arch>
-                </os>
-            </activation>
+            <id>windows-amd64</id>
             <properties>
+                <cmake.classifier>windows-amd64</cmake.classifier>
+                <cmake.generator>Visual Studio 14 2015</cmake.generator>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-i386</id>
+            <properties>
+                <cmake.classifier>linux-i386</cmake.classifier>
+                <download.cmake>false</download.cmake>
                 <cmake.generator>Unix Makefiles</cmake.generator>
             </properties>
         </profile>
         <profile>
-            <id>linux64</id>
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <arch>!i386</arch>
-                </os>
-            </activation>
+            <id>linux-amd64</id>
             <properties>
+                <cmake.classifier>linux-amd64</cmake.classifier>
                 <cmake.generator>Unix Makefiles</cmake.generator>
             </properties>
         </profile>
         <profile>
-            <id>mac64</id>
-            <activation>
-                <os>
-                    <name>Mac OS X</name>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
+            <id>linux-arm</id>
             <properties>
+                <cmake.classifier>linux-arm</cmake.classifier>
+                <download.cmake>false</download.cmake>
+                <cmake.generator>Unix Makefiles</cmake.generator>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-amd64</id>
+            <properties>
+                <cmake.classifier>mac-amd64</cmake.classifier>
                 <cmake.generator>Unix Makefiles</cmake.generator>
                 <!-- with xcode -->
                 <!-- <cmake.generator>xcode</cmake.generator> -->
@@ -140,7 +144,7 @@
         </profile>
         <!--
           Other cmake.generators
-          http://www.cmake.org/cmake/help/v2.8.8/cmake.html#section_Generators
+          https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html
         -->
     </profiles>
 </project>

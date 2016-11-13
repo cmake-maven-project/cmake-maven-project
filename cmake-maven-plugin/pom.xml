@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.6.2-b1-SNAPSHOT</version>
+		<version>3.7.0-b1-SNAPSHOT</version>
 	</parent>
 	<artifactId>cmake-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
@@ -102,7 +102,7 @@
 						<goals>
 							<goal>copy-dependencies</goal>
 							<!-- There is a go-offline goal but it's broken
-								http://jira.codehaus.org/browse/MDEP-82 -->
+							http://jira.codehaus.org/browse/MDEP-82 -->
 						</goals>
 						<configuration>
 							<artifactItems>
@@ -126,13 +126,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.19.1</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit47</artifactId>
-						<version>2.19.1</version>
-					</dependency>
-				</dependencies>
 				<configuration>
 					<!-- Our tests shouldn't be run as unit tests -->
 					<excludes>
@@ -197,13 +190,6 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>cmake-binaries</artifactId>
-			<version>${project.version}</version>
-			<classifier>${cmake.classifier}</classifier>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<!-- Run tests from ${test-repo} repository instead of the local repo -->
@@ -211,31 +197,37 @@
 		<test-repo>${project.build.directory}/test-classes/test-repo</test-repo>
 	</properties>
 
-	<!--
-		OS profile activation is triggered by the system's operating system.
-		This can be overridden by substracting a profile on the command line.
-
-		For instance: mvn -Pwindows,-linux64 install
-
-		To accept the OS activated profile, just use: mvn install
-	-->
 	<profiles>
 		<profile>
-			<id>pick-a-profile</id>
+			<id>list-profiles</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<plugins>
 					<plugin>
-						<artifactId>maven-help-plugin</artifactId>
-						<version>2.2</version>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
 						<executions>
 							<execution>
-								<goals>
-									<goal>all-profiles</goal>
-								</goals>
 								<phase>validate</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<echo>Please activate one of the following profiles:</echo>
+										<echo>* windows-i386</echo>
+										<echo>* windows-amd64</echo>
+										<echo>* linux-i386</echo>
+										<echo>* linux-amd64</echo>
+										<echo>* linux-arm</echo>
+										<echo>* mac-amd64</echo>
+										<echo/>
+										<echo>For instance: mvn -Pwindows-amd64 install</echo>
+										<fail/>
+									</target>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
@@ -243,51 +235,78 @@
 			</build>
 		</profile>
 		<profile>
-			<id>windows</id>
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-			</activation>
+			<id>windows-i386</id>
 			<properties>
-				<cmake.classifier>windows</cmake.classifier>
+				<cmake.classifier>windows-i386</cmake.classifier>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>cmake-binaries</artifactId>
+					<version>${project.version}</version>
+					<classifier>${cmake.classifier}</classifier>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>windows-amd64</id>
+			<properties>
+				<cmake.classifier>windows-amd64</cmake.classifier>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>cmake-binaries</artifactId>
+					<version>${project.version}</version>
+					<classifier>${cmake.classifier}</classifier>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>linux-i386</id>
+			<properties>
+				<cmake.classifier>linux-i386</cmake.classifier>
+				<download.cmake>false</download.cmake>
 			</properties>
 		</profile>
 		<profile>
-			<id>linux32</id>
-			<activation>
-				<os>
-					<name>Linux</name>
-					<arch>i386</arch>
-				</os>
-			</activation>
+			<id>linux-amd64</id>
 			<properties>
-				<cmake.classifier>linux32</cmake.classifier>
+				<cmake.classifier>linux-amd64</cmake.classifier>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>cmake-binaries</artifactId>
+					<version>${project.version}</version>
+					<classifier>${cmake.classifier}</classifier>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>linux-arm</id>
+			<properties>
+				<cmake.classifier>linux-arm</cmake.classifier>
+				<download.cmake>false</download.cmake>
 			</properties>
 		</profile>
 		<profile>
-			<id>linux64</id>
-			<activation>
-				<os>
-					<name>Linux</name>
-					<arch>!i386</arch>
-				</os>
-			</activation>
+			<id>mac-amd64</id>
 			<properties>
-				<cmake.classifier>linux64</cmake.classifier>
+				<cmake.classifier>mac-amd64</cmake.classifier>
 			</properties>
-		</profile>
-		<profile>
-			<id>mac64</id>
-			<activation>
-				<os>
-					<name>Mac OS X</name>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<cmake.classifier>mac64</cmake.classifier>
-			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>cmake-binaries</artifactId>
+					<version>${project.version}</version>
+					<classifier>${cmake.classifier}</classifier>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 </project>
