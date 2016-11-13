@@ -13,11 +13,13 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
@@ -44,13 +46,15 @@ import org.twdata.maven.mojoexecutor.MojoExecutor.ExecutionEnvironment;
 public class GenerateMojo
 	extends AbstractMojo
 {
+	private static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-i386",
+		"windows-amd64", "linux-i386", "linux-amd64", "linux-arm", "mac-amd64");
 	/**
 	 * The classifier of the current platform.
 	 * <p>
-	 * One of [windows32, windows64, linux64, linux32, mac64].
+	 * One of [windows-i386, windows-amd64, linux-i386, linux-amd64, linux-arm, mac-amd64].
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	@Parameter(property = "classifier", readonly = true, required = true)
+	@Parameter(property = "classifier", readonly = true)
 	private String classifier;
 	/**
 	 * /**
@@ -117,38 +121,45 @@ public class GenerateMojo
 	{
 		try
 		{
-			if (!downloadBinaries)
-				getLog().info(" **** Using Native CMake");
-			PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
-				get("pluginDescriptor");
-			String groupId = pluginDescriptor.getGroupId();
-			String version = pluginDescriptor.getVersion();
 			if (!targetPath.exists() && !targetPath.mkdirs())
 				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
 
-			File cmakeDir = downloadBinaries ? new File(project.getBuild().getDirectory(),
-				"dependency/cmake") : new File(cmakeRootDir);
-			if (!downloadBinaries)
-				getLog().info(" **** Using Native CMake");
-
-			String binariesArtifact = "cmake-binaries";
-
-			Element groupIdElement = new Element("groupId", groupId);
-			Element artifactIdElement = new Element("artifactId", binariesArtifact);
-			Element versionElement = new Element("version", version);
-			Element classifierElement = new Element("classifier", classifier);
-			Element outputDirectoryElement = new Element("outputDirectory", cmakeDir.getAbsolutePath());
-			Element artifactItemElement = new Element("artifactItem", groupIdElement, artifactIdElement,
-				versionElement, classifierElement, outputDirectoryElement);
-			Element artifactItemsItem = new Element("artifactItems", artifactItemElement);
-			Xpp3Dom configuration = MojoExecutor.configuration(artifactItemsItem);
+			File cmakeDir;
 			if (downloadBinaries)
 			{
+				getLog().info("Downloading binaries");
+				cmakeDir = new File(project.getBuild().getDirectory(), "dependency/cmake");
+				if (classifier == null)
+					throw new MojoExecutionException("\"classifier\" must be set");
+				if (!VALID_CLASSIFIERS.contains(classifier))
+				{
+					throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
+						"\nActual: " + classifier);
+				}
+				PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
+					get("pluginDescriptor");
+				String groupId = pluginDescriptor.getGroupId();
+				String version = pluginDescriptor.getVersion();
+				String binariesArtifact = "cmake-binaries";
+				Element groupIdElement = new Element("groupId", groupId);
+				Element artifactIdElement = new Element("artifactId", binariesArtifact);
+				Element versionElement = new Element("version", version);
+				Element classifierElement = new Element("classifier", classifier);
+				Element outputDirectoryElement = new Element("outputDirectory", cmakeDir.getAbsolutePath());
+				Element artifactItemElement = new Element("artifactItem", groupIdElement, artifactIdElement,
+					versionElement, classifierElement, outputDirectoryElement);
+				Element artifactItemsItem = new Element("artifactItems", artifactItemElement);
+				Xpp3Dom configuration = MojoExecutor.configuration(artifactItemsItem);
 				ExecutionEnvironment environment = MojoExecutor.executionEnvironment(project, session,
 					pluginManager);
 				Plugin dependencyPlugin = MojoExecutor.plugin("org.apache.maven.plugins",
 					"maven-dependency-plugin", "2.8");
 				MojoExecutor.executeMojo(dependencyPlugin, "unpack", configuration, environment);
+			}
+			else
+			{
+				getLog().info("Using local binaries");
+				cmakeDir = new File(cmakeRootDir);
 			}
 
 			ProcessBuilder processBuilder = new ProcessBuilder(

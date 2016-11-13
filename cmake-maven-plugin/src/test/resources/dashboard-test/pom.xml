@@ -71,12 +71,13 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <echo>please activate one of the following profiles:</echo>
-                                        <echo>* windows32</echo>
-                                        <echo>* windows64</echo>
-                                        <echo>* linux32</echo>
-                                        <echo>* linux64</echo>
-                                        <echo>* mac64</echo>
+                                        <echo>Please activate one of the following profiles:</echo>
+                                        <echo>* windows-i386</echo>
+                                        <echo>* windows-amd64</echo>
+                                        <echo>* linux-i386</echo>
+                                        <echo>* linux-amd64</echo>
+                                        <echo>* linux-arm</echo>
+                                        <echo>* mac-amd64</echo>
                                         <echo/>
                                         <echo>For instance: mvn -Pwindows64 install</echo>
                                         <fail/>
@@ -89,9 +90,9 @@
             </build>
         </profile>
         <profile>
-            <id>windows32</id>
+            <id>windows-i386</id>
             <properties>
-                <cmake.classifier>windows32</cmake.classifier>
+                <cmake.classifier>windows-i386</cmake.classifier>
                 <cmake.generator>Visual Studio 14 2015</cmake.generator>
                 <!-- with cygwin -->
                 <!-- <cmake.generator>Unix Makefiles</cmake.generator> -->
@@ -102,30 +103,39 @@
             </properties>
         </profile>
         <profile>
-            <id>windows64</id>
+            <id>windows-amd64</id>
             <properties>
-                <cmake.classifier>windows64</cmake.classifier>
+                <cmake.classifier>windows-amd64</cmake.classifier>
                 <cmake.generator>Visual Studio 14 2015</cmake.generator>
             </properties>
         </profile>
         <profile>
-            <id>linux32</id>
+            <id>linux-i386</id>
             <properties>
-                <cmake.classifier>linux32</cmake.classifier>
+                <cmake.classifier>linux-i386</cmake.classifier>
+                <download.cmake>false</download.cmake>
                 <cmake.generator>Unix Makefiles</cmake.generator>
             </properties>
         </profile>
         <profile>
-            <id>linux64</id>
+            <id>linux-amd64</id>
             <properties>
-                <cmake.classifier>linux64</cmake.classifier>
+                <cmake.classifier>linux-amd64</cmake.classifier>
                 <cmake.generator>Unix Makefiles</cmake.generator>
             </properties>
         </profile>
         <profile>
-            <id>mac64</id>
+            <id>linux-arm</id>
             <properties>
-                <cmake.classifier>mac64</cmake.classifier>
+                <cmake.classifier>linux-arm</cmake.classifier>
+                <download.cmake>false</download.cmake>
+                <cmake.generator>Unix Makefiles</cmake.generator>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-amd64</id>
+            <properties>
+                <cmake.classifier>mac-amd64</cmake.classifier>
                 <cmake.generator>Unix Makefiles</cmake.generator>
                 <!-- with xcode -->
                 <!-- <cmake.generator>xcode</cmake.generator> -->

@@ -13,11 +13,12 @@ matrix:
            - gcc-multilib
    - os: linux
      # Travis by default is 64 bit so we toggle to use the 32 bit libs
-     env: MAVEN_PROFILE="-Plinux32,-linux64"
+     env: MAVEN_PROFILE="-Plinux-i386"
      jdk: oraclejdk8
      addons:
        apt:
          packages:
+           - cmake
            - gcc-multilib
    - os: linux
      env: MAVEN_PROFILE=""
@@ -28,11 +29,12 @@ matrix:
            - gcc-multilib
    - os: linux
      # Travis by default is 64 bit so we toggle to use the 32 bit libs
-     env: MAVEN_PROFILE="-Plinux32,-linux64"
+     env: MAVEN_PROFILE="-Plinux-i386"
      jdk: openjdk7
      addons:
        apt:
          packages:
+           - cmake
            - gcc-multilib
    # Travis only supports jdk7 on OS X at the moment (and needs JAVA_HOME set)
    - os: osx

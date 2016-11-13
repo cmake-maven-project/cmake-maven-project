@@ -126,13 +126,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.19.1</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit47</artifactId>
-						<version>2.19.1</version>
-					</dependency>
-				</dependencies>
 				<configuration>
 					<!-- Our tests shouldn't be run as unit tests -->
 					<excludes>
@@ -223,11 +216,12 @@
 								<configuration>
 									<tasks>
 										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows32</echo>
-										<echo>* windows64</echo>
-										<echo>* linux32</echo>
-										<echo>* linux64</echo>
-										<echo>* mac64</echo>
+										<echo>* windows-i386</echo>
+										<echo>* windows-amd64</echo>
+										<echo>* linux-i386</echo>
+										<echo>* linux-amd64</echo>
+										<echo>* linux-arm</echo>
+										<echo>* mac-amd64</echo>
 										<echo/>
 										<echo>For instance: mvn -Pwindows64 install</echo>
 										<fail/>
@@ -240,9 +234,9 @@
 			</build>
 		</profile>
 		<profile>
-			<id>windows32</id>
+			<id>windows-i386</id>
 			<properties>
-				<cmake.classifier>windows32</cmake.classifier>
+				<cmake.classifier>windows-i386</cmake.classifier>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -255,9 +249,9 @@
 			</dependencies>
 		</profile>
 		<profile>
-			<id>windows64</id>
+			<id>windows-amd64</id>
 			<properties>
-				<cmake.classifier>windows64</cmake.classifier>
+				<cmake.classifier>windows-amd64</cmake.classifier>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -270,9 +264,16 @@
 			</dependencies>
 		</profile>
 		<profile>
-			<id>linux32</id>
+			<id>linux-i386</id>
 			<properties>
-				<cmake.classifier>linux32</cmake.classifier>
+				<cmake.classifier>linux-i386</cmake.classifier>
+				<download.cmake>false</download.cmake>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-amd64</id>
+			<properties>
+				<cmake.classifier>linux-amd64</cmake.classifier>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -285,24 +286,16 @@
 			</dependencies>
 		</profile>
 		<profile>
-			<id>linux64</id>
+			<id>linux-arm</id>
 			<properties>
-				<cmake.classifier>linux64</cmake.classifier>
+				<cmake.classifier>linux-arm</cmake.classifier>
+				<download.cmake>false</download.cmake>
 			</properties>
-			<dependencies>
-				<dependency>
-					<groupId>${project.groupId}</groupId>
-					<artifactId>cmake-binaries</artifactId>
-					<version>${project.version}</version>
-					<classifier>${cmake.classifier}</classifier>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
 		</profile>
 		<profile>
-			<id>mac64</id>
+			<id>mac-amd64</id>
 			<properties>
-				<cmake.classifier>mac64</cmake.classifier>
+				<cmake.classifier>mac-amd64</cmake.classifier>
 			</properties>
 			<dependencies>
 				<dependency>

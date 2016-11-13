@@ -31,7 +31,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
               <!-- One of the generators defined at https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html -->
             </generator>
             <classifier>
-              <!-- The classifier of the current platform. One of [windows32, windows64, linux64, linux32, mac64]. -->
+              <!-- The classifier of the current platform. One of [windows-i386, windows-amd64, linux-i386, linux-amd64, linux-arm, mac-amd64]. -->
             </classifier>
             <environmentVariables>
               <key>value</key>
@@ -126,23 +126,27 @@ To clean an old build, run:
 
 The following profiles are supported:
 
-* windows32
-* windows64
-* linux64
-* linux32
-* mac64
+* windows-i386
+* windows-amd64
+* linux-i386
+* linux-amd64
+* linux-arm
+* mac-amd64
 
 For instance, when building for 64-bit Windows machines, use:
 
     mvn -Pwindows64 install
 
-### Building Your Project on a Raspberry Pi
+### Using a local CMake installation
 
-CMake doesn't offer a pre-built version of their software for ARM machines, but Raspberry Pi distributions like Raspbian offer CMake as a part of the system's software packages. Simply set the `download.cmake` system property to `false` and the plugin will use the local installation:
+cmake.org doesn't provide binaries for some platforms, such as 32-bit Linux and Raspberry Pi. In such cases, users can install the binaries themselves (typically using package managers like `apt-get`) and point the plugin at them.
 
-    mvn -Ddownload.cmake=false clean install
+The following Maven profiles use local CMake installations:
 
-The plugin looks for the cmake under `${cmake.root.dir}/${cmake.child.dir}` and ctest under `${cmake.root.dir}/${cmake.ctest.dir}`. By default, `${cmake.root.dir}` resolves to `/usr`, `${cmake.child.dir}` to `/bin/cmake` and `${cmake.test.dir}` to `/`.
+    `linux-i386` corresponds to the 32-bit Linux platform.
+    `linux-arm` corresponds to the Rasbian (Raspberry Pi) platform.
+
+but you can configure this behavior for any platform by setting `${download.cmake}` to `false`. The plugin looks for cmake under `${cmake.root.dir}/${cmake.child.dir}` and ctest under `${cmake.root.dir}/${cmake.ctest.dir}`. By default, `${cmake.root.dir}` resolves to `/usr`, `${cmake.child.dir}` to `/bin/cmake` and `${cmake.test.dir}` to `/`.
 
 That's it! To learn more about CMake itself, consult the [CMake.org](https://cmake.org/) website.
 
