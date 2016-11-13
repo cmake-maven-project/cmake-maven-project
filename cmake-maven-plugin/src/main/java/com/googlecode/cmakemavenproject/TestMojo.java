@@ -100,15 +100,13 @@ public class TestMojo extends AbstractMojo
 	@Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
 	private String cmakeRootDir;
 
-	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake", required = false)
-	private String cmakeChildDir;
-
 	@Parameter(property = "cmake.ctest.dir", defaultValue = "/", required = false)
 	private String ctestChildDir;
 
 	/**
 	 * Executes the CTest run.
 	 */
+	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
 		Log log = getLog();

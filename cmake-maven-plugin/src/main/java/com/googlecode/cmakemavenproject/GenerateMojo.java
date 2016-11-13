@@ -17,11 +17,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -47,6 +45,13 @@ public class GenerateMojo
 	extends AbstractMojo
 {
 	/**
+	 * The release platform.
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@Parameter(property = "classifier", readonly = true, required = true)
+	private String classifier;
+	/**
+	 * /**
 	 * The directory containing CMakeLists.txt.
 	 */
 	@SuppressFBWarnings(
@@ -116,35 +121,9 @@ public class GenerateMojo
 				get("pluginDescriptor");
 			String groupId = pluginDescriptor.getGroupId();
 			String version = pluginDescriptor.getVersion();
-			String classifier = getClassifier();
 			if (!targetPath.exists() && !targetPath.mkdirs())
 				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
 
-			if (classifier == null)
-			{
-				String os = System.getProperty("os.name");
-				String arch = System.getProperty("os.arch");
-				if (os.toLowerCase(Locale.US).startsWith("windows"))
-					classifier = "windows";
-				else if (os.toLowerCase(Locale.US).startsWith("linux"))
-				{
-					if (arch.equals("x86_64") || arch.equals("amd64"))
-						classifier = "linux64";
-					else if (arch.equals("i386") || arch.equals("arm"))
-						classifier = "linux32";
-					else
-						throw new MojoExecutionException("Unsupported Linux arch: " + arch);
-				}
-				else if (os.toLowerCase(Locale.US).startsWith("mac"))
-				{
-					if (arch.equals("x86_64"))
-						classifier = "mac64";
-					else
-						throw new MojoExecutionException("Unsupported Mac arch: " + arch);
-				}
-				else
-					throw new MojoExecutionException("Unsupported os.name: " + os);
-			}
 			File cmakeDir = downloadBinaries ? new File(project.getBuild().getDirectory(),
 				"dependency/cmake") : new File(cmakeRootDir);
 			if (!downloadBinaries)
@@ -200,18 +179,5 @@ public class GenerateMojo
 		{
 			throw new MojoExecutionException("", e);
 		}
-	}
-
-	private String getClassifier()
-	{
-		for (Profile profile: project.getActiveProfiles())
-		{
-			final String id = profile.getId();
-			if (id.equals("linux32") || id.equals("linux64") || id.equals("mac64") || id.equals("windows"))
-			{
-				return id;
-			}
-		}
-		return null;
 	}
 }

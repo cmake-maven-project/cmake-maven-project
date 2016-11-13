@@ -13,7 +13,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.4.1-b1</version>
+      <version>3.7.0-b1</version>
       <executions>
         <execution>
           <id>cmake-generate</id>
@@ -28,17 +28,17 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
               <!-- The directory write the project files to -->
             </targetPath>
             <generator>
-              <!-- One of the generators defined at http://www.cmake.org/cmake/help/v2.8.10/cmake.html#section_Generators -->
+              <!-- One of the generators defined at https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html -->
             </generator>
             <environmentVariables>
               <key>value</key>
             </environmentVariables>
             <options>
               <!--
-                Optional: One or more options found at http://www.cmake.org/cmake/help/v2.8.10/cmake.html#section_Options
+                Optional: One or more options found at https://cmake.org/cmake/help/v3.7/manual/cmake.1.html
                 For example:
               -->
-              <option>-DBUILD_THIRDPARTY:bool=on</option> 
+              <option>-DBUILD_THIRDPARTY:bool=on</option>
             </options>
           </configuration>
         </execution>
@@ -50,7 +50,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.4.1-b1</version>
+      <version>3.7.0-b1</version>
       <executions>
         <execution>
           <id>cmake-compile</id>
@@ -80,7 +80,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.4.1-b1</version>
+      <version>3.7.0-b1</version>
       <executions>
         <execution>
           <id>cmake-test</id>
@@ -88,7 +88,7 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
             <goal>test</goal>
           </goals>
           <configuration>
-            <!-- "buildDirectory" is "targetPath" from the "generate" goal --> 
+            <!-- "buildDirectory" is "targetPath" from the "generate" goal -->
             <buildDirectory>${project.build.directory}</buildDirectory>
             <!-- Optional way to not fail the build on test failures -->
             <!-- <testFailureIgnore>true</testFailureIgnore> -->
@@ -105,119 +105,41 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
       </executions>
     </plugin>
 
-### Configuring Platform-Specific Build Profiles
+### Examples
 
-You can use Maven profiles (in your project's pom.xml file) to enable platform-specific configurations. For example, the below changes the generator based on OS:
+The following projects contain examples of how to use this plugin:
 
-    <profiles>
-      <profile>
-        <id>linux64</id>
-        <activation>
-          <os>
-            <name>Linux</name>
-            <arch>!i386</arch>
-          </os>
-        </activation>
-        <properties>
-          <cmake.generator>Unix Makefiles</cmake.generator>
-        </properties>
-      </profile>
-      <profile>
-        <id>linux32</id>
-        <activation>
-          <os>
-            <name>Linux</name>
-            <arch>i386</arch>
-          </os>
-        </activation>
-        <properties>
-          <cmake.generator>Unix Makefiles</cmake.generator>
-        </properties>
-      </profile>
-      <profile>
-        <id>mac64</id>
-        <activation>
-          <os>
-            <name>Mac OS X</name>
-          </os>
-        </activation>
-        <properties>
-          <cmake.generator>xcode</cmake.generator>
-        </properties>
-      </profile>
-      <profile>
-        <id>windows</id>
-        <activation>
-          <os>
-            <family>windows</family>
-          </os>
-        </activation>
-        <properties>
-          <!-- with cygwin -->
-          <cmake.generator>Unix Makefiles</cmake.generator>
-          <!-- with MinGW -->
-          <!-- <cmake.generator>MinGW Makefiles</cmake.generator> -->
-          <!-- with MSYS -->
-          <!-- <cmake.generator>MSYS Makefiles</cmake.generator> -->
-        </properties>
-      </profile>
-    </profiles>
+https://bitbucket.org/cowwoc/requirements/src/238f37a385057a640acb8bec5452a425ab8e9ce0/native/pom.xml?at=dev-3.0.0&fileviewer=file-view-default
 
+### Building instructions
 
-### Building Your Project Using Version 2.8.11-b4 and Later
+To build the plugin, run:
 
-Since version 2.8.11-b4, CMake-Maven-Project will use OS activation to determine which profile to use. If you're building on a Linux system, it will automatically select the 'linux' profile; if you're running on a Windows system, it will automatically select the 'windows' profile. You simply have to build your project in the standard Maven way:
-
-    mvn install
-
-OS profile activation can be overridden (if you have a Windows cross-compiling setup on a 64 bit Linux machine, for instance). To select the Windows profile on a 64 bit Linux machine, use:
-
-    mvn -Pwindows,-linux64 install
-
-This removes the 'linux64' profile and adds the 'windows' one.
-
-Since version 3.4.1-b1, the following profiles are supported:
-
-* windows
-* linux64
-* linux32
-* mac64
-
-Between versions 2.8.11-b4 and 3.4.1-b1, the supported build profiles were:
-
-* windows
-* linux
-* mac
+    mvn -P<profile> install
 
 To clean an old build, run:
 
     mvn -P<profile> clean
 
-### Building Your Project Using Version 2.8.11-b3 and Earlier
-
-To build your project using an earlier version of CMake-Maven-Project, you will need to supply the OS profile you want to use. It will not be auto-detected.
-
-    mvn -P<profile> install
-
-So, for example, to build on 64 bit Linux:
-
-    mvn -Plinux install
-
 The following profiles are supported:
 
-* windows
-* linux
-* mac
+* windows32
+* windows64
+* linux64
+* linux32
+* mac64
 
-### Building Your Project on a Raspberry Pi Using Version 3.4.1-b2 and Later
+For instance, when building for 64-bit Windows machines, use:
 
-Your CMake project can be built with cmake-maven-project on a Raspberry Pi with just a couple of additional steps. CMake doesn't offer a pre-built version of their software for ARM machines, but Raspberry Pi distributions like Raspbian offer CMake as a part of the system's software packages. Since cmake-maven-project version 3.4.1-b2, a Maven build can be configured to use the system's CMake on a Raspberry Pi system by supplying additional arguments at the point of running the build.
+    mvn -Pwindows64 install
 
-The only required additional argument to tell cmake-maven-project to use the local CMake instead of a profile in the build's pom.xml file is: `-Ddownload.cmake=false`. For instance, to build a clean version of a project on a Raspberry Pi with CMake already installed locally, you'd run:
+### Building Your Project on a Raspberry Pi
+
+CMake doesn't offer a pre-built version of their software for ARM machines, but Raspberry Pi distributions like Raspbian offer CMake as a part of the system's software packages. Simply set the `download.cmake` system property to `false` and the plugin will use the local installation:
 
     mvn -Ddownload.cmake=false clean install
 
-There are some optional additional arguments that can also be used if needed: `-Dcmake.root.dir`, `-Dcmake.child.dir` and `-Dcmake.ctest.dir`. These are useful if your project wants to define different CMake root, child, or test directories for a build. Their values would be directory locations for each of those parameters (which would be specific to your project).
+The plugin looks for the cmake under `${cmake.root.dir}/${cmake.child.dir}` and ctest under `${cmake.root.dir}/${cmake.ctest.dir}`. By default, `${cmake.root.dir}` resolves to `/usr`, `${cmake.child.dir}` to `/bin/cmake` and `${cmake.test.dir}` to `/`.
 
 That's it! To learn more about CMake itself, consult the [CMake.org](https://cmake.org/) website.
 

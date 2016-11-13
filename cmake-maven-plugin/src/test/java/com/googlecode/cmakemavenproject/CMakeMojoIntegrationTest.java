@@ -49,8 +49,7 @@ public abstract class CMakeMojoIntegrationTest
 	 * @throws IOException           If there is a problem with configuration.
 	 * @throws VerificationException If there is a problem with verification.
 	 */
-	protected Verifier getVerifier(String testName) throws IOException,
-		VerificationException
+	protected Verifier getVerifier(String testName) throws IOException, VerificationException
 	{
 		Class<? extends CMakeMojoIntegrationTest> cls = getClass();
 		String name = testName.startsWith("/") ? testName : "/" + testName;
@@ -71,7 +70,7 @@ public abstract class CMakeMojoIntegrationTest
 			sysProperties.setProperty(DOWNLOAD_CMAKE, "false");
 		}
 		// Set the profile that's being used in the running of the tests
-		verifier.addCliOption(getActivatedProfile());
+		verifier.addCliOption("-P" + getActivatedProfile());
 
 		// use.mavenRepoLocal instructs forked tests to use the local repo
 		verProperties.setProperty("use.mavenRepoLocal", "true");
@@ -86,27 +85,7 @@ public abstract class CMakeMojoIntegrationTest
 	 */
 	private String getActivatedProfile() throws VerificationException
 	{
-		String classifier = System.getProperty(CMAKE_CLASSIFIER);
-
-		if (classifier.equals("linux64"))
-		{
-			return "-Plinux64,-linux32,-windows,-mac64";
-		}
-		else if (classifier.equals("linux32"))
-		{
-			return "-Plinux32,-linux64,-windows,-mac64";
-		}
-		else if (classifier.equals("windows"))
-		{
-			return "-Pwindows,-linux32,-linux64,-mac64";
-		}
-		else if (classifier.equals("mac64"))
-		{
-			return "-Pmac64,-windows,-linux32,-linux64";
-		}
-		else
-		{
-			throw new VerificationException("Unexpected test profile: " + classifier);
-		}
+		// For now, the activated profile just so happens to be equal to ${cmake.classifier}
+		return System.getProperty(CMAKE_CLASSIFIER);
 	}
 }
