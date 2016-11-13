@@ -30,6 +30,9 @@ This repository [originally lived]((https://code.google.com/p/cmake-maven-projec
             <generator>
               <!-- One of the generators defined at https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html -->
             </generator>
+            <classifier>
+              <!-- The classifier of the current platform. One of [windows32, windows64, linux64, linux32, mac64]. -->
+            </classifier>
             <environmentVariables>
               <key>value</key>
             </environmentVariables>

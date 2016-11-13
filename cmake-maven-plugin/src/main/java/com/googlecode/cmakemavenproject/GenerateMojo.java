@@ -45,7 +45,9 @@ public class GenerateMojo
 	extends AbstractMojo
 {
 	/**
-	 * The release platform.
+	 * The classifier of the current platform.
+	 * <p>
+	 * One of [windows32, windows64, linux64, linux32, mac64].
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "classifier", readonly = true, required = true)
