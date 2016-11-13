@@ -80,6 +80,15 @@
                                         <echo>* mac-amd64</echo>
                                         <echo/>
                                         <echo>For instance: mvn -Pwindows-amd64 install</echo>
+
+                                        <!-- Avoid failing the build when Travis primes the build without a Maven profile -->
+                                        <condition property="is.travis">
+                                            <and>
+                                                <equals arg1="${skipTests}" arg2="true" casesensitive="false"/>
+                                                <equals arg1="${maven.javadoc.skip}" arg2="true" casesensitive="false"/>
+                                            </and>
+                                        </condition>
+                                        <fail unless="is.travis"/>
                                     </tasks>
                                 </configuration>
                             </execution>
