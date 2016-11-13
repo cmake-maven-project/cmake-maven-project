@@ -42,6 +42,7 @@ matrix:
        - JAVA_HOME=$(/usr/libexec/java_home)
        - MAVEN_PROFILE="-Pmac-amd64"
 
+install: true
 script:
   - mvn install $MAVEN_PROFILE
 

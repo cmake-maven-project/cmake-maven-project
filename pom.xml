@@ -133,41 +133,20 @@
 								</goals>
 								<configuration>
 									<target>
-										<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
-
-										<!-- Avoid failing the build when Travis primes the build without a Maven profile -->
-										<if>
-											<and>
-												<equals arg1="${skipTests}" arg2="true" casesensitive="false"/>
-												<equals arg1="${maven.javadoc.skip}" arg2="true" casesensitive="false"/>
-											</and>
-											<then>
-												<echo>Travis is priming dependenices, skipping the build.</echo>
-											</then>
-											<else>
-												<echo>Please activate one of the following profiles:</echo>
-												<echo>* windows-i386</echo>
-												<echo>* windows-amd64</echo>
-												<echo>* linux-i386</echo>
-												<echo>* linux-amd64</echo>
-												<echo>* linux-arm</echo>
-												<echo>* mac-amd64</echo>
-												<echo/>
-												<echo>For instance: mvn -Pwindows-amd64 install</echo>
-												<fail/>
-											</else>
-										</if>
+										<echo>Please activate one of the following profiles:</echo>
+										<echo>* windows-i386</echo>
+										<echo>* windows-amd64</echo>
+										<echo>* linux-i386</echo>
+										<echo>* linux-amd64</echo>
+										<echo>* linux-arm</echo>
+										<echo>* mac-amd64</echo>
+										<echo/>
+										<echo>For instance: mvn -Pwindows-amd64 install</echo>
+										<fail/>
 									</target>
 								</configuration>
 							</execution>
 						</executions>
-						<dependencies>
-							<dependency>
-								<groupId>ant-contrib</groupId>
-								<artifactId>ant-contrib</artifactId>
-								<version>20020829</version>
-							</dependency>
-						</dependencies>
 					</plugin>
 				</plugins>
 			</build>
