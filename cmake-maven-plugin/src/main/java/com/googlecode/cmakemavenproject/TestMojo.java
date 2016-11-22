@@ -105,6 +105,9 @@ public class TestMojo extends AbstractMojo
 
 	/**
 	 * Executes the CTest run.
+	 *
+	 * @throws MojoExecutionException if an unexpected problem occurs
+	 * @throws MojoFailureException   if the test(s) fail
 	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
@@ -136,13 +139,13 @@ public class TestMojo extends AbstractMojo
 
 			if (downloadBinaries)
 			{
-				args = new ArrayList<String>(Arrays.asList(
+				args = new ArrayList<>(Arrays.asList(
 					new File(new File(projBuildDir, "dependency/cmake").getAbsoluteFile(), "bin/ctest")
 						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 			}
 			else
 			{
-				args = new ArrayList<String>(Arrays.asList(
+				args = new ArrayList<>(Arrays.asList(
 					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), "bin/ctest")
 						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 			}
@@ -219,15 +222,7 @@ public class TestMojo extends AbstractMojo
 			if (returnCode != 0 && !testFailureIgnore)
 				throw new MojoExecutionException("Return code: " + returnCode);
 		}
-		catch (InterruptedException e)
-		{
-			throw new MojoExecutionException(e.getMessage(), e);
-		}
-		catch (IOException e)
-		{
-			throw new MojoExecutionException(e.getMessage(), e);
-		}
-		catch (TransformerException e)
+		catch (InterruptedException | IOException | TransformerException e)
 		{
 			throw new MojoExecutionException(e.getMessage(), e);
 		}

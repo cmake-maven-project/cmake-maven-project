@@ -130,11 +130,7 @@ public class CompileMojo
 			if (returnCode != 0)
 				throw new MojoExecutionException("Return code: " + returnCode);
 		}
-		catch (InterruptedException e)
-		{
-			throw new MojoExecutionException("", e);
-		}
-		catch (IOException e)
+		catch (InterruptedException | IOException e)
 		{
 			throw new MojoExecutionException("", e);
 		}
