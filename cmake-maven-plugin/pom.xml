@@ -138,6 +138,7 @@
 						<cmake.classifier>${cmake.classifier}</cmake.classifier>
 					</systemPropertyVariables>
 					<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+					<skipTests>${skipTests}</skipTests>
 				</configuration>
 				<executions>
 					<execution>
@@ -307,6 +308,13 @@
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
+		</profile>
+		<profile>
+			<id>portable</id>
+			<!-- Skips platform-specific modules (used when publishing releases) -->
+			<properties>
+				<skipTests>true</skipTests>
+			</properties>
 		</profile>
 	</profiles>
 </project>

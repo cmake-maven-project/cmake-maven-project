@@ -179,6 +179,10 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>portable</id>
+			<!-- Skips platform-specific modules (used when publishing releases) -->
+		</profile>
+		<profile>
 			<id>sonatype-oss-release</id>
 			<build>
 				<plugins>
