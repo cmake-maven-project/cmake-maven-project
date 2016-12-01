@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -30,6 +31,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -61,6 +63,11 @@ import org.apache.maven.project.MavenProject;
 public class GetBinariesMojo
 	extends AbstractMojo
 {
+	/**
+	 * The maximum number of times to retry deleting files.
+	 */
+	private static final int MAX_RETRIES = 30;
+
 	/**
 	 * The release platform.
 	 */
@@ -608,7 +615,40 @@ public class GetBinariesMojo
 			public FileVisitResult postVisitDirectory(Path dir, IOException t) throws IOException
 			{
 				if (t == null)
-					Files.deleteIfExists(dir);
+				{
+					for (int i = 0; true; ++i)
+					{
+						try
+						{
+							Files.deleteIfExists(dir);
+							break;
+						}
+						catch (DirectoryNotEmptyException e)
+						{
+							if (i < MAX_RETRIES)
+							{
+								// Workaround file lock preventing deletion on Windows
+								long timeout = Math.min(1000, (long) (10 * Math.pow(2, i)));
+								try
+								{
+									Log log = getLog();
+									if (log.isInfoEnabled())
+									{
+										log.info(dir + " is locked... Sleeping before retry [" + (i + 1) + "/" +
+											MAX_RETRIES + "]");
+									}
+									TimeUnit.MILLISECONDS.sleep(timeout);
+									continue;
+								}
+								catch (InterruptedException ignore)
+								{
+									// give up
+								}
+							}
+							throw e;
+						}
+					}
+				}
 				return super.postVisitDirectory(dir, t);
 			}
 		});
