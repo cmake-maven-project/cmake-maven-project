@@ -106,13 +106,13 @@ public class GenerateMojo
 	@Parameter(property = "session", required = true, readonly = true)
 	private MavenSession session;
 
-	@Parameter(property = "download.cmake", defaultValue = "true", required = false)
+	@Parameter(property = "download.cmake", defaultValue = "true")
 	private boolean downloadBinaries;
 
-	@Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
+	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
 	private String cmakeRootDir;
 
-	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake", required = false)
+	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake")
 	private String cmakeChildDir;
 
 	@Override

@@ -97,10 +97,10 @@ public class TestMojo extends AbstractMojo
 	@Parameter(property = "download.cmake", defaultValue = "true")
 	private boolean downloadBinaries;
 
-	@Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
+	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
 	private String cmakeRootDir;
 
-	@Parameter(property = "cmake.ctest.dir", defaultValue = "/", required = false)
+	@Parameter(property = "cmake.ctest.dir", defaultValue = "/")
 	private String ctestChildDir;
 
 	/**

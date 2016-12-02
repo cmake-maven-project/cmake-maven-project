@@ -76,10 +76,10 @@ public class CompileMojo
 	@Parameter(property = "download.cmake", defaultValue = "true")
 	private boolean downloadBinaries;
 
-	@Parameter(property = "cmake.root.dir", defaultValue = "/usr", required = false)
+	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
 	private String cmakeRootDir;
 
-	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake", required = false)
+	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake")
 	private String cmakeChildDir;
 
 	@Override
@@ -97,8 +97,7 @@ public class CompileMojo
 			// We assume that someone else has extracted the cmake binaries beforehand (e.g. the
 			// "generate" mojo).
 			File cmakeFile = downloadBinaries ? new File(project.getBuild().getDirectory(),
-				"dependency/cmake/bin/cmake")
-				: new File(cmakeRootDir + "/" + cmakeChildDir);
+				"dependency/cmake/bin/cmake") : new File(cmakeRootDir + "/" + cmakeChildDir);
 			if (!downloadBinaries)
 			{
 				getLog().info("Configured to use native CMake");

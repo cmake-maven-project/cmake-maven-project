@@ -72,7 +72,7 @@ public class GetBinariesMojo
 	 * The release platform.
 	 */
 	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-	@Parameter(property = "classifier", required = true, readonly = true)
+	@Parameter(property = "classifier", readonly = true)
 	private String classifier;
 	/**
 	 * The project version.
@@ -84,19 +84,21 @@ public class GetBinariesMojo
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
 
-	@Parameter(property = "download.cmake", defaultValue = "true")
-	private boolean downloadBinaries;
+	@Parameter(property = "skip", defaultValue = "false")
+	private boolean skip;
 
 	@Override
 	@SuppressFBWarnings("NP_UNWRITTEN_FIELD")
 	public void execute()
 		throws MojoExecutionException
 	{
-		if (!downloadBinaries)
+		if (skip)
 		{
-			getLog().info("Configured to use native CMake, skipping download");
+			getLog().debug("Skipping plugin because <skip> was true");
 			return;
-		} // Use native cmake
+		}
+		if (classifier == null || classifier.trim().isEmpty())
+			throw new MojoExecutionException("classifier must be specified");
 
 		String suffix;
 
