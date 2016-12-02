@@ -12,6 +12,32 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.12</version>
+				<executions>
+					<execution>
+						<!-- http://stackoverflow.com/a/40938111/14731 -->
+						<id>negate-download-cmake</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>bsh-property</goal>
+						</goals>
+						<configuration>
+							<source>
+								<![CDATA[
+								downloadCmake = project.getProperties().getProperty("download.cmake");
+								skip.download = downloadCmake != null && !Boolean.valueOf(downloadCmake);
+								]]>
+							</source>
+							<properties>
+								<property>skip.download</property>
+							</properties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.googlecode.cmake-maven-project</groupId>
 				<artifactId>cmake-binaries-plugin</artifactId>
 				<version>${project.version}</version>
@@ -39,32 +65,6 @@
 		</plugins>
 	</build>
 	<profiles>
-		<profile>
-			<id>download-enabled</id>
-			<activation>
-				<property>
-					<name>download.cmake</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<properties>
-				<!-- negate download.cmake: http://stackoverflow.com/a/40938111/14731 -->
-				<skip.download>false</skip.download>
-			</properties>
-		</profile>
-		<profile>
-			<id>download-disabled</id>
-			<activation>
-				<property>
-					<name>download.cmake</name>
-					<value>false</value>
-				</property>
-			</activation>
-			<properties>
-				<!-- negate download.cmake: http://stackoverflow.com/a/40938111/14731 -->
-				<skip.download>true</skip.download>
-			</properties>
-		</profile>
 		<profile>
 			<id>list-profiles</id>
 			<activation>
