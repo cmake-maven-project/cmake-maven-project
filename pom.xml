@@ -87,6 +87,16 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.10.4</version>
 			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>sonatype-nexus-staging</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+				</configuration>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -177,10 +187,6 @@
 			<modules>
 				<module>cmake-binaries</module>
 			</modules>
-		</profile>
-		<profile>
-			<id>portable</id>
-			<!-- Skips platform-specific modules (used when publishing releases) -->
 		</profile>
 		<profile>
 			<id>sonatype-oss-release</id>

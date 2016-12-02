@@ -309,12 +309,5 @@
 				</dependency>
 			</dependencies>
 		</profile>
-		<profile>
-			<id>portable</id>
-			<!-- Skips platform-specific modules (used when publishing releases) -->
-			<properties>
-				<skipTests>true</skipTests>
-			</properties>
-		</profile>
 	</profiles>
 </project>
