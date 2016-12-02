@@ -23,7 +23,6 @@
 						</goals>
 						<configuration>
 							<classifier>${cmake.classifier}</classifier>
-							<skip>${cmake.download}</skip>
 						</configuration>
 					</execution>
 				</executions>
@@ -104,7 +103,8 @@
 			empty file.
 			-->
 			<properties>
-				<cmake.classifier>mac-amd64</cmake.classifier>
+				<download.cmake>false</download.cmake>
+				<cmake.classifier/>
 			</properties>
 		</profile>
 	</profiles>
