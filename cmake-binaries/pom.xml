@@ -31,10 +31,30 @@
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.0.2</version>
-				<configuration>
-					<classifier>${cmake.classifier}</classifier>
-					<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
-				</configuration>
+				<executions>
+					<execution>
+						<!--
+						Sonatype requires a main jar, even for platform-specific artifacts, so we supply it
+						with an empty file.
+						-->
+						<id>main-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>attachment-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>${cmake.classifier}</classifier>
+							<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
