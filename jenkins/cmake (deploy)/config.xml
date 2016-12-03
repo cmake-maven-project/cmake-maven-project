@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.9">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>100</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.9.0">
+      <maxConcurrentPerNode>0</maxConcurrentPerNode>
+      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>false</throttleEnabled>
+      <throttleOption>project</throttleOption>
+      <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.23">
+    <script>parallel windows:
+{
+    node(&quot;windows &amp;&amp; i386 &amp;&amp; amd64&quot;)
+    {
+        timeout(2)
+        {
+            stage(&quot;Checkout (windows)&quot;)
+            {
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
+            }
+        }
+        timeout(10)
+        {
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA32_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
+            {
+                stage(&quot;Deploy (windows-i386)&quot;)
+                {
+                    // https://jenkins.io/doc/pipeline/examples/
+                    // Apache Maven related side notes:
+                    // --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
+                    // -V : strongly recommended in CI, will display the JDK and Maven versions in use.
+                    //      Very useful to be quickly sure the selected versions were the ones you think.
+                    // -U : force maven to update snapshots each time (default : once an hour, makes no sense in CI).
+                    // -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
+                    //                            having to crawl the workspace files to see the cause).            
+                    bat script: &apos;mvn --batch-mode -V -U -e clean deploy -Pwindows-i386 -Dsurefire.useFile=false&apos;
+                    archiveArtifacts &apos;**&apos;
+                }
+            }
+        }
+        timeout(10)
+        {
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
+            {
+                stage(&quot;Deploy (windows-amd64)&quot;)
+                {
+                    bat script: &apos;mvn --batch-mode -V -U -e clean deploy -Pwindows-amd64 -Dsurefire.useFile=false&apos;
+                    archiveArtifacts &apos;**&apos;
+                }
+            }
+        }
+    }
+}, linux_i386:
+{
+    node(&quot;linux &amp;&amp; i386&quot;)
+    {
+        timeout(2)
+        {
+            stage(&quot;Checkout (linux-i386)&quot;)
+            {
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
+            }
+        }
+        timeout(10)
+        {
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA32_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
+            {
+                stage(&quot;Deploy (linux-i386)&quot;)
+                {
+                    sh script: &apos;&apos;&apos;sudo apt-get install cmake -y
+                    mvn --batch-mode -V -U -e clean deploy -Plinux-i386 -Dsurefire.useFile=false&apos;&apos;&apos;
+                    archiveArtifacts &apos;**&apos;
+                }
+            }
+        }
+    }
+}, linux_amd64:
+{
+    node(&quot;linux &amp;&amp; amd64&quot;)
+    {
+        timeout(2)
+        {
+            stage(&quot;Checkout (linux-amd64)&quot;)
+            {
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
+            }
+        }
+        timeout(10)
+        {
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
+            {
+                stage(&quot;Deploy (linux-amd64)&quot;)
+                {
+                    sh script: &apos;mvn --batch-mode -V -U -e clean deploy -Plinux-amd64 -Dsurefire.useFile=false&apos;
+                    archiveArtifacts &apos;**&apos;
+                }
+            }
+        }
+    }
+}, mac:
+{
+    node(&quot;mac&quot;)
+    {
+        timeout(2)
+        {
+            stage(&quot;Checkout (mac)&quot;)
+            {
+                    checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
+            }
+        }
+        timeout(10)
+        {
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
+            {
+                stage(&quot;Deploy (mac-amd64)&quot;)
+                {
+                    sh script: &apos;mvn --batch-mode -V -U -e clean deploy -Pmac-amd64 -Dsurefire.useFile=false&apos;
+                    archiveArtifacts &apos;**&apos;
+                }
+            }
+        }
+    }
+},
+failFast: true</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <quietPeriod>60</quietPeriod>
+</flow-definition>

@@ -1,0 +1,332 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.9">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>100</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.3">
+          <name>releaseVersion</name>
+          <description>What version number should be released?</description>
+          <defaultValue>3.7.0-b1</defaultValue>
+          <regex>\d+\.\d+\.\d+-b\d+</regex>
+          <failedValidationMessage>releaseVersion number must have format: &lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;-b&lt;build&gt;</failedValidationMessage>
+        </hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition>
+        <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.3">
+          <name>nextVersion</name>
+          <description>What SNAPSHOT version should be used after the release?</description>
+          <defaultValue>3.7.0-b2-SNAPSHOT</defaultValue>
+          <regex>.+-SNAPSHOT</regex>
+          <failedValidationMessage>Version number must end with -SNAPSHOT</failedValidationMessage>
+        </hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>dryRun</name>
+          <description>If true, the release is simulated but not actually carried out.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.9.0">
+      <maxConcurrentPerNode>0</maxConcurrentPerNode>
+      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>false</throttleEnabled>
+      <throttleOption>project</throttleOption>
+      <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.23">
+    <script>// Command-line options (taken from https://jenkins.io/doc/pipeline/examples/):
+// --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
+// -V : strongly recommended in CI, will display the JDK and Maven versions in use.
+//      Very useful to be quickly sure the selected versions were the ones you think.
+// -U : force maven to update snapshots each time (default : once an hour, makes no sense in CI).
+// -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
+//                            having to crawl the workspace files to see the cause).
+// -e : Display stack-traces on failure
+
+// Create release candidate branch
+def repository = &apos;github.com/cmake-maven-project/cmake-maven-project.git&apos;
+// One can look up a project&apos;s profileId by running: mvn nexus-staging:rc-list-profiles -DserverId=sonatype-nexus-staging -DnexusUrl=https://oss.sonatype.org/
+def stagingProfileId = &apos;1a35794454094c&apos;
+def stagingRepositoryId
+
+node(&quot;linux &amp;&amp; amd64&quot;)
+{
+    // http://stackoverflow.com/a/33630506/14731
+    withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
+    {
+	def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+        timeout(2)
+        {
+            stage(&quot;Checkout (linux-amd64)&quot;)
+            {
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &apos;master&apos;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+            }
+        }
+        timeout(10)
+        {
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
+            {
+                stage(&quot;Create release branch&quot;)
+                {
+                    // Check if tag already exists: http://stackoverflow.com/a/21116365/14731
+                    // Commit without failure if nothing changed: http://stackoverflow.com/a/8123841/14731
+                    def tagExists = sh(returnStdout: true, script: &quot;git ls-remote https://${repository} release-${releaseVersion} | wc -l&quot;).toBoolean()
+                    if (tagExists)
+                        echo &apos;Tag release-&apos; + releaseVersion + &apos; already exists&apos;
+                    else
+                    {
+                        echo &apos;Tagging release as release-&apos; + releaseVersion
+                        sh script: &quot;&quot;&quot;git config user.email cowwoc@bbs.darktech.org
+                            git config user.name &quot;Gili Tzabari&quot;
+                            mvn --batch-mode -V -e versions:set -DnewVersion=${releaseVersion} -DgenerateBackupPoms=false
+                            git add -u
+                            git commit -m &quot;[jenkins] Releasing version ${releaseVersion}&quot;
+                            git tag release-${releaseVersion}
+                            git checkout master
+                            mvn --batch-mode -V -e versions:set -DnewVersion=${nextVersion} -DgenerateBackupPoms=false
+                            git add -u
+                            git diff-index --quiet HEAD || git commit -m &quot;[jenkins] Incrementing version to ${nextVersion}&quot;
+                            git push ${origin} master
+                            git push ${origin} release-${releaseVersion}&quot;&quot;&quot;
+                    }
+
+                    // Open a new staging repository and capture its ID
+                    def output = sh returnStdout: true, script: &quot;&quot;&quot;git checkout tags/release-${releaseVersion}
+                        mvn --batch-mode -U -e nexus-staging:rc-open -DserverId=sonatype-nexus-staging -DnexusUrl=https://oss.sonatype.org/ -DstagingProfileId=${stagingProfileId}&quot;&quot;&quot;
+                    echo output
+                    stagingRepositoryId = ( output =~ /Opened (comgooglecodecmake-maven-project-\d+)/ ) [0][1]
+                }
+            }
+        }
+    }
+}
+
+// Build and release from all platforms
+try
+{
+    parallel linux_i386:
+    {
+        // Linux-i386 deploys the portable modules (which is convenient since it doesn&apos;t deploy platform-specific binaries).
+        // Remaining platforms only deploy cmake-binaries module.
+        node(&quot;linux &amp;&amp; i386&quot;)
+        {
+            withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
+            {
+                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+                timeout(2)
+                {
+                    stage(&quot;Checkout (linux-i386)&quot;)
+                    {
+                        checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                    }
+                }
+                timeout(10)
+                {
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA32_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
+                    {
+                        stage(&quot;Build (linux-i386)&quot;)
+                        {
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Plinux-i386 clean install&apos;
+                        }
+                        stage(&quot;Deploy (linux-i386)&quot;)
+                        {
+                            sh script: &quot;mvn --batch-mode -e -Plinux-i386,empty-jar-for-platform-specific-artifacts,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
+                        }
+                    }
+                }
+            }
+        }
+    }, linux_amd64:
+    {
+        node(&quot;linux &amp;&amp; amd64&quot;)
+        {
+            withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
+            {
+                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+                timeout(2)
+                {
+                    stage(&quot;Checkout (linux-amd64)&quot;)
+                    {
+                        checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                    }
+                }
+                timeout(10)
+                {
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
+                    {
+                        stage(&quot;Build (linux-amd64)&quot;)
+                        {
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Plinux-amd64 clean install&apos;
+                        }
+                        stage(&quot;Deploy (linux-amd64)&quot;)
+                        {
+                            sh script: &quot;&quot;&quot;cd cmake-binaries
+                                mvn --batch-mode -e -Plinux-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                        }
+                    }
+                }
+            }
+        }
+    }, mac:
+    {
+        node(&quot;mac&quot;)
+        {
+            withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
+            {
+                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+                timeout(2)
+                {
+                    stage(&quot;Checkout (mac)&quot;)
+                    {
+                        checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                    }
+                }
+                timeout(10)
+                {
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
+                    {
+                        stage(&quot;Build (mac-amd64)&quot;)
+                        {
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Pmac-amd64 clean install&apos;
+                        }
+                        stage(&quot;Deploy (mac-amd64)&quot;)
+                        {
+                            sh script: &quot;&quot;&quot;cd cmake-binaries
+                                mvn --batch-mode -e -Pmac-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                        }
+                    }
+                }
+            }
+        }
+    }, windows:
+    {
+        node(&quot;windows &amp;&amp; i386 &amp;&amp; amd64&quot;)
+        {
+            withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
+            {
+                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+                timeout(2)
+                {
+                    stage(&quot;Checkout (windows)&quot;)
+                    {
+                        checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                    }
+                }
+                timeout(10)
+                {
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA32_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin;${tool &apos;git&apos;};${env.JAVA_HOME}/bin&quot;])
+                    {
+                        stage(&quot;Build (windows-i386)&quot;)
+                        {
+                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Pwindows-i386 clean install&apos;
+                        }
+                        stage(&quot;Deploy (windows-i386)&quot;)
+                        {
+                            bat script: &quot;&quot;&quot;cd cmake-binaries
+                                mvn --batch-mode -e -Pwindows-i386,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                        }
+                    }
+                }
+                timeout(10)
+                {
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin;${tool &apos;git&apos;};${env.JAVA_HOME}/bin&quot;])
+                    {
+                        stage(&quot;Build (windows-amd64)&quot;)
+                        {
+                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Pwindows-amd64 clean install&apos;
+                        }
+                        stage(&quot;Deploy (windows-amd64)&quot;)
+                        {
+                            bat script: &quot;&quot;&quot;cd cmake-binaries
+                                mvn --batch-mode -e -Pwindows-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                        }
+                    }
+                }
+            }
+        }
+    },
+    failFast: true
+}
+catch (e)
+{
+    try
+    {
+        // Drop staging repository
+        node(&quot;linux &amp;&amp; amd64&quot;)
+        {
+            withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
+            {
+                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+                timeout(2)
+                {
+                    stage(&quot;Checkout (linux-amd64)&quot;)
+                    {
+                        checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                    }
+                }
+                timeout(5)
+                {
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
+                    {
+                        sh script: &quot;mvn --batch-mode -U -e nexus-staging:rc-drop -DserverId=sonatype-nexus-staging -DnexusUrl=https://oss.sonatype.org/ -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
+                    }
+                }
+            }
+        }
+    }
+    catch (e2)
+    {
+        // Ignore and throw the original exception
+    }
+    throw e;
+}
+
+// TODO: On failure, invoke a combination of:
+// * git push --delete origin &lt;tag&gt; -f
+// * git push -f (restore origin/master to its original position)
+// &quot;mvn nexus-staging:drop&quot;. See http://central.sonatype.org/pages/apache-maven.html.
+
+// Close the release
+node(&quot;linux &amp;&amp; amd64&quot;)
+{
+    withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
+    {
+        def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+        timeout(2)
+        {
+            stage(&quot;Checkout (linux-amd64)&quot;)
+            {
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+            }
+        }
+        timeout(10)
+        {
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
+            {
+                stage(&quot;Close release&quot;)
+                {
+                    sh script: &quot;mvn --batch-mode -U -e nexus-staging:rc-close -DserverId=sonatype-nexus-staging -DnexusUrl=https://oss.sonatype.org/ -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
+                }
+            }
+        }
+    }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+</flow-definition>
