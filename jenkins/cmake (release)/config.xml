@@ -17,22 +17,17 @@
         <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.3">
           <name>releaseVersion</name>
           <description>What version number should be released?</description>
-          <defaultValue>3.7.0-b1</defaultValue>
+          <defaultValue></defaultValue>
           <regex>\d+\.\d+\.\d+-b\d+</regex>
           <failedValidationMessage>releaseVersion number must have format: &lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;-b&lt;build&gt;</failedValidationMessage>
         </hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition>
         <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.3">
           <name>nextVersion</name>
           <description>What SNAPSHOT version should be used after the release?</description>
-          <defaultValue>3.7.0-b2-SNAPSHOT</defaultValue>
+          <defaultValue></defaultValue>
           <regex>.+-SNAPSHOT</regex>
           <failedValidationMessage>Version number must end with -SNAPSHOT</failedValidationMessage>
         </hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition>
-        <hudson.model.BooleanParameterDefinition>
-          <name>dryRun</name>
-          <description>If true, the release is simulated but not actually carried out.</description>
-          <defaultValue>true</defaultValue>
-        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.9.0">
