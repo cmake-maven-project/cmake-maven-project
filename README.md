@@ -148,8 +148,8 @@ cmake.org doesn't provide binaries for some platforms, such as 32-bit Linux and 
 
 The following Maven profiles use local CMake installations:
 
-    `linux-i386` corresponds to the 32-bit Linux platform.
-    `linux-arm` corresponds to the Rasbian (Raspberry Pi) platform.
+* `linux-i386` corresponds to the 32-bit Linux platform.
+* `linux-arm` corresponds to the Rasbian (Raspberry Pi) platform.
 
 but you can configure this behavior for any platform by setting `${download.cmake}` to `false`. The plugin looks for cmake under `${cmake.root.dir}/${cmake.child.dir}` and ctest under `${cmake.root.dir}/${cmake.ctest.dir}`. By default, `${cmake.root.dir}` resolves to `/usr`, `${cmake.child.dir}` to `/bin/cmake` and `${cmake.test.dir}` to `/`.
 
