@@ -135,7 +135,7 @@ try
                         checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
                     }
                 }
-                timeout(10)
+                timeout(15)
                 {
                     withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA32_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
                     {
@@ -146,6 +146,7 @@ try
                         stage(&quot;Deploy (linux-i386)&quot;)
                         {
                             sh script: &quot;mvn --batch-mode -e -Plinux-i386,empty-jar,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
+                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
                         }
                     }
                 }
@@ -165,7 +166,7 @@ try
                         checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
                     }
                 }
-                timeout(10)
+                timeout(15)
                 {
                     withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
                     {
@@ -177,6 +178,7 @@ try
                         {
                             sh script: &quot;&quot;&quot;cd cmake-binaries
                                 mvn --batch-mode -e -Plinux-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
                         }
                     }
                 }
@@ -196,7 +198,7 @@ try
                         checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
                     }
                 }
-                timeout(10)
+                timeout(15)
                 {
                     withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
                     {
@@ -208,6 +210,7 @@ try
                         {
                             sh script: &quot;&quot;&quot;cd cmake-binaries
                                 mvn --batch-mode -e -Pmac-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
                         }
                     }
                 }
@@ -227,7 +230,7 @@ try
                         checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
                     }
                 }
-                timeout(10)
+                timeout(15)
                 {
                     withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA32_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin;${tool &apos;git&apos;};${env.JAVA_HOME}/bin&quot;])
                     {
@@ -239,10 +242,11 @@ try
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
                                 mvn --batch-mode -e -Pwindows-i386,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
                         }
                     }
                 }
-                timeout(10)
+                timeout(15)
                 {
                     withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin;${tool &apos;git&apos;};${env.JAVA_HOME}/bin&quot;])
                     {
@@ -254,6 +258,7 @@ try
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
                                 mvn --batch-mode -e -Pwindows-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
                         }
                     }
                 }
