@@ -146,7 +146,7 @@ try
                         stage(&quot;Deploy (linux-i386)&quot;)
                         {
                             sh script: &quot;mvn --batch-mode -e -Plinux-i386,empty-jar,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
-                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
+                            archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
                 }
@@ -178,7 +178,7 @@ try
                         {
                             sh script: &quot;&quot;&quot;cd cmake-binaries
                                 mvn --batch-mode -e -Plinux-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
-                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
+                            archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
                 }
@@ -210,7 +210,7 @@ try
                         {
                             sh script: &quot;&quot;&quot;cd cmake-binaries
                                 mvn --batch-mode -e -Pmac-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
-                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
+                            archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
                 }
@@ -242,7 +242,7 @@ try
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
                                 mvn --batch-mode -e -Pwindows-i386,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
-                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
+                            archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
                 }
@@ -258,7 +258,7 @@ try
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
                                 mvn --batch-mode -e -Pwindows-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
-                            archiveArtifacts artifacts: &amp;apos;**/target/*.jar&amp;apos;, excludes: &amp;apos;**/target/test-classes/**&amp;apos;
+                            archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
                 }
