@@ -118,13 +118,13 @@ The following projects contain examples of how to use this plugin:
 
 To build the plugin, run:
 
-    mvn -P<profile> install
+    mvn install
 
 To clean an old build, run:
 
-    mvn -P<profile> clean
+    mvn clean
 
-The following profiles are supported:
+By default, Maven will activate the right profile based on your JVM:
 
 * windows-i386
 * windows-amd64
@@ -133,9 +133,11 @@ The following profiles are supported:
 * linux-arm
 * mac-amd64
 
-For instance, when building for 64-bit Windows machines, use:
+If detection does not work, or you wish to override it (e.g. you're running linux-amd64 but want to cross-compile for linux-i386) then set `-DosDetection=false -P<profile>`.
 
-    mvn -Pwindows-amd64 install
+For instance, when building for 32-bit Linux machines, use:
+
+    mvn -DosDetection=false -Plinux-i386 install
 
 ### Using a local CMake installation
 
