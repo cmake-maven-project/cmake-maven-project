@@ -19,13 +19,13 @@ matrix:
          packages:
            - cmake
            - gcc-multilib
-   # Travis only supports jdk7 on OS X at the moment (and needs JAVA_HOME set)
+   # xcode8 maps to oraclejdk8: https://github.com/travis-ci/travis-ci/issues/2316
    - os: osx
-     env: JAVA_HOME=$(/usr/libexec/java_home)
+     osx_image: xcode8.1
 
 install: true
 script:
-  - mvn -v install $MAVEN_PROFILE
+  - mvn -V install $MAVEN_PROFILE
 
 notifications:
   irc:
