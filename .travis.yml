@@ -25,7 +25,7 @@ matrix:
 
 install: true
 script:
-  - mvn install $MAVEN_PROFILE
+  - mvn -v install $MAVEN_PROFILE
 
 notifications:
   irc:
