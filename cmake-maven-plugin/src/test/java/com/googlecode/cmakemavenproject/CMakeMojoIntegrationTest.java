@@ -70,7 +70,7 @@ public abstract class CMakeMojoIntegrationTest
 			sysProperties.setProperty(DOWNLOAD_CMAKE, "false");
 		}
 		// Set the profile that's being used in the running of the tests
-		verifier.addCliOption("-P" + getActivatedProfile());
+		verifier.addCliOption("-DosDetection=false -P" + getActivatedProfile());
 
 		// use.mavenRepoLocal instructs forked tests to use the local repo
 		verProperties.setProperty("use.mavenRepoLocal", "true");

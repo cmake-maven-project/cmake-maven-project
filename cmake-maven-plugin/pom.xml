@@ -237,6 +237,16 @@
 		</profile>
 		<profile>
 			<id>windows-i386</id>
+			<activation>
+				<property>
+					<name>osDetection</name>
+					<value>!false</value>
+				</property>
+				<os>
+					<family>windows</family>
+					<arch>x86</arch>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>windows-i386</cmake.classifier>
 			</properties>
@@ -252,6 +262,16 @@
 		</profile>
 		<profile>
 			<id>windows-amd64</id>
+			<activation>
+				<property>
+					<name>osDetection</name>
+					<value>!false</value>
+				</property>
+				<os>
+					<family>windows</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>windows-amd64</cmake.classifier>
 			</properties>
@@ -267,6 +287,16 @@
 		</profile>
 		<profile>
 			<id>linux-i386</id>
+			<activation>
+				<property>
+					<name>osDetection</name>
+					<value>!false</value>
+				</property>
+				<os>
+					<family>linux</family>
+					<arch>i386</arch>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>linux-i386</cmake.classifier>
 				<download.cmake>false</download.cmake>
@@ -274,6 +304,16 @@
 		</profile>
 		<profile>
 			<id>linux-amd64</id>
+			<activation>
+				<property>
+					<name>osDetection</name>
+					<value>!false</value>
+				</property>
+				<os>
+					<family>linux</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>linux-amd64</cmake.classifier>
 			</properties>
@@ -289,6 +329,16 @@
 		</profile>
 		<profile>
 			<id>linux-arm</id>
+			<activation>
+				<property>
+					<name>osDetection</name>
+					<value>!false</value>
+				</property>
+				<os>
+					<family>linux</family>
+					<arch>arm</arch>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>linux-arm</cmake.classifier>
 				<download.cmake>false</download.cmake>
@@ -296,6 +346,16 @@
 		</profile>
 		<profile>
 			<id>mac-amd64</id>
+			<activation>
+				<property>
+					<name>osDetection</name>
+					<value>!false</value>
+				</property>
+				<os>
+					<family>mac</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
 			<properties>
 				<cmake.classifier>mac-amd64</cmake.classifier>
 			</properties>

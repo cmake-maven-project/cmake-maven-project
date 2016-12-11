@@ -145,7 +145,7 @@ try
                         }
                         stage(&quot;Deploy (linux-i386)&quot;)
                         {
-                            sh script: &quot;mvn --batch-mode -e -Plinux-i386,empty-jar-for-platform-specific-artifacts,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
+                            sh script: &quot;mvn --batch-mode -e -Plinux-i386,empty-jar,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
                         }
                     }
                 }
