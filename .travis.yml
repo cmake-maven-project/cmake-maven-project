@@ -5,7 +5,6 @@ sudo: false
 matrix:
   include:
    - os: linux
-     env: MAVEN_PROFILE="-Plinux-amd64"
      jdk: oraclejdk8
      addons:
        apt:
@@ -13,7 +12,7 @@ matrix:
            - gcc-multilib
    - os: linux
      # Travis by default is 64 bit so we toggle to use the 32 bit libs
-     env: MAVEN_PROFILE="-Plinux-i386"
+     env: MAVEN_PROFILE="-DosDetection=false -Plinux-i386"
      jdk: oraclejdk8
      addons:
        apt:
@@ -22,9 +21,7 @@ matrix:
            - gcc-multilib
    # Travis only supports jdk7 on OS X at the moment (and needs JAVA_HOME set)
    - os: osx
-     env:
-       - JAVA_HOME=$(/usr/libexec/java_home)
-       - MAVEN_PROFILE="-Pmac-amd64"
+     env: JAVA_HOME=$(/usr/libexec/java_home)
 
 install: true
 script:
