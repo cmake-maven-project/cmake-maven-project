@@ -190,12 +190,15 @@ public class GenerateMojo
 			{
 				for (Entry<String, String> entry: environmentVariables.entrySet())
 				{
-					if (entry.getValue() == null)
+					String value = entry.getValue();
+					if (value == null)
 					{
-						// Linux does not support null values: https://github.com/cmake-maven-project/cmake-maven-project/issues/11
-						continue;
+						// Maven converts empty properties to null and Linux does not support null values,
+						// so we convert them back to empty strings:
+						// https://github.com/cmake-maven-project/cmake-maven-project/issues/11
+						value = "";
 					}
-					env.put(entry.getKey(), entry.getValue());
+					env.put(entry.getKey(), value);
 				}
 			}
 			Log log = getLog();
