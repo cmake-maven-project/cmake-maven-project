@@ -36,6 +36,7 @@
                         </goals>
                         <configuration>
                             <projectDirectory>${project.build.directory}/</projectDirectory>
+                            <classifier>${cmake.classifier}</classifier>
                         </configuration>
                     </execution>
                     <execution>

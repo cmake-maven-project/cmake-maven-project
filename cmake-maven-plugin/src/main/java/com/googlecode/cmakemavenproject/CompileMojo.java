@@ -13,12 +13,14 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import static com.googlecode.cmakemavenproject.Mojos.VALID_CLASSIFIERS;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -37,6 +39,8 @@ import org.apache.maven.project.MavenProject;
 public class CompileMojo
 	extends AbstractMojo
 {
+	@Parameter(property = "classifier", readonly = true, required = true)
+	private String classifier;
 	/**
 	 * The build configuration (e.g. "Win32|Debug", "x64|Release").
 	 */
@@ -79,7 +83,7 @@ public class CompileMojo
 	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
 	private String cmakeRootDir;
 
-	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake")
+	@Parameter(property = "cmake.child.dir")
 	private String cmakeChildDir;
 
 	@Override
@@ -87,6 +91,31 @@ public class CompileMojo
 	public void execute()
 		throws MojoExecutionException, MojoFailureException
 	{
+		if (cmakeChildDir == null)
+		{
+			switch (classifier)
+			{
+				case "windows-i386":
+				case "windows-amd64":
+				{
+					cmakeChildDir = "bin/cmake.exe";
+					break;
+				}
+				case "linux-i386":
+				case "linux-amd64":
+				case "linux-arm":
+				case "mac-amd64":
+				{
+					cmakeChildDir = "bin/cmake";
+					break;
+				}
+				default:
+				{
+					throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
+						"\nActual: " + classifier);
+				}
+			}
+		}
 		try
 		{
 			if (!projectDirectory.exists())
@@ -115,7 +144,17 @@ public class CompileMojo
 			Map<String, String> env = processBuilder.environment();
 
 			if (environmentVariables != null)
-				env.putAll(environmentVariables);
+			{
+				for (Entry<String, String> entry: environmentVariables.entrySet())
+				{
+					if (entry.getValue() == null)
+					{
+						// Linux does not support null values: https://github.com/cmake-maven-project/cmake-maven-project/issues/11
+						continue;
+					}
+					env.put(entry.getKey(), entry.getValue());
+				}
+			}
 			Log log = getLog();
 			if (log.isDebugEnabled())
 			{

@@ -70,6 +70,9 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
             <projectDirectory>
               <!-- "targetPath" from the "generate" goal -->
             </projectDirectory>
+            <classifier>
+              <!-- The classifier of the current platform. One of [windows-i386, windows-amd64, linux-i386, linux-amd64, linux-arm, mac-amd64]. -->
+            </classifier>
             <environmentVariables>
               <key>value</key>
             </environmentVariables>

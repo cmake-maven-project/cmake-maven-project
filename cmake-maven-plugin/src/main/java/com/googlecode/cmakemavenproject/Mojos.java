@@ -1,9 +1,11 @@
 package com.googlecode.cmakemavenproject;
 
+import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Set;
 
 /**
  * Mojo helper functions.
@@ -12,6 +14,12 @@ import java.io.InputStreamReader;
  */
 public class Mojos
 {
+	/**
+	 * The set of valid classifiers.
+	 */
+	public static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-i386",
+		"windows-amd64", "linux-i386", "linux-amd64", "linux-arm", "mac-amd64");
+
 	/**
 	 * Launches and waits for a process to complete.
 	 * <p>

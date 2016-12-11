@@ -105,17 +105,27 @@ public class GetBinariesMojo
 		switch (classifier)
 		{
 			case "windows-i386":
+			{
 				suffix = "win32-x86.zip";
 				break;
+			}
 			case "windows-amd64":
+			{
 				suffix = "win64-x64.zip";
 				break;
+			}
 			case "linux-amd64":
+			{
 				suffix = "Linux-x86_64.tar.gz";
 				break;
+			}
 			case "mac-amd64":
+			{
 				suffix = "Darwin-x86_64.tar.gz";
 				break;
+			}
+			case "linux-i386":
+			case "linux-arm":
 			default:
 				throw new MojoExecutionException("Unsupported classifier: " + classifier);
 		}

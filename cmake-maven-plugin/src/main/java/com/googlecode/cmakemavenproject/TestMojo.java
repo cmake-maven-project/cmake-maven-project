@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -165,7 +166,17 @@ public class TestMojo extends AbstractMojo
 			Map<String, String> env = processBuilder.environment();
 
 			if (environmentVariables != null)
-				env.putAll(environmentVariables);
+			{
+				for (Entry<String, String> entry: environmentVariables.entrySet())
+				{
+					if (entry.getValue() == null)
+					{
+						// Linux does not support null values: https://github.com/cmake-maven-project/cmake-maven-project/issues/11
+						continue;
+					}
+					env.put(entry.getKey(), entry.getValue());
+				}
+			}
 
 			if (log.isDebugEnabled())
 			{

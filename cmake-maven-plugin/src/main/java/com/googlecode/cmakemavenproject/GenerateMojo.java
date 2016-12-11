@@ -13,13 +13,13 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import com.google.common.collect.ImmutableSet;
+import static com.googlecode.cmakemavenproject.Mojos.VALID_CLASSIFIERS;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
@@ -46,15 +46,13 @@ import org.twdata.maven.mojoexecutor.MojoExecutor.ExecutionEnvironment;
 public class GenerateMojo
 	extends AbstractMojo
 {
-	private static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-i386",
-		"windows-amd64", "linux-i386", "linux-amd64", "linux-arm", "mac-amd64");
 	/**
 	 * The classifier of the current platform.
 	 * <p>
 	 * One of [windows-i386, windows-amd64, linux-i386, linux-amd64, linux-arm, mac-amd64].
 	 */
 	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
-	@Parameter(property = "classifier", readonly = true)
+	@Parameter(property = "classifier", readonly = true, required = true)
 	private String classifier;
 	/**
 	 * /**
@@ -112,13 +110,38 @@ public class GenerateMojo
 	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
 	private String cmakeRootDir;
 
-	@Parameter(property = "cmake.child.dir", defaultValue = "bin/cmake")
+	@Parameter(property = "cmake.child.dir")
 	private String cmakeChildDir;
 
 	@Override
 	public void execute()
 		throws MojoExecutionException
 	{
+		if (cmakeChildDir == null)
+		{
+			switch (classifier)
+			{
+				case "windows-i386":
+				case "windows-amd64":
+				{
+					cmakeChildDir = "bin/cmake.exe";
+					break;
+				}
+				case "linux-i386":
+				case "linux-amd64":
+				case "linux-arm":
+				case "mac-amd64":
+				{
+					cmakeChildDir = "bin/cmake";
+					break;
+				}
+				default:
+				{
+					throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
+						"\nActual: " + classifier);
+				}
+			}
+		}
 		try
 		{
 			if (!targetPath.exists() && !targetPath.mkdirs())
@@ -129,13 +152,6 @@ public class GenerateMojo
 			{
 				getLog().info("Downloading binaries");
 				cmakeDir = new File(project.getBuild().getDirectory(), "dependency/cmake");
-				if (classifier == null)
-					throw new MojoExecutionException("\"classifier\" must be set");
-				if (!VALID_CLASSIFIERS.contains(classifier))
-				{
-					throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
-						"\nActual: " + classifier);
-				}
 				PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
 					get("pluginDescriptor");
 				String groupId = pluginDescriptor.getGroupId();
@@ -171,7 +187,17 @@ public class GenerateMojo
 			Map<String, String> env = processBuilder.environment();
 
 			if (environmentVariables != null)
-				env.putAll(environmentVariables);
+			{
+				for (Entry<String, String> entry: environmentVariables.entrySet())
+				{
+					if (entry.getValue() == null)
+					{
+						// Linux does not support null values: https://github.com/cmake-maven-project/cmake-maven-project/issues/11
+						continue;
+					}
+					env.put(entry.getKey(), entry.getValue());
+				}
+			}
 			Log log = getLog();
 			if (log.isDebugEnabled())
 			{
