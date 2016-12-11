@@ -37,7 +37,7 @@
                 checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
             }
         }
-        timeout(10)
+        timeout(15)
         {
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA32_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
             {
@@ -56,7 +56,7 @@
                 }
             }
         }
-        timeout(10)
+        timeout(15)
         {
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
             {
@@ -79,7 +79,7 @@
                 checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
             }
         }
-        timeout(10)
+        timeout(15)
         {
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA32_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
             {
@@ -103,7 +103,7 @@
                 checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
             }
         }
-        timeout(10)
+        timeout(15)
         {
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
             {
@@ -126,7 +126,7 @@
                     checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
             }
         }
-        timeout(10)
+        timeout(15)
         {
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA64_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
             {
