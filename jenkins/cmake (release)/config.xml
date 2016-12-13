@@ -64,7 +64,7 @@ node(&quot;linux &amp;&amp; amd64&quot;)
     // http://stackoverflow.com/a/33630506/14731
     withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
     {
-	def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+        def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
         timeout(2)
         {
             stage(&quot;Checkout (linux-amd64)&quot;)
