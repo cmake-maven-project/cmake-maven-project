@@ -53,7 +53,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.7.0-b1</version>
+      <version>3.7.0-b2</version>
       <executions>
         <execution>
           <id>cmake-compile</id>
@@ -86,7 +86,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.7.0-b1</version>
+      <version>3.7.0-b2</version>
       <executions>
         <execution>
           <id>cmake-test</id>
