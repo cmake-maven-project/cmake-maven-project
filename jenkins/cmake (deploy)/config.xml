@@ -30,7 +30,7 @@
 {
     node(&quot;windows &amp;&amp; i386 &amp;&amp; amd64&quot;)
     {
-        timeout(2)
+        timeout(10)
         {
             stage(&quot;Checkout (windows)&quot;)
             {
@@ -72,7 +72,7 @@
 {
     node(&quot;linux &amp;&amp; i386&quot;)
     {
-        timeout(2)
+        timeout(10)
         {
             stage(&quot;Checkout (linux-i386)&quot;)
             {
@@ -96,7 +96,7 @@
 {
     node(&quot;linux &amp;&amp; amd64&quot;)
     {
-        timeout(2)
+        timeout(10)
         {
             stage(&quot;Checkout (linux-amd64)&quot;)
             {
@@ -119,7 +119,7 @@
 {
     node(&quot;mac&quot;)
     {
-        timeout(2)
+        timeout(10)
         {
             stage(&quot;Checkout (mac)&quot;)
             {
