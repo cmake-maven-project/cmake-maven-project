@@ -64,7 +64,7 @@ node(&quot;linux &amp;&amp; amd64&quot;)
     // http://stackoverflow.com/a/33630506/14731
     withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
     {
-        def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
+        def authenticatedRepository = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
         timeout(10)
         {
             stage(&quot;Checkout (linux-amd64)&quot;)
@@ -96,8 +96,8 @@ node(&quot;linux &amp;&amp; amd64&quot;)
                             mvn --batch-mode -V -e versions:set -DnewVersion=${nextVersion} -DgenerateBackupPoms=false
                             git add -u
                             git diff-index --quiet HEAD || git commit -m &quot;[jenkins] Incrementing version to ${nextVersion}&quot;
-                            git push ${origin} master
-                            git push ${origin} release-${releaseVersion}&quot;&quot;&quot;
+                            git push ${authenticatedRepository} master
+                            git push ${authenticatedRepository} release-${releaseVersion}&quot;&quot;&quot;
                     }
 
                     // Open a new staging repository and capture its ID
@@ -122,7 +122,6 @@ try
         {
             withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
             {
-                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
                 timeout(10)
                 {
                     stage(&quot;Checkout (linux-i386)&quot;)
@@ -136,11 +135,11 @@ try
                     {
                         stage(&quot;Build (linux-i386)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Plinux-i386 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Plinux-i386 clean install&apos;
                         }
                         stage(&quot;Deploy (linux-i386)&quot;)
                         {
-                            sh script: &quot;mvn --batch-mode -e -Plinux-i386,empty-jar deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
+                            sh script: &quot;mvn --batch-mode -e -DosDetection=false -Plinux-i386,release,empty-jar deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -153,7 +152,6 @@ try
         {
             withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
             {
-                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
                 timeout(10)
                 {
                     stage(&quot;Checkout (linux-amd64)&quot;)
@@ -167,12 +165,12 @@ try
                     {
                         stage(&quot;Build (linux-amd64)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Plinux-amd64 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Plinux-amd64 clean install&apos;
                         }
                         stage(&quot;Deploy (linux-amd64)&quot;)
                         {
                             sh script: &quot;&quot;&quot;cd cmake-binaries
-                                mvn --batch-mode -e -Plinux-amd64 deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                                mvn --batch-mode -e -DosDetection=false -Plinux-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -185,7 +183,6 @@ try
         {
             withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
             {
-                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
                 timeout(10)
                 {
                     stage(&quot;Checkout (mac)&quot;)
@@ -199,12 +196,12 @@ try
                     {
                         stage(&quot;Build (mac-amd64)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Pmac-amd64 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pmac-amd64 clean install&apos;
                         }
                         stage(&quot;Deploy (mac-amd64)&quot;)
                         {
                             sh script: &quot;&quot;&quot;cd cmake-binaries
-                                mvn --batch-mode -e -Pmac-amd64 deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                                mvn --batch-mode -e -DosDetection=false -Pmac-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -217,7 +214,6 @@ try
         {
             withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
             {
-                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
                 timeout(10)
                 {
                     stage(&quot;Checkout (windows)&quot;)
@@ -231,12 +227,12 @@ try
                     {
                         stage(&quot;Build (windows-i386)&quot;)
                         {
-                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Pwindows-i386 clean install&apos;
+                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pwindows-i386 clean install&apos;
                         }
                         stage(&quot;Deploy (windows-i386)&quot;)
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
-                                mvn --batch-mode -e -Pwindows-i386 deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                                mvn --batch-mode -e -DosDetection=false -Pwindows-i386,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -247,12 +243,12 @@ try
                     {
                         stage(&quot;Build (windows-amd64)&quot;)
                         {
-                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -Pwindows-amd64 clean install&apos;
+                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pwindows-amd64 clean install&apos;
                         }
                         stage(&quot;Deploy (windows-amd64)&quot;)
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
-                                mvn --batch-mode -e -Pwindows-amd64 deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                                mvn --batch-mode -e -DosDetection=false -Pwindows-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -271,7 +267,6 @@ catch (e)
         {
             withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
             {
-                def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
                 timeout(10)
                 {
                     stage(&quot;Checkout (linux-amd64)&quot;)
@@ -296,17 +291,11 @@ catch (e)
     throw e;
 }
 
-// TODO: On failure, invoke a combination of:
-// * git push --delete origin &lt;tag&gt; -f
-// * git push -f (restore origin/master to its original position)
-// &quot;mvn nexus-staging:drop&quot;. See http://central.sonatype.org/pages/apache-maven.html.
-
 // Close the release
 node(&quot;linux &amp;&amp; amd64&quot;)
 {
     withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
     {
-        def origin = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${repository}&quot;
         timeout(10)
         {
             stage(&quot;Checkout (linux-amd64)&quot;)

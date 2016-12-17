@@ -128,9 +128,7 @@ public class CompileMojo
 			File cmakeFile = downloadBinaries ? new File(project.getBuild().getDirectory(),
 				"dependency/cmake/bin/cmake") : new File(cmakeRootDir + "/" + cmakeChildDir);
 			if (!downloadBinaries)
-			{
 				getLog().info("Configured to use native CMake");
-			}
 
 			ProcessBuilder processBuilder = new ProcessBuilder(cmakeFile.getAbsolutePath(),
 				"--build", projectDirectory.getPath());

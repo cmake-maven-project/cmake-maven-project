@@ -67,12 +67,17 @@ public class GetBinariesMojo
 	 * The maximum number of times to retry deleting files.
 	 */
 	private static final int MAX_RETRIES = 30;
-
+/**
+	 * The set of valid classifiers.
+	 */
+	private static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-i386",
+		"windows-amd64", "linux-i386", "linux-amd64", "linux-arm", "mac-amd64");
+	
 	/**
 	 * The release platform.
 	 */
 	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-	@Parameter(property = "classifier", readonly = true)
+	@Parameter(property = "classifier", readonly = true, required = true)
 	private String classifier;
 	/**
 	 * The project version.
@@ -84,22 +89,11 @@ public class GetBinariesMojo
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
 
-	@Parameter(property = "skip", defaultValue = "false")
-	private boolean skip;
-
 	@Override
 	@SuppressFBWarnings("NP_UNWRITTEN_FIELD")
 	public void execute()
 		throws MojoExecutionException
 	{
-		if (skip)
-		{
-			getLog().debug("Skipping plugin because <skip> was true");
-			return;
-		}
-		if (classifier == null || classifier.trim().isEmpty())
-			throw new MojoExecutionException("classifier must be specified");
-
 		String suffix;
 
 		switch (classifier)
@@ -127,7 +121,8 @@ public class GetBinariesMojo
 			case "linux-i386":
 			case "linux-arm":
 			default:
-				throw new MojoExecutionException("Unsupported classifier: " + classifier);
+				throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
+						"\nActual: " + classifier);
 		}
 
 		String cmakeVersion = getCMakeVersion(projectVersion);

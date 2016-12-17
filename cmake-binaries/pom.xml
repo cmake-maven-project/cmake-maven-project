@@ -12,32 +12,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.12</version>
-				<executions>
-					<execution>
-						<!-- http://stackoverflow.com/a/40938111/14731 -->
-						<id>negate-download-cmake</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>bsh-property</goal>
-						</goals>
-						<configuration>
-							<source>
-								<![CDATA[
-								downloadCmake = project.getProperties().getProperty("download.cmake");
-								skip.download = downloadCmake != null && !Boolean.valueOf(downloadCmake);
-								]]>
-							</source>
-							<properties>
-								<property>skip.download</property>
-							</properties>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>com.googlecode.cmake-maven-project</groupId>
 				<artifactId>cmake-binaries-plugin</artifactId>
 				<version>${project.version}</version>
@@ -49,7 +23,6 @@
 						</goals>
 						<configuration>
 							<classifier>${cmake.classifier}</classifier>
-							<skip>${skip.download}</skip>
 						</configuration>
 					</execution>
 				</executions>
@@ -169,9 +142,21 @@
 			Sonatype requires a main jar, even for platform-specific artifacts, so we supply it with an
 			empty file.
 			-->
-			<properties>
-				<skip.download>true</skip.download>
-			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.googlecode.cmake-maven-project</groupId>
+						<artifactId>cmake-binaries-plugin</artifactId>
+						<version>${project.version}</version>
+						<executions>
+							<execution>
+								<id>cmake-binaries</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>

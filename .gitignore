@@ -10,3 +10,6 @@ nbactions.xml
 .classpath
 .project
 .checkstyle
+
+# Netbeans files
+nbactions*.xml
