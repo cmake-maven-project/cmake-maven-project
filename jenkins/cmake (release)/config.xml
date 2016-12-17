@@ -117,7 +117,7 @@ try
     parallel linux_i386:
     {
         // Linux-i386 deploys the portable modules (which is convenient since it doesn&apos;t deploy platform-specific binaries).
-        // Remaining platforms only deploy cmake-binaries module.
+        // Remaining platforms only deploy platform-specific binaries.
         node(&quot;linux &amp;&amp; i386&quot;)
         {
             withCredentials([[$class: &apos;UsernamePasswordMultiBinding&apos;, credentialsId: &apos;github&apos;, usernameVariable: &apos;GIT_USERNAME&apos;, passwordVariable: &apos;GIT_PASSWORD&apos;]])
