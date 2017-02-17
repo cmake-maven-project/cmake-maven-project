@@ -48,6 +48,7 @@
                             <buildDirectory>${project.build.directory}</buildDirectory>
                             <testFailureIgnore>false</testFailureIgnore>
                             <dashboard>Experimental</dashboard>
+                            <classifier>${cmake.classifier}</classifier>
                         </configuration>
                     </execution>
                 </executions>

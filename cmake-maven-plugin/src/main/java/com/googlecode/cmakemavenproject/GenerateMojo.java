@@ -107,7 +107,7 @@ public class GenerateMojo
 	@Parameter(property = "download.cmake", defaultValue = "true")
 	private boolean downloadBinaries;
 
-	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
+	@Parameter(property = "cmake.root.dir", defaultValue = "/usr/")
 	private String cmakeRootDir;
 
 	@Parameter(property = "cmake.child.dir")
@@ -147,11 +147,10 @@ public class GenerateMojo
 			if (!targetPath.exists() && !targetPath.mkdirs())
 				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
 
-			File cmakeDir;
 			if (downloadBinaries)
 			{
 				getLog().info("Downloading binaries");
-				cmakeDir = new File(project.getBuild().getDirectory(), "dependency/cmake");
+				File cmakeDir = new File(project.getBuild().getDirectory(), "dependency/cmake");
 				PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().
 					get("pluginDescriptor");
 				String groupId = pluginDescriptor.getGroupId();
@@ -175,11 +174,12 @@ public class GenerateMojo
 			else
 			{
 				getLog().info("Using local binaries");
-				cmakeDir = new File(cmakeRootDir);
 			}
 
-			ProcessBuilder processBuilder = new ProcessBuilder(
-				new File(cmakeDir, cmakeChildDir).getAbsolutePath(),
+			String cmakePath = downloadBinaries ? new File(project.getBuild().getDirectory(),
+					"dependency/cmake/bin/cmake").getAbsolutePath() : cmakeRootDir + cmakeChildDir;
+
+			ProcessBuilder processBuilder = new ProcessBuilder(cmakePath,
 				"-G", generator).directory(targetPath);
 			if (options != null)
 				processBuilder.command().addAll(options);

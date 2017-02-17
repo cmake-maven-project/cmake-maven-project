@@ -39,6 +39,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import static com.googlecode.cmakemavenproject.Mojos.VALID_CLASSIFIERS;
+
 /**
  * Goal which runs CMake/CTest tests.
  *
@@ -95,13 +97,22 @@ public class TestMojo extends AbstractMojo
 	@Parameter
 	private List<String> options;
 
+	/**
+	 * The classifier of the current platform.
+	 * <p>
+	 * One of [windows-i386, windows-x86_64, linux-i386, linux-x86_64, linux-arm, mac-x86_64].
+	 */
+	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
+	@Parameter(property = "classifier", readonly = true, required = true)
+	private String classifier;
+
 	@Parameter(property = "download.cmake", defaultValue = "true")
 	private boolean downloadBinaries;
 
-	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
+	@Parameter(property = "cmake.root.dir", defaultValue = "/usr/")
 	private String cmakeRootDir;
 
-	@Parameter(property = "cmake.ctest.dir", defaultValue = "/")
+	@Parameter(property = "cmake.ctest.dir", defaultValue = "")
 	private String ctestChildDir;
 
 	/**
@@ -113,6 +124,31 @@ public class TestMojo extends AbstractMojo
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
+		if (ctestChildDir == null)
+		{
+			switch (classifier)
+			{
+				case "windows-x86_32":
+				case "windows-x86_64":
+				{
+					ctestChildDir = "bin/ctest.exe";
+					break;
+				}
+				case "linux-x86_32":
+				case "linux-x86_64":
+				case "linux-arm_32":
+				case "mac-x86_64":
+				{
+					ctestChildDir = "bin/ctest";
+					break;
+				}
+				default:
+				{
+					throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
+							"\nActual: " + classifier);
+				}
+			}
+		}
 		Log log = getLog();
 
 		// Surefire skips tests with properties so we'll do it this way too
@@ -131,25 +167,16 @@ public class TestMojo extends AbstractMojo
 			String threadCountString = Integer.toString(threadCount);
 			String projBuildDir = project.getBuild().getDirectory();
 			String buildDir = buildDirectory.getAbsolutePath();
-			List<String> args;
 
 			if (!buildDirectory.exists())
 				throw new MojoExecutionException(buildDir + " does not exist");
 			if (!buildDirectory.isDirectory())
 				throw new MojoExecutionException(buildDir + " isn't directory");
 
-			if (downloadBinaries)
-			{
-				args = new ArrayList<>(Arrays.asList(
-					new File(new File(projBuildDir, "dependency/cmake").getAbsoluteFile(), "bin/ctest")
-						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
-			}
-			else
-			{
-				args = new ArrayList<>(Arrays.asList(
-					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), "bin/ctest")
-						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
-			}
+			String ctestPath = downloadBinaries ? new File(project.getBuild().getDirectory(),
+					"dependency/cmake/bin/ctest").getAbsolutePath() : cmakeRootDir + ctestChildDir;
+
+			List<String> args = new ArrayList<>(Arrays.asList(ctestPath, "-T", "Test", "-j", threadCountString));
 
 			// If set, this will post results to a pre-configured dashboard
 			if (dashboard != null)

@@ -48,6 +48,7 @@
                             <buildDirectory>${project.build.directory}</buildDirectory>
                             <!-- This test fails, and that's what we're expecting; it's OK -->
                             <testFailureIgnore>true</testFailureIgnore>
+                            <classifier>${cmake.classifier}</classifier>
                         </configuration>
                     </execution>
                 </executions>
