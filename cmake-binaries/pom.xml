@@ -57,12 +57,12 @@
 								<configuration>
 									<target>
 										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows-i386</echo>
-										<echo>* windows-amd64</echo>
-										<echo>* linux-amd64</echo>
-										<echo>* mac-amd64</echo>
+										<echo>* windows-x86_32</echo>
+										<echo>* windows-x86_64</echo>
+										<echo>* linux-x86_64</echo>
+										<echo>* mac-x86_64</echo>
 										<echo/>
-										<echo>For instance: mvn -Pwindows-amd64 install</echo>
+										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
 										<fail/>
 									</target>
 								</configuration>
@@ -73,7 +73,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>windows-i386</id>
+			<id>windows-x86_32</id>
 			<activation>
 				<property>
 					<name>osDetection</name>
@@ -85,11 +85,11 @@
 				</os>
 			</activation>
 			<properties>
-				<cmake.classifier>windows-i386</cmake.classifier>
+				<cmake.classifier>windows-x86_32</cmake.classifier>
 			</properties>
 		</profile>
 		<profile>
-			<id>windows-amd64</id>
+			<id>windows-x86_64</id>
 			<activation>
 				<property>
 					<name>osDetection</name>
@@ -101,11 +101,11 @@
 				</os>
 			</activation>
 			<properties>
-				<cmake.classifier>windows-amd64</cmake.classifier>
+				<cmake.classifier>windows-x86_64</cmake.classifier>
 			</properties>
 		</profile>
 		<profile>
-			<id>linux-amd64</id>
+			<id>linux-x86_64</id>
 			<activation>
 				<property>
 					<name>osDetection</name>
@@ -117,11 +117,11 @@
 				</os>
 			</activation>
 			<properties>
-				<cmake.classifier>linux-amd64</cmake.classifier>
+				<cmake.classifier>linux-x86_64</cmake.classifier>
 			</properties>
 		</profile>
 		<profile>
-			<id>mac-amd64</id>
+			<id>mac-x86_64</id>
 			<activation>
 				<property>
 					<name>osDetection</name>
@@ -133,7 +133,7 @@
 				</os>
 			</activation>
 			<properties>
-				<cmake.classifier>mac-amd64</cmake.classifier>
+				<cmake.classifier>mac-x86_64</cmake.classifier>
 			</properties>
 		</profile>
 		<profile>

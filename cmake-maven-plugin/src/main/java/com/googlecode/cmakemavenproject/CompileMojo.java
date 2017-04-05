@@ -95,16 +95,16 @@ public class CompileMojo
 		{
 			switch (classifier)
 			{
-				case "windows-i386":
-				case "windows-amd64":
+				case "windows-x86_32":
+				case "windows-x86_64":
 				{
 					cmakeChildDir = "bin/cmake.exe";
 					break;
 				}
-				case "linux-i386":
-				case "linux-amd64":
-				case "linux-arm":
-				case "mac-amd64":
+				case "linux-x86_32":
+				case "linux-x86_64":
+				case "linux-arm_32":
+				case "mac-x86_64":
 				{
 					cmakeChildDir = "bin/cmake";
 					break;

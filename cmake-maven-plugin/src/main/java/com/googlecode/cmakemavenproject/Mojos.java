@@ -17,8 +17,8 @@ public class Mojos
 	/**
 	 * The set of valid classifiers.
 	 */
-	public static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-i386",
-		"windows-amd64", "linux-i386", "linux-amd64", "linux-arm", "mac-amd64");
+	public static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-x86_32",
+		"windows-x86_64", "linux-x86_32", "linux-x86_64", "linux-arm_32", "mac-x86_64");
 
 	/**
 	 * Launches and waits for a process to complete.

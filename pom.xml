@@ -131,14 +131,14 @@
 								<configuration>
 									<target>
 										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows-i386</echo>
-										<echo>* windows-amd64</echo>
-										<echo>* linux-i386</echo>
-										<echo>* linux-amd64</echo>
-										<echo>* linux-arm</echo>
-										<echo>* mac-amd64</echo>
+										<echo>* windows-x86_32</echo>
+										<echo>* windows-x86_64</echo>
+										<echo>* linux-x86_32</echo>
+										<echo>* linux-x86_64</echo>
+										<echo>* linux-arm_32</echo>
+										<echo>* mac-x86_64</echo>
 										<echo/>
-										<echo>For instance: mvn -Pwindows-amd64 install</echo>
+										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
 										<fail/>
 									</target>
 								</configuration>
@@ -149,7 +149,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>windows-i386</id>
+			<id>windows-x86_32</id>
 			<activation>
 				<property>
 					<name>osDetection</name>
@@ -165,7 +165,7 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>windows-amd64</id>
+			<id>windows-x86_64</id>
 			<activation>
 				<property>
 					<name>osDetection</name>
@@ -181,7 +181,7 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>linux-i386</id>
+			<id>linux-x86_32</id>
 			<activation>
 				<property>
 					<name>osDetection</name>
@@ -194,7 +194,7 @@
 			</activation>
 		</profile>
 		<profile>
-			<id>linux-amd64</id>
+			<id>linux-x86_64</id>
 			<activation>
 				<property>
 					<name>osDetection</name>
@@ -210,10 +210,10 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>linux-arm</id>
+			<id>linux-arm_32</id>
 		</profile>
 		<profile>
-			<id>mac-amd64</id>
+			<id>mac-x86_64</id>
 			<activation>
 				<property>
 					<name>osDetection</name>

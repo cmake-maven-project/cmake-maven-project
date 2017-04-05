@@ -29,7 +29,6 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.EnumSet;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -67,12 +66,12 @@ public class GetBinariesMojo
 	 * The maximum number of times to retry deleting files.
 	 */
 	private static final int MAX_RETRIES = 30;
-/**
+	/**
 	 * The set of valid classifiers.
 	 */
-	private static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-i386",
-		"windows-amd64", "linux-i386", "linux-amd64", "linux-arm", "mac-amd64");
-	
+	private static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-x86_32",
+		"windows-x86_64", "linux-x86_32", "linux-x86_64", "linux-arm_32", "mac-x86_64");
+
 	/**
 	 * The release platform.
 	 */
@@ -98,31 +97,31 @@ public class GetBinariesMojo
 
 		switch (classifier)
 		{
-			case "windows-i386":
+			case "windows-x86_32":
 			{
 				suffix = "win32-x86.zip";
 				break;
 			}
-			case "windows-amd64":
+			case "windows-x86_64":
 			{
 				suffix = "win64-x64.zip";
 				break;
 			}
-			case "linux-amd64":
+			case "linux-x86_64":
 			{
 				suffix = "Linux-x86_64.tar.gz";
 				break;
 			}
-			case "mac-amd64":
+			case "mac-x86_64":
 			{
 				suffix = "Darwin-x86_64.tar.gz";
 				break;
 			}
-			case "linux-i386":
-			case "linux-arm":
+			case "linux-x86_32":
+			case "linux-arm_32":
 			default:
 				throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
-						"\nActual: " + classifier);
+					"\nActual: " + classifier);
 		}
 
 		String cmakeVersion = getCMakeVersion(projectVersion);
@@ -458,9 +457,22 @@ public class GetBinariesMojo
 	 */
 	private boolean supportsPosix(InputStream in)
 	{
-		return !System.getProperty("os.name").toLowerCase(Locale.US).startsWith("windows") &&
-			(in instanceof ArchiveInputStream || in instanceof ZipArchiveInputStream ||
-			in instanceof TarArchiveInputStream);
+		switch (classifier)
+		{
+			case "windows-x86_32":
+			case "windows-x86_64":
+				return false;
+			case "linux-x86_32":
+			case "linux-x86_64":
+			case "linux-arm_32":
+			case "mac-x86_64":
+				break;
+			default:
+				throw new AssertionError("\"classifier\" must be one of " + VALID_CLASSIFIERS +
+					"\nActual: " + classifier);
+		}
+		return in instanceof ArchiveInputStream || in instanceof ZipArchiveInputStream ||
+			in instanceof TarArchiveInputStream;
 	}
 
 	/**
