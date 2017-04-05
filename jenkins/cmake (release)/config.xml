@@ -135,11 +135,11 @@ try
                     {
                         stage(&quot;Build (linux-i386)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Plinux-i386 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Plinux-x86_32 clean install&apos;
                         }
                         stage(&quot;Deploy (linux-i386)&quot;)
                         {
-                            sh script: &quot;mvn --batch-mode -e -DosDetection=false -Plinux-i386,release,empty-jar deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
+                            sh script: &quot;mvn --batch-mode -e -DosDetection=false -Plinux-x86_32,release,empty-jar deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -165,12 +165,12 @@ try
                     {
                         stage(&quot;Build (linux-amd64)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Plinux-amd64 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Plinux-x86_64 clean install&apos;
                         }
                         stage(&quot;Deploy (linux-amd64)&quot;)
                         {
                             sh script: &quot;&quot;&quot;cd cmake-binaries
-                                mvn --batch-mode -e -DosDetection=false -Plinux-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                                mvn --batch-mode -e -DosDetection=false -Plinux-x86_64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -196,12 +196,12 @@ try
                     {
                         stage(&quot;Build (mac-amd64)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pmac-amd64 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pmac-x86_64 clean install&apos;
                         }
                         stage(&quot;Deploy (mac-amd64)&quot;)
                         {
                             sh script: &quot;&quot;&quot;cd cmake-binaries
-                                mvn --batch-mode -e -DosDetection=false -Pmac-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                                mvn --batch-mode -e -DosDetection=false -Pmac-x86_64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -227,12 +227,12 @@ try
                     {
                         stage(&quot;Build (windows-i386)&quot;)
                         {
-                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pwindows-i386 clean install&apos;
+                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pwindows-x86_32 clean install&apos;
                         }
                         stage(&quot;Deploy (windows-i386)&quot;)
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
-                                mvn --batch-mode -e -DosDetection=false -Pwindows-i386,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                                mvn --batch-mode -e -DosDetection=false -Pwindows-x86_32,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -243,12 +243,12 @@ try
                     {
                         stage(&quot;Build (windows-amd64)&quot;)
                         {
-                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pwindows-amd64 clean install&apos;
+                            bat script: &apos;mvn --batch-mode -U -e -Dsurefire.useFile=false -DosDetection=false -Pwindows-x86_64 clean install&apos;
                         }
                         stage(&quot;Deploy (windows-amd64)&quot;)
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
-                                mvn --batch-mode -e -DosDetection=false -Pwindows-amd64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
+                                mvn --batch-mode -e -DosDetection=false -Pwindows-x86_64,release deploy -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId}&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
