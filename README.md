@@ -31,7 +31,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
               <!-- One of the generators defined at https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html -->
             </generator>
             <classifier>
-              <!-- The classifier of the current platform. One of [windows-i386, windows-amd64, linux-i386, linux-amd64, linux-arm, mac-amd64]. -->
+              <!-- The classifier of the current platform. One of [windows-x86_32, windows-x86_64, linux-x86_32, linux-x86_64, linux-arm_32, mac-x86_64]. -->
             </classifier>
             <environmentVariables>
               <key>value</key>
@@ -71,7 +71,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
               <!-- "targetPath" from the "generate" goal -->
             </projectDirectory>
             <classifier>
-              <!-- The classifier of the current platform. One of [windows-i386, windows-amd64, linux-i386, linux-amd64, linux-arm, mac-amd64]. -->
+              <!-- The classifier of the current platform. One of [windows-x86_32, windows-x86_64, linux-x86_32, linux-x86_64, linux-arm_32, mac-x86_64]. -->
             </classifier>
             <environmentVariables>
               <key>value</key>
@@ -129,18 +129,18 @@ To clean an old build, run:
 
 By default, Maven will activate the right profile based on your JVM:
 
-* windows-i386
-* windows-amd64
-* linux-i386
-* linux-amd64
-* linux-arm
-* mac-amd64
+* windows-x86_32
+* windows-x86_64
+* linux-x86_32
+* linux-x86_64
+* linux-arm_32
+* mac-x86_64
 
-If detection does not work, or you wish to override it (e.g. you're running linux-amd64 but want to cross-compile for linux-i386) then set `-DosDetection=false -P<profile>`.
+If detection does not work, or you wish to override it (e.g. you're running linux-x86_64 but want to cross-compile for linux-x86_32) then set `-DosDetection=false -P<profile>`.
 
 For instance, when building for 32-bit Linux machines, use:
 
-    mvn -DosDetection=false -Plinux-i386 install
+    mvn -DosDetection=false -Plinux-x86_32 install
 
 ### Using a local CMake installation
 
@@ -148,8 +148,8 @@ cmake.org doesn't provide binaries for some platforms, such as 32-bit Linux and 
 
 The following Maven profiles use local CMake installations:
 
-* `linux-i386` corresponds to the 32-bit Linux platform.
-* `linux-arm` corresponds to the Rasbian (Raspberry Pi) platform.
+* `linux-x86_32` corresponds to the 32-bit Linux platform.
+* `linux-arm_32` corresponds to the Rasbian (Raspberry Pi) platform.
 
 but you can configure this behavior for any platform by setting `${download.cmake}` to `false`. The plugin looks for cmake under `${cmake.root.dir}/${cmake.child.dir}` and ctest under `${cmake.root.dir}/${cmake.ctest.dir}`. By default, `${cmake.root.dir}` resolves to `/usr`, `${cmake.child.dir}` to `/bin/cmake` and `${cmake.test.dir}` to `/`.
 

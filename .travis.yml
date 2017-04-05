@@ -12,7 +12,7 @@ matrix:
            - gcc-multilib
    - os: linux
      # Travis by default is 64 bit so we toggle to use the 32 bit libs
-     env: MAVEN_PROFILE="-DosDetection=false -Plinux-i386"
+     env: MAVEN_PROFILE="-DosDetection=false -Plinux-x86_32"
      jdk: oraclejdk8
      addons:
        apt:
