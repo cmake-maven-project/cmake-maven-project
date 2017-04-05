@@ -51,7 +51,7 @@
                     // -U : force maven to update snapshots each time (default : once an hour, makes no sense in CI).
                     // -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
                     //                            having to crawl the workspace files to see the cause).            
-                    bat script: &apos;mvn --batch-mode -V -U -e clean deploy -Pwindows-i386 -Dsurefire.useFile=false&apos;
+                    bat script: &apos;mvn --batch-mode -V -U -e clean deploy -Pwindows-x86_32 -Dsurefire.useFile=false&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -62,7 +62,7 @@
             {
                 stage(&quot;Deploy (windows-amd64)&quot;)
                 {
-                    bat script: &apos;mvn --batch-mode -V -U -e clean deploy -Pwindows-amd64 -Dsurefire.useFile=false&apos;
+                    bat script: &apos;mvn --batch-mode -V -U -e clean deploy -Pwindows-x86_64 -Dsurefire.useFile=false&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -86,7 +86,7 @@
                 stage(&quot;Deploy (linux-i386)&quot;)
                 {
                     sh script: &apos;&apos;&apos;sudo apt-get install cmake -y
-                    mvn --batch-mode -V -U -e clean deploy -Plinux-i386 -Dsurefire.useFile=false&apos;&apos;&apos;
+                    mvn --batch-mode -V -U -e clean deploy -Plinux-x86_32 -Dsurefire.useFile=false&apos;&apos;&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -109,7 +109,7 @@
             {
                 stage(&quot;Deploy (linux-amd64)&quot;)
                 {
-                    sh script: &apos;mvn --batch-mode -V -U -e clean deploy -Plinux-amd64 -Dsurefire.useFile=false&apos;
+                    sh script: &apos;mvn --batch-mode -V -U -e clean deploy -Plinux-x86_64 -Dsurefire.useFile=false&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -132,7 +132,7 @@
             {
                 stage(&quot;Deploy (mac-amd64)&quot;)
                 {
-                    sh script: &apos;mvn --batch-mode -V -U -e clean deploy -Pmac-amd64 -Dsurefire.useFile=false&apos;
+                    sh script: &apos;mvn --batch-mode -V -U -e clean deploy -Pmac-x86_64 -Dsurefire.useFile=false&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
