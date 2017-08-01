@@ -6,6 +6,9 @@
 		<artifactId>cmake</artifactId>
 		<version>3.7.2-b2-SNAPSHOT</version>
 	</parent>
+	<prerequisites>
+		<maven>3.3.9</maven>
+	</prerequisites>
 	<artifactId>cmake-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>CMake Maven Plugin</name>
