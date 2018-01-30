@@ -26,7 +26,7 @@ matrix:
 install: true
 script:
   - mvn -N io.takari:maven:wrapper
-  - mvnw -V install $MAVEN_PROFILE
+  - ./mvnw -V install $MAVEN_PROFILE
 
 notifications:
   irc:
