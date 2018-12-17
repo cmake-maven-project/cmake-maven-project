@@ -61,8 +61,6 @@ public abstract class CMakeMojoIntegrationTest
 
 		// Construct a verifier that will run our integration tests
 		Verifier verifier = new Verifier(test.getAbsolutePath(), settings, true);
-		// Travis uses https://github.com/takari/maven-wrapper but forked Verifiers try to use the (old) system version of Maven
-		verifier.setForkJvm(false);
 		Properties verProperties = verifier.getVerifierProperties();
 		Properties sysProperties = verifier.getSystemProperties();
 
