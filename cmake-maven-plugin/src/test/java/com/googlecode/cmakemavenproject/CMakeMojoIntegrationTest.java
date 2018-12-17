@@ -13,12 +13,14 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import java.io.File;
-import java.io.IOException;
-import java.util.Properties;
+
 import org.apache.maven.it.VerificationException;
 import org.apache.maven.it.Verifier;
 import org.apache.maven.it.util.ResourceExtractor;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * An abstract test class that handles <code>Verifier</code> configuration.
@@ -59,6 +61,8 @@ public abstract class CMakeMojoIntegrationTest
 
 		// Construct a verifier that will run our integration tests
 		Verifier verifier = new Verifier(test.getAbsolutePath(), settings, true);
+		// Travis uses https://github.com/takari/maven-wrapper but forked Verifiers try to use the (old) system version of Maven
+		verifier.setForkJvm(false);
 		Properties verProperties = verifier.getVerifierProperties();
 		Properties sysProperties = verifier.getSystemProperties();
 

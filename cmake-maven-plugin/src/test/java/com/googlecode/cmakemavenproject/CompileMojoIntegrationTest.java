@@ -13,6 +13,7 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 import org.apache.maven.it.Verifier;
 import org.junit.Test;
 
@@ -23,7 +24,6 @@ import org.junit.Test;
  */
 public class CompileMojoIntegrationTest extends CMakeMojoIntegrationTest
 {
-
 	/**
 	 * Tests the compilation of a simple Hello-World-Test project.
 	 *
@@ -53,5 +53,4 @@ public class CompileMojoIntegrationTest extends CMakeMojoIntegrationTest
 		verifier.resetStreams();
 		verifier.verifyErrorFreeLog();
 	}
-
 }
