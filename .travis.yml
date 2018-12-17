@@ -4,24 +4,23 @@ sudo: false
 
 matrix:
   include:
-   - os: linux
-     jdk: oraclejdk8
-     addons:
-       apt:
-         packages:
-           - gcc-multilib
-   - os: linux
-     # Travis by default is 64 bit so we toggle to use the 32 bit libs
-     env: MAVEN_PROFILE="-DosDetection=false -Plinux-x86_32"
-     jdk: oraclejdk8
-     addons:
-       apt:
-         packages:
-           - cmake
-           - gcc-multilib
-   # xcode8 maps to oraclejdk8: https://github.com/travis-ci/travis-ci/issues/2316
-   - os: osx
-     osx_image: xcode8.1
+    - os: linux
+      jdk: oraclejdk11
+      addons:
+        apt:
+          packages:
+            - gcc-multilib
+    - os: linux
+      # Travis by default is 64 bit so we toggle to use the 32 bit libs
+      env: MAVEN_PROFILE="-DosDetection=false -Plinux-x86_32"
+      jdk: oraclejdk11
+      addons:
+        apt:
+          packages:
+            - cmake
+            - gcc-multilib
+    - os: osx
+      osx_image: xcode10.1
 
 install: true
 script:
