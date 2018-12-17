@@ -3,7 +3,7 @@ target
 # Ignore NetBeans files
 nb-configuration.xml
 nbactions-windows.xml
-nbactions.xml
+nbactions*.xml
 
 # Ignore Eclipse files
 .settings
@@ -11,5 +11,6 @@ nbactions.xml
 .project
 .checkstyle
 
-# Netbeans files
-nbactions*.xml
+# IDEA files
+.idea
+*.iml

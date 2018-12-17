@@ -2,150 +2,149 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
     http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.cmaketest</groupId>
-    <artifactId>dashboard-test</artifactId>
-    <version>0.0.1</version>
-    <packaging>jar</packaging>
-    <name>Dashboard Test for CMake Maven Plugin</name>
+	<groupId>com.cmaketest</groupId>
+	<artifactId>dashboard-test</artifactId>
+	<version>0.0.1</version>
+	<packaging>jar</packaging>
+	<name>Dashboard Test for CMake Maven Plugin</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.googlecode.cmake-maven-project</groupId>
-                <artifactId>cmake-maven-plugin</artifactId>
-                <version>${cmake.project.version}</version>
-                <executions>
-                    <execution>
-                        <id>ctest-generate</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <sourcePath>${project.basedir}</sourcePath>
-                            <targetPath>${project.build.directory}</targetPath>
-                            <generator>${cmake.generator}</generator>
-                            <classifier>${cmake.classifier}</classifier>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>basic</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <projectDirectory>${project.build.directory}/</projectDirectory>
-                            <classifier>${cmake.classifier}</classifier>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>cmake-test</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <buildDirectory>${project.build.directory}</buildDirectory>
-                            <testFailureIgnore>false</testFailureIgnore>
-                            <dashboard>Experimental</dashboard>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-    <profiles>
-        <profile>
-            <id>list-profiles</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.8</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <echo>Please activate one of the following profiles:</echo>
-                                        <echo>* windows-x86_32</echo>
-                                        <echo>* windows-x86_64</echo>
-                                        <echo>* linux-x86_32</echo>
-                                        <echo>* linux-x86_64</echo>
-                                        <echo>* linux-arm_32</echo>
-                                        <echo>* mac-x86_64</echo>
-                                        <echo/>
-                                        <echo>For instance: mvn -Pwindows-x86_64 install</echo>
-                                        <fail/>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>windows-x86_32</id>
-            <properties>
-                <cmake.classifier>windows-x86_32</cmake.classifier>
-                <cmake.generator>Visual Studio 14 2015</cmake.generator>
-                <!-- with cygwin -->
-                <!-- <cmake.generator>Unix Makefiles</cmake.generator> -->
-                <!-- with MinGW -->
-                <!-- <cmake.generator>MinGW Makefiles</cmake.generator> -->
-                <!-- with MSYS -->
-                <!-- <cmake.generator>MSYS Makefiles</cmake.generator> -->
-            </properties>
-        </profile>
-        <profile>
-            <id>windows-x86_64</id>
-            <properties>
-                <cmake.classifier>windows-x86_64</cmake.classifier>
-                <cmake.generator>Visual Studio 14 2015</cmake.generator>
-            </properties>
-        </profile>
-        <profile>
-            <id>linux-x86_32</id>
-            <properties>
-                <cmake.classifier>linux-x86_32</cmake.classifier>
-                <download.cmake>false</download.cmake>
-                <cmake.generator>Unix Makefiles</cmake.generator>
-            </properties>
-        </profile>
-        <profile>
-            <id>linux-x86_64</id>
-            <properties>
-                <cmake.classifier>linux-x86_64</cmake.classifier>
-                <cmake.generator>Unix Makefiles</cmake.generator>
-            </properties>
-        </profile>
-        <profile>
-            <id>linux-arm_32</id>
-            <properties>
-                <cmake.classifier>linux-arm_32</cmake.classifier>
-                <download.cmake>false</download.cmake>
-                <cmake.generator>Unix Makefiles</cmake.generator>
-            </properties>
-        </profile>
-        <profile>
-            <id>mac-x86_64</id>
-            <properties>
-                <cmake.classifier>mac-x86_64</cmake.classifier>
-                <cmake.generator>Unix Makefiles</cmake.generator>
-                <!-- with xcode -->
-                <!-- <cmake.generator>xcode</cmake.generator> -->
-            </properties>
-        </profile>
-        <!--
-          Other cmake.generators
-          https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html
-        -->
-    </profiles>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.googlecode.cmake-maven-project</groupId>
+				<artifactId>cmake-maven-plugin</artifactId>
+				<version>${cmake.project.version}</version>
+				<executions>
+					<execution>
+						<id>ctest-generate</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<sourcePath>${project.basedir}</sourcePath>
+							<targetPath>${project.build.directory}</targetPath>
+							<generator>${cmake.generator}</generator>
+							<classifier>${cmake.classifier}</classifier>
+						</configuration>
+					</execution>
+					<execution>
+						<id>basic</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<projectDirectory>${project.build.directory}/</projectDirectory>
+							<classifier>${cmake.classifier}</classifier>
+						</configuration>
+					</execution>
+					<execution>
+						<id>cmake-test</id>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<buildDirectory>${project.build.directory}</buildDirectory>
+							<testFailureIgnore>false</testFailureIgnore>
+							<dashboard>Experimental</dashboard>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>list-profiles</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<echo>Please activate one of the following profiles:</echo>
+										<echo>* windows-x86_32</echo>
+										<echo>* windows-x86_64</echo>
+										<echo>* linux-x86_32</echo>
+										<echo>* linux-x86_64</echo>
+										<echo>* linux-arm_32</echo>
+										<echo>* mac-x86_64</echo>
+										<echo/>
+										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
+										<fail/>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>windows-x86_32</id>
+			<properties>
+				<cmake.classifier>windows-x86_32</cmake.classifier>
+				<cmake.generator>Visual Studio 14 2015</cmake.generator>
+				<!-- with cygwin -->
+				<!-- <cmake.generator>Unix Makefiles</cmake.generator> -->
+				<!-- with MinGW -->
+				<!-- <cmake.generator>MinGW Makefiles</cmake.generator> -->
+				<!-- with MSYS -->
+				<!-- <cmake.generator>MSYS Makefiles</cmake.generator> -->
+			</properties>
+		</profile>
+		<profile>
+			<id>windows-x86_64</id>
+			<properties>
+				<cmake.classifier>windows-x86_64</cmake.classifier>
+				<cmake.generator>Visual Studio 14 2015</cmake.generator>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-x86_32</id>
+			<properties>
+				<cmake.classifier>linux-x86_32</cmake.classifier>
+				<download.cmake>false</download.cmake>
+				<cmake.generator>Unix Makefiles</cmake.generator>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-x86_64</id>
+			<properties>
+				<cmake.classifier>linux-x86_64</cmake.classifier>
+				<cmake.generator>Unix Makefiles</cmake.generator>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-arm_32</id>
+			<properties>
+				<cmake.classifier>linux-arm_32</cmake.classifier>
+				<download.cmake>false</download.cmake>
+				<cmake.generator>Unix Makefiles</cmake.generator>
+			</properties>
+		</profile>
+		<profile>
+			<id>mac-x86_64</id>
+			<properties>
+				<cmake.classifier>mac-x86_64</cmake.classifier>
+				<cmake.generator>Unix Makefiles</cmake.generator>
+				<!-- with xcode -->
+				<!-- <cmake.generator>xcode</cmake.generator> -->
+			</properties>
+		</profile>
+		<!--
+			Other cmake.generators
+			https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html
+		-->
+	</profiles>
 </project>
