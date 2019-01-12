@@ -21,10 +21,15 @@ matrix:
             - gcc-multilib
     - os: osx
       osx_image: xcode10.1
+# Java is not yet supported on the Windows Build Environment
+#    - os: windows
+#      jdk: oraclejdk11
 
 install: true
 script:
   - mvn -N io.takari:maven:wrapper
+  - |-
+    export PATH=`./mvnw -v |awk -F ': ' '{print $2}' |sed -n 2p`/bin:$PATH
   - ./mvnw -V install $MAVEN_PROFILE
 
 notifications:
