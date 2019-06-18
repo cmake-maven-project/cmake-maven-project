@@ -137,7 +137,15 @@ public class CompileMojo
 			if (config != null)
 				Collections.addAll(processBuilder.command(), "--config", config);
 			if (options != null)
-				processBuilder.command().addAll(options);
+			{
+				// Skip undefined Maven properties:
+				// <options>
+				//   <option>${optional.property}</option>
+				// </options>
+				List<String> nonEmptyOptions = options.stream().filter(option -> !option.isEmpty()).
+					collect(Collectors.toList());
+				processBuilder.command().addAll(nonEmptyOptions);
+			}
 
 			Map<String, String> env = processBuilder.environment();
 

@@ -182,7 +182,15 @@ public class GenerateMojo
 				new File(cmakeDir, cmakeChildDir).getAbsolutePath(),
 				"-G", generator).directory(targetPath);
 			if (options != null)
-				processBuilder.command().addAll(options);
+			{
+				// Skip undefined Maven properties:
+				// <options>
+				//   <option>${optional.property}</option>
+				// </options>
+				List<String> nonEmptyOptions = options.stream().filter(option -> !option.isEmpty()).
+					collect(Collectors.toList());
+				processBuilder.command().addAll(nonEmptyOptions);
+			}
 			processBuilder.command().add(sourcePath.getAbsolutePath());
 			Map<String, String> env = processBuilder.environment();
 
