@@ -13,13 +13,8 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import static com.googlecode.cmakemavenproject.Mojos.VALID_CLASSIFIERS;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
@@ -37,9 +32,19 @@ import org.twdata.maven.mojoexecutor.MojoExecutor;
 import org.twdata.maven.mojoexecutor.MojoExecutor.Element;
 import org.twdata.maven.mojoexecutor.MojoExecutor.ExecutionEnvironment;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import static com.googlecode.cmakemavenproject.Mojos.VALID_CLASSIFIERS;
+
 /**
  * Goal which generates project files.
  * <p>
+ *
  * @author Gili Tzabari
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_SOURCES)
@@ -196,7 +201,7 @@ public class GenerateMojo
 
 			if (environmentVariables != null)
 			{
-				for (Entry<String, String> entry: environmentVariables.entrySet())
+				for (Entry<String, String> entry : environmentVariables.entrySet())
 				{
 					String value = entry.getValue();
 					if (value == null)
