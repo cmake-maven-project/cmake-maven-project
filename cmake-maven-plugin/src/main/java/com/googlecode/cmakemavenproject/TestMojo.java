@@ -13,6 +13,21 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,19 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
+import java.util.stream.Collectors;
 
 /**
  * Goal which runs CMake/CTest tests.
@@ -161,13 +164,21 @@ public class TestMojo extends AbstractMojo
 			processBuilder.directory(buildDirectory);
 
 			if (options != null)
-				processBuilder.command().addAll(options);
+			{
+				// Skip undefined Maven properties:
+				// <options>
+				//   <option>${optional.property}</option>
+				// </options>
+				List<String> nonEmptyOptions = options.stream().filter(option -> !option.isEmpty()).
+					collect(Collectors.toList());
+				processBuilder.command().addAll(nonEmptyOptions);
+			}
 
 			Map<String, String> env = processBuilder.environment();
 
 			if (environmentVariables != null)
 			{
-				for (Entry<String, String> entry: environmentVariables.entrySet())
+				for (Entry<String, String> entry : environmentVariables.entrySet())
 				{
 					String value = entry.getValue();
 					if (value == null)
