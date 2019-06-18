@@ -86,7 +86,7 @@ node(&quot;linux &amp;&amp; amd64&quot;)
                     else
                     {
                         echo &apos;Tagging release as release-&apos; + releaseVersion
-                        sh script: &quot;&quot;&quot;git config user.email cowwoc@bbs.darktech.org
+                        sh script: &quot;&quot;&quot;git config user.email cowwoc2020@gmail.com
                             git config user.name &quot;Gili Tzabari&quot;
                             mvn --batch-mode -V -e versions:set -DnewVersion=${releaseVersion} -DgenerateBackupPoms=false
                             git add -u
