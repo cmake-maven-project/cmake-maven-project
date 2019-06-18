@@ -13,6 +13,7 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 import org.apache.maven.it.Verifier;
 import org.junit.Test;
 
@@ -23,7 +24,6 @@ import org.junit.Test;
  */
 public class TestMojoIntegrationTest extends CMakeMojoIntegrationTest
 {
-
 	/**
 	 * Tests the testing of a simple Hello-World-Test project.
 	 *
@@ -54,4 +54,18 @@ public class TestMojoIntegrationTest extends CMakeMojoIntegrationTest
 		verifier.verifyErrorFreeLog();
 	}
 
+	/**
+	 * Tests running cmake with an auto-detected generator.
+	 *
+	 * @throws Exception If the test fails as a result of an exception
+	 */
+	@Test
+	public void testDetectedGenerator() throws Exception
+	{
+		Verifier verifier = getVerifier("detected-generator-test");
+		verifier.displayStreamBuffers();
+		verifier.executeGoal("verify");
+		verifier.resetStreams();
+		verifier.verifyErrorFreeLog();
+	}
 }

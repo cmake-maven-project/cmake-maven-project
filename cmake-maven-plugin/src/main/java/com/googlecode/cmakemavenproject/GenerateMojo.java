@@ -14,7 +14,6 @@ package com.googlecode.cmakemavenproject;
  * the License.
  */
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
@@ -34,16 +33,13 @@ import org.twdata.maven.mojoexecutor.MojoExecutor.ExecutionEnvironment;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import static com.googlecode.cmakemavenproject.Mojos.VALID_CLASSIFIERS;
 
 /**
  * Goal which generates project files.
- * <p>
  *
  * @author Gili Tzabari
  */
@@ -56,65 +52,44 @@ public class GenerateMojo
 	 * <p>
 	 * One of [windows-x86_32, windows-x86_64, linux-x86_32, linux-x86_64, linux-arm_32, mac-x86_64].
 	 */
-	@SuppressWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "classifier", readonly = true, required = true)
 	private String classifier;
 	/**
 	 * /**
 	 * The directory containing CMakeLists.txt.
 	 */
-	@SuppressFBWarnings(
-		{
-			"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"
-		})
 	@Parameter(required = true)
 	private File sourcePath;
 	/**
 	 * The output directory.
 	 */
-	@SuppressFBWarnings(
-		{
-			"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"
-		})
 	@Parameter(required = true)
 	private File targetPath;
 	/**
 	 * The makefile generator to use.
 	 */
-	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
-	@Parameter(required = true)
+	@Parameter
 	private String generator;
 	/**
 	 * The environment variables.
 	 */
-	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter
 	private Map<String, String> environmentVariables;
 	/**
 	 * Extra command-line options to pass to cmake.
 	 */
-	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter
 	private List<String> options;
-	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Component
 	private BuildPluginManager pluginManager;
-	@SuppressFBWarnings(
-		{
-			"UWF_UNWRITTEN_FIELD", "NP_UNWRITTEN_FIELD"
-		})
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
-	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "session", required = true, readonly = true)
 	private MavenSession session;
-
 	@Parameter(property = "download.cmake", defaultValue = "true")
 	private boolean downloadBinaries;
-
 	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
 	private String cmakeRootDir;
-
 	@Parameter(property = "cmake.child.dir")
 	private String cmakeChildDir;
 
@@ -123,30 +98,7 @@ public class GenerateMojo
 		throws MojoExecutionException
 	{
 		if (cmakeChildDir == null)
-		{
-			switch (classifier)
-			{
-				case "windows-x86_32":
-				case "windows-x86_64":
-				{
-					cmakeChildDir = "bin/cmake.exe";
-					break;
-				}
-				case "linux-x86_32":
-				case "linux-x86_64":
-				case "linux-arm_32":
-				case "mac-x86_64":
-				{
-					cmakeChildDir = "bin/cmake";
-					break;
-				}
-				default:
-				{
-					throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
-						"\nActual: " + classifier);
-				}
-			}
-		}
+			cmakeChildDir = Mojos.getCmakePath(classifier);
 		try
 		{
 			if (!targetPath.exists() && !targetPath.mkdirs())
@@ -183,9 +135,14 @@ public class GenerateMojo
 				cmakeDir = new File(cmakeRootDir);
 			}
 
-			ProcessBuilder processBuilder = new ProcessBuilder(
-				new File(cmakeDir, cmakeChildDir).getAbsolutePath(),
-				"-G", generator).directory(targetPath);
+			List<String> command = new ArrayList<>();
+			command.add(new File(cmakeDir, cmakeChildDir).getAbsolutePath());
+			if (generator != null && !generator.trim().isEmpty())
+			{
+				command.add("-G");
+				command.add(generator);
+			}
+			ProcessBuilder processBuilder = new ProcessBuilder(command).directory(targetPath);
 			if (options != null)
 			{
 				// Skip undefined Maven properties:
@@ -197,23 +154,11 @@ public class GenerateMojo
 				processBuilder.command().addAll(nonEmptyOptions);
 			}
 			processBuilder.command().add(sourcePath.getAbsolutePath());
-			Map<String, String> env = processBuilder.environment();
 
+			Map<String, String> env = processBuilder.environment();
 			if (environmentVariables != null)
-			{
-				for (Entry<String, String> entry : environmentVariables.entrySet())
-				{
-					String value = entry.getValue();
-					if (value == null)
-					{
-						// Maven converts empty properties to null and Linux does not support null values,
-						// so we convert them back to empty strings:
-						// https://github.com/cmake-maven-project/cmake-maven-project/issues/11
-						value = "";
-					}
-					env.put(entry.getKey(), value);
-				}
-			}
+				Mojos.overrideEnvironmentVariables(environmentVariables, env);
+
 			Log log = getLog();
 			if (log.isDebugEnabled())
 			{
