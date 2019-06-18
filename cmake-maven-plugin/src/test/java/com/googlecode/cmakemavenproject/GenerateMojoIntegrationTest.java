@@ -23,7 +23,6 @@ import org.junit.Test;
  */
 public class GenerateMojoIntegrationTest extends CMakeMojoIntegrationTest
 {
-
 	/**
 	 * Tests the generation of a simple Hello-World-Test project.
 	 *

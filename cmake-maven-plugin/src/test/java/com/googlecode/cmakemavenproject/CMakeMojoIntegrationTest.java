@@ -29,7 +29,6 @@ import java.util.Properties;
  */
 public abstract class CMakeMojoIntegrationTest
 {
-
 	// Maven settings.xml file to be used for the test projects
 	private static final String SETTINGS = "/settings.xml";
 
@@ -44,7 +43,6 @@ public abstract class CMakeMojoIntegrationTest
 	/**
 	 * Returns a <code>Verifier</code> that has been configured to use the test repository along with
 	 * the test project that was passed in as a variable.
-	 * <p>
 	 *
 	 * @param testName The CMake Maven project to test
 	 * @return A configured <code>Verifier</code>

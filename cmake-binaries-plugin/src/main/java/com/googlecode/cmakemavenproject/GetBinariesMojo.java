@@ -2,7 +2,26 @@ package com.googlecode.cmakemavenproject;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -33,25 +52,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.compress.compressors.CompressorException;
-import org.apache.commons.compress.compressors.CompressorInputStream;
-import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 /**
  * Downloads and installs the CMake binaries into the local Maven repository.
@@ -75,21 +75,17 @@ public class GetBinariesMojo
 	/**
 	 * The release platform.
 	 */
-	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "classifier", readonly = true, required = true)
 	private String classifier;
 	/**
 	 * The project version.
 	 */
-	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "project.version")
 	private String projectVersion;
-	@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 	@Parameter(property = "project", required = true, readonly = true)
 	private MavenProject project;
 
 	@Override
-	@SuppressFBWarnings("NP_UNWRITTEN_FIELD")
 	public void execute()
 		throws MojoExecutionException
 	{
@@ -151,7 +147,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Returns the cmake version associated with the project.
-	 * <p>
+	 *
 	 * @param version the project version
 	 * @return the cmake version
 	 * @throws NullPointerException     if version is null
@@ -191,7 +187,7 @@ public class GetBinariesMojo
 
 	/**
 	 * Downloads a file.
-	 * <p>
+	 *
 	 * @param url the file to download
 	 * @return the path of the downloaded file
 	 * @throws MojoExecutionException if an error occurs downloading the file
@@ -362,38 +358,38 @@ public class GetBinariesMojo
 	private void copyDirectory(final Path source, final Path target) throws IOException
 	{
 		Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
-			new FileVisitor<Path>()
-		{
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-				throws IOException
+			new FileVisitor<>()
 			{
-				Files.createDirectories(target.resolve(source.relativize(dir)));
-				return FileVisitResult.CONTINUE;
-			}
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+					throws IOException
+				{
+					Files.createDirectories(target.resolve(source.relativize(dir)));
+					return FileVisitResult.CONTINUE;
+				}
 
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-			{
-				Files.copy(file, target.resolve(source.relativize(file)),
-					StandardCopyOption.COPY_ATTRIBUTES);
-				return FileVisitResult.CONTINUE;
-			}
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+				{
+					Files.copy(file, target.resolve(source.relativize(file)),
+						StandardCopyOption.COPY_ATTRIBUTES);
+					return FileVisitResult.CONTINUE;
+				}
 
-			@Override
-			public FileVisitResult visitFileFailed(Path file, IOException e) throws IOException
-			{
-				throw e;
-			}
-
-			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException
-			{
-				if (e != null)
+				@Override
+				public FileVisitResult visitFileFailed(Path file, IOException e) throws IOException
+				{
 					throw e;
-				return FileVisitResult.CONTINUE;
-			}
-		});
+				}
+
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException
+				{
+					if (e != null)
+						throw e;
+					return FileVisitResult.CONTINUE;
+				}
+			});
 	}
 
 	/**
