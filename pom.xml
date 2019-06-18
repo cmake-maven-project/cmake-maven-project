@@ -184,7 +184,6 @@
 		<maven.compiler.target>11</maven.compiler.target>
 		<maven.core.version>3.6.1</maven.core.version>
 		<maven.plugin.annotations.version>3.6.0</maven.plugin.annotations.version>
-		<findbugs.anotations.version>3.0.1u2</findbugs.anotations.version>
 	</properties>
 	<profiles>
 		<profile>
