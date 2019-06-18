@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.13.2-b1-SNAPSHOT</version>
+		<version>3.14.5-b1-SNAPSHOT</version>
 	</parent>
 	<prerequisites>
 		<maven>${maven.version}</maven>
@@ -89,17 +89,9 @@
 						<goals>
 							<goal>copy-dependencies</goal>
 							<!-- There is a go-offline goal but it's broken
-							http://jira.codehaus.org/browse/MDEP-82 -->
+							https://issues.apache.org/jira/browse/MDEP-82 -->
 						</goals>
 						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>${project.groupId}</groupId>
-									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}</version>
-									<type>${project.packaging}</type>
-								</artifactItem>
-							</artifactItems>
 							<outputDirectory>${test-repo}</outputDirectory>
 							<useRepositoryLayout>true</useRepositoryLayout>
 							<addParentPoms>true</addParentPoms>
