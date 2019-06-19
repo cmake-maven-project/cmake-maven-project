@@ -58,7 +58,7 @@
 
 // Create release candidate branch
 def repository = &apos;github.com/cmake-maven-project/cmake-maven-project.git&apos;
-// One can look up a project&apos;s profileId by running: mvn nexus-staging:rc-list-profiles -DserverId=sonatype-nexus-staging -DnexusUrl=https://oss.sonatype.org/
+// One can look up a project&apos;s profileId by running: mvn nexus-staging:rc-list-profiles
 def stagingProfileId = &apos;1a35794454094c&apos;
 def stagingRepositoryId
 
@@ -107,7 +107,7 @@ node(&quot;linux&quot;)
 
                     // Open a new staging repository and capture its ID
                     def output = sh returnStdout: true, script: &quot;&quot;&quot;git checkout tags/release-${releaseVersion}
-                        mvn --batch-mode -e -DserverId=sonatype-nexus-staging -DnexusUrl=https://oss.sonatype.org/ -DstagingProfileId=${stagingProfileId} nexus-staging:rc-open&quot;&quot;&quot;
+                        mvn --batch-mode -e -DstagingProfileId=${stagingProfileId} nexus-staging:rc-open&quot;&quot;&quot;
                     echo output
                     stagingRepositoryId = ( output =~ /Opened (comgooglecodecmake-maven-project-\d+)/ ) [0][1]
                 }
