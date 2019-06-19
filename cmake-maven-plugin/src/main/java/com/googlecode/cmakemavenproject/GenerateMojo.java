@@ -50,7 +50,7 @@ public class GenerateMojo
 	/**
 	 * The classifier of the current platform.
 	 * <p>
-	 * One of [windows-x86_32, windows-x86_64, linux-x86_32, linux-x86_64, linux-arm_32, mac-x86_64].
+	 * One of [windows-x86_64, linux-x86_64, linux-arm_32, mac-x86_64].
 	 */
 	@Parameter(property = "classifier", readonly = true, required = true)
 	private String classifier;

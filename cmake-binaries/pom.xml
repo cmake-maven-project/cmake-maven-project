@@ -72,27 +72,11 @@
 			</build>
 		</profile>
 		<profile>
-			<id>windows-x86_32</id>
-			<activation>
-				<property>
-					<name>osDetection</name>
-					<value>!false</value>
-				</property>
-				<os>
-					<family>windows</family>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<properties>
-				<cmake.classifier>windows-x86_32</cmake.classifier>
-			</properties>
-		</profile>
-		<profile>
 			<id>windows-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>windows-x86_64</value>
 				</property>
 				<os>
 					<family>windows</family>
@@ -107,8 +91,8 @@
 			<id>linux-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>linux-x86_64</value>
 				</property>
 				<os>
 					<family>linux</family>
@@ -123,8 +107,8 @@
 			<id>mac-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>mac-x86_64</value>
 				</property>
 				<os>
 					<family>mac</family>
@@ -134,28 +118,6 @@
 			<properties>
 				<cmake.classifier>mac-x86_64</cmake.classifier>
 			</properties>
-		</profile>
-		<profile>
-			<id>empty-jar</id>
-			<!--
-			Sonatype requires a main jar, even for platform-specific artifacts, so we supply it with an
-			empty file.
-			-->
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.googlecode.cmake-maven-project</groupId>
-						<artifactId>cmake-binaries-plugin</artifactId>
-						<version>${project.version}</version>
-						<executions>
-							<execution>
-								<id>cmake-binaries</id>
-								<phase>none</phase>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 </project>

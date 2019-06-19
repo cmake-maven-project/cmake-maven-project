@@ -24,7 +24,8 @@
 	<scm>
 		<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
 		<connection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git</connection>
-		<developerConnection>scm:git:git@github.com:cmake-maven-project/cmake-maven-project.git</developerConnection>
+		<developerConnection>scm:git:git@github.com:cmake-maven-project/cmake-maven-project.git
+		</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 	<developers>
@@ -204,9 +205,7 @@
 								<configuration>
 									<target>
 										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows-x86_32</echo>
 										<echo>* windows-x86_64</echo>
-										<echo>* linux-x86_32</echo>
 										<echo>* linux-x86_64</echo>
 										<echo>* linux-arm_32</echo>
 										<echo>* mac-x86_64</echo>
@@ -222,27 +221,11 @@
 			</build>
 		</profile>
 		<profile>
-			<id>windows-x86_32</id>
-			<activation>
-				<property>
-					<name>osDetection</name>
-					<value>!false</value>
-				</property>
-				<os>
-					<family>windows</family>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<modules>
-				<module>cmake-binaries</module>
-			</modules>
-		</profile>
-		<profile>
 			<id>windows-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>windows-x86_64</value>
 				</property>
 				<os>
 					<family>windows</family>
@@ -254,24 +237,11 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>linux-x86_32</id>
-			<activation>
-				<property>
-					<name>osDetection</name>
-					<value>!false</value>
-				</property>
-				<os>
-					<family>linux</family>
-					<arch>i386</arch>
-				</os>
-			</activation>
-		</profile>
-		<profile>
 			<id>linux-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>linux-x86_64</value>
 				</property>
 				<os>
 					<family>linux</family>
@@ -284,13 +254,14 @@
 		</profile>
 		<profile>
 			<id>linux-arm_32</id>
+			<!-- Need to be able to run tests on the platform -->
 		</profile>
 		<profile>
 			<id>mac-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>mac-x86_64</value>
 				</property>
 				<os>
 					<family>mac</family>
@@ -302,7 +273,12 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>release</id>
+			<id>deploy</id>
+			<activation>
+				<property>
+					<name>deploy</name>
+				</property>
+			</activation>
 			<build>
 				<plugins>
 					<plugin>
@@ -348,16 +324,6 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>
-		<profile>
-			<id>empty-jar</id>
-			<!--
-			Sonatype requires a main jar, even for platform-specific artifacts, so we supply it with an
-			empty file.
-			-->
-			<modules>
-				<module>cmake-binaries</module>
-			</modules>
 		</profile>
 	</profiles>
 </project>

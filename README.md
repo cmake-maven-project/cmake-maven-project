@@ -129,29 +129,23 @@ To clean an old build, run:
 
 By default, Maven will activate the right profile based on your JVM:
 
-* windows-x86_32
 * windows-x86_64
-* linux-x86_32
 * linux-x86_64
 * linux-arm_32
 * mac-x86_64
 
-If detection does not work, or you wish to override it (e.g. you're running linux-x86_64 but want to cross-compile for linux-x86_32) then set `-DosDetection=false -P<profile>`.
+If detection does not work, or you wish to override it then set `-Dplatform=<profile>`.
 
-For instance, when building for 32-bit Linux machines, use:
+For instance, when building for 64-bit Linux machines, use:
 
-    mvn -DosDetection=false -Plinux-x86_32 install
+    mvn -Plinux-x86_64 install
 
 ### Using a local CMake installation
 
-cmake.org doesn't provide binaries for some platforms, such as 32-bit Linux and Raspberry Pi. In such cases, users can install the binaries themselves (typically using package managers like `apt-get`) and point the plugin at them.
+cmake.org doesn't provide binaries for some platforms, such as Raspberry Pi. In such cases, users can install the binaries themselves (typically using package managers like `apt-get`) and point the plugin at them.
 
-The following Maven profiles use local CMake installations:
-
-* `linux-x86_32` corresponds to the 32-bit Linux platform.
-* `linux-arm_32` corresponds to the Rasbian (Raspberry Pi) platform.
-
-but you can configure this behavior for any platform by setting `${download.cmake}` to `false`. The plugin looks for cmake under `${cmake.root.dir}/${cmake.child.dir}` and ctest under `${cmake.root.dir}/${cmake.ctest.dir}`. By default, `${cmake.root.dir}` resolves to `/usr`, `${cmake.child.dir}` to `/bin/cmake` and `${cmake.test.dir}` to `/`.
+You can configure this behavior for any platform by setting `${download.cmake}` to `false`. The plugin
+ looks for cmake under `${cmake.root.dir}/${cmake.child.dir}` and ctest under `${cmake.root.dir}/${cmake.ctest.dir}`. By default, `${cmake.root.dir}` resolves to `/usr`, `${cmake.child.dir}` to `/bin/cmake` and `${cmake.test.dir}` to `/`.
 
 That's it! To learn more about CMake itself, consult the [CMake.org](https://cmake.org/) website.
 
