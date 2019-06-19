@@ -198,9 +198,7 @@
 								<configuration>
 									<target>
 										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows-x86_32</echo>
 										<echo>* windows-x86_64</echo>
-										<echo>* linux-x86_32</echo>
 										<echo>* linux-x86_64</echo>
 										<echo>* linux-arm_32</echo>
 										<echo>* mac-x86_64</echo>
@@ -216,36 +214,11 @@
 			</build>
 		</profile>
 		<profile>
-			<id>windows-x86_32</id>
-			<activation>
-				<property>
-					<name>osDetection</name>
-					<value>!false</value>
-				</property>
-				<os>
-					<family>windows</family>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<properties>
-				<cmake.classifier>windows-x86_32</cmake.classifier>
-			</properties>
-			<dependencies>
-				<dependency>
-					<groupId>${project.groupId}</groupId>
-					<artifactId>cmake-binaries</artifactId>
-					<version>${project.version}</version>
-					<classifier>${cmake.classifier}</classifier>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
 			<id>windows-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>windows-x86_64</value>
 				</property>
 				<os>
 					<family>windows</family>
@@ -266,28 +239,11 @@
 			</dependencies>
 		</profile>
 		<profile>
-			<id>linux-x86_32</id>
-			<activation>
-				<property>
-					<name>osDetection</name>
-					<value>!false</value>
-				</property>
-				<os>
-					<family>linux</family>
-					<arch>i386</arch>
-				</os>
-			</activation>
-			<properties>
-				<cmake.classifier>linux-x86_32</cmake.classifier>
-				<download.cmake>false</download.cmake>
-			</properties>
-		</profile>
-		<profile>
 			<id>linux-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>linux-x86_64</value>
 				</property>
 				<os>
 					<family>linux</family>
@@ -311,8 +267,8 @@
 			<id>linux-arm</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>linux-arm</value>
 				</property>
 				<os>
 					<family>linux</family>
@@ -328,8 +284,8 @@
 			<id>mac-x86_64</id>
 			<activation>
 				<property>
-					<name>osDetection</name>
-					<value>!false</value>
+					<name>platform</name>
+					<value>mac-x86_64</value>
 				</property>
 				<os>
 					<family>mac</family>

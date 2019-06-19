@@ -57,12 +57,10 @@ public class Mojos
 	{
 		switch (classifier)
 		{
-			case "windows-x86_32":
 			case "windows-x86_64":
 			{
 				return "bin/cmake.exe";
 			}
-			case "linux-x86_32":
 			case "linux-x86_64":
 			case "linux-arm_32":
 			case "mac-x86_64":

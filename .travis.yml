@@ -10,15 +10,6 @@ matrix:
         apt:
           packages:
             - gcc-multilib
-    - os: linux
-      # Travis by default is 64 bit so we toggle to use the 32 bit libs
-      env: MAVEN_PROFILE="-DosDetection=false -Plinux-x86_32"
-      jdk: oraclejdk11
-      addons:
-        apt:
-          packages:
-            - cmake
-            - gcc-multilib
     - os: osx
       osx_image: xcode10.1
 # Java is not yet supported on the Windows Build Environment
