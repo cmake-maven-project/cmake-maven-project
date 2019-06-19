@@ -172,7 +172,8 @@ try
                 }
                 timeout(15)
                 {
-                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
+                    // gpg resides in /usr/local/bin
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
                     {
                         stage(&quot;Build (linux)&quot;)
                         {

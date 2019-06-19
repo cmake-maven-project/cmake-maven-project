@@ -114,7 +114,8 @@ parallel windows:
         }
         timeout(15)
         {
-            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
+            // gpg resides in /usr/local/bin
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
             {
 			          stage(&quot;Deploy (mac)&quot;)
                 {
