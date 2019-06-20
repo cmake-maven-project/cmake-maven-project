@@ -204,16 +204,16 @@
 									<goal>run</goal>
 								</goals>
 								<configuration>
-									<tasks>
-										<echo>Please pick one of the following platforms:</echo>
+									<target>
+										<echo>Please activate one of the following profiles:</echo>
 										<echo>* windows-x86_64</echo>
 										<echo>* linux-x86_64</echo>
 										<echo>* linux-arm_32</echo>
 										<echo>* mac-x86_64</echo>
 										<echo/>
-										<echo>For instance: mvn -Dplatform=windows-x86_64 install</echo>
+										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
 										<fail/>
-									</tasks>
+									</target>
 								</configuration>
 							</execution>
 						</executions>
@@ -224,15 +224,14 @@
 		<profile>
 			<id>windows-x86_64</id>
 			<activation>
-				<property>
-					<name>platform</name>
-					<value>windows-x86_64</value>
-				</property>
 				<os>
 					<family>windows</family>
 					<arch>amd64</arch>
 				</os>
 			</activation>
+			<properties>
+				<platform>windows-x86_64</platform>
+			</properties>
 			<modules>
 				<module>cmake-binaries</module>
 			</modules>
@@ -240,35 +239,42 @@
 		<profile>
 			<id>linux-x86_64</id>
 			<activation>
-				<property>
-					<name>platform</name>
-					<value>linux-x86_64</value>
-				</property>
 				<os>
 					<family>linux</family>
 					<arch>amd64</arch>
 				</os>
 			</activation>
+			<properties>
+				<platform>linux-x86_64</platform>
+			</properties>
 			<modules>
 				<module>cmake-binaries</module>
 			</modules>
 		</profile>
 		<profile>
 			<id>linux-arm_32</id>
-			<!-- Need to be able to run tests on the platform -->
+			<activation>
+				<os>
+					<family>linux</family>
+					<arch>arm</arch>
+				</os>
+			</activation>
+			<properties>
+				<platform>linux-arm_32</platform>
+			</properties>
+			<!-- The binaries ship with the OS so we skip cmake-binaries -->
 		</profile>
 		<profile>
 			<id>mac-x86_64</id>
 			<activation>
-				<property>
-					<name>platform</name>
-					<value>mac-x86_64</value>
-				</property>
 				<os>
 					<family>mac</family>
 					<arch>x86_64</arch>
 				</os>
 			</activation>
+			<properties>
+				<platform>mac-x86_64</platform>
+			</properties>
 			<modules>
 				<module>cmake-binaries</module>
 			</modules>

@@ -113,10 +113,9 @@
 						<!-- So we keep test dependencies in sync with this project -->
 						<cmake.project.version>${project.version}</cmake.project.version>
 						<!-- This passes the testing profile onto our test projects -->
-						<cmake.classifier>${cmake.classifier}</cmake.classifier>
+						<cmake.platform>${platform}</cmake.platform>
 					</systemPropertyVariables>
 					<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
-					<skipTests>${skipTests}</skipTests>
 				</configuration>
 				<executions>
 					<execution>
@@ -216,24 +215,17 @@
 		<profile>
 			<id>windows-x86_64</id>
 			<activation>
-				<property>
-					<name>platform</name>
-					<value>windows-x86_64</value>
-				</property>
 				<os>
 					<family>windows</family>
 					<arch>amd64</arch>
 				</os>
 			</activation>
-			<properties>
-				<cmake.classifier>windows-x86_64</cmake.classifier>
-			</properties>
 			<dependencies>
 				<dependency>
 					<groupId>${project.groupId}</groupId>
 					<artifactId>cmake-binaries</artifactId>
 					<version>${project.version}</version>
-					<classifier>${cmake.classifier}</classifier>
+					<classifier>${platform}</classifier>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
@@ -241,24 +233,17 @@
 		<profile>
 			<id>linux-x86_64</id>
 			<activation>
-				<property>
-					<name>platform</name>
-					<value>linux-x86_64</value>
-				</property>
 				<os>
 					<family>linux</family>
 					<arch>amd64</arch>
 				</os>
 			</activation>
-			<properties>
-				<cmake.classifier>linux-x86_64</cmake.classifier>
-			</properties>
 			<dependencies>
 				<dependency>
 					<groupId>${project.groupId}</groupId>
 					<artifactId>cmake-binaries</artifactId>
 					<version>${project.version}</version>
-					<classifier>${cmake.classifier}</classifier>
+					<classifier>${platform}</classifier>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
@@ -266,41 +251,29 @@
 		<profile>
 			<id>linux-arm</id>
 			<activation>
-				<property>
-					<name>platform</name>
-					<value>linux-arm</value>
-				</property>
 				<os>
 					<family>linux</family>
 					<arch>arm</arch>
 				</os>
 			</activation>
 			<properties>
-				<cmake.classifier>linux-arm_32</cmake.classifier>
 				<download.cmake>false</download.cmake>
 			</properties>
 		</profile>
 		<profile>
 			<id>mac-x86_64</id>
 			<activation>
-				<property>
-					<name>platform</name>
-					<value>mac-x86_64</value>
-				</property>
 				<os>
 					<family>mac</family>
 					<arch>x86_64</arch>
 				</os>
 			</activation>
-			<properties>
-				<cmake.classifier>mac-x86_64</cmake.classifier>
-			</properties>
 			<dependencies>
 				<dependency>
 					<groupId>${project.groupId}</groupId>
 					<artifactId>cmake-binaries</artifactId>
 					<version>${project.version}</version>
-					<classifier>${cmake.classifier}</classifier>
+					<classifier>${platform}</classifier>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>

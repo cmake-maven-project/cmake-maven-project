@@ -23,7 +23,7 @@
 							<goal>get-binaries</goal>
 						</goals>
 						<configuration>
-							<classifier>${cmake.classifier}</classifier>
+							<classifier>${platform}</classifier>
 						</configuration>
 					</execution>
 				</executions>
@@ -31,93 +31,10 @@
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
-					<classifier>${cmake.classifier}</classifier>
+					<classifier>${platform}</classifier>
 					<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>list-profiles</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>validate</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows-x86_32</echo>
-										<echo>* windows-x86_64</echo>
-										<echo>* linux-x86_64</echo>
-										<echo>* mac-x86_64</echo>
-										<echo/>
-										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
-										<fail/>
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>windows-x86_64</id>
-			<activation>
-				<property>
-					<name>platform</name>
-					<value>windows-x86_64</value>
-				</property>
-				<os>
-					<family>windows</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<cmake.classifier>windows-x86_64</cmake.classifier>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-x86_64</id>
-			<activation>
-				<property>
-					<name>platform</name>
-					<value>linux-x86_64</value>
-				</property>
-				<os>
-					<family>linux</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<cmake.classifier>linux-x86_64</cmake.classifier>
-			</properties>
-		</profile>
-		<profile>
-			<id>mac-x86_64</id>
-			<activation>
-				<property>
-					<name>platform</name>
-					<value>mac-x86_64</value>
-				</property>
-				<os>
-					<family>mac</family>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<cmake.classifier>mac-x86_64</cmake.classifier>
-			</properties>
-		</profile>
-	</profiles>
 </project>

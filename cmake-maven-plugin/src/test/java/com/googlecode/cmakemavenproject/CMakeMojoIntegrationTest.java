@@ -35,8 +35,8 @@ public abstract class CMakeMojoIntegrationTest
 	// CMake-Maven-Plugin version (so we don't have to manually keep in sync)
 	private static final String CMP_VERSION = "cmake.project.version";
 
-	// Get the classifier configured by our build process
-	private static final String CMAKE_CLASSIFIER = "cmake.classifier";
+	// Get the platform configured by our build process
+	private static final String BUILD_PLATFORM = "cmake.platform";
 
 	private static final String DOWNLOAD_CMAKE = "download.cmake";
 
@@ -69,8 +69,8 @@ public abstract class CMakeMojoIntegrationTest
 		{
 			sysProperties.setProperty(DOWNLOAD_CMAKE, "false");
 		}
-		// Set the profile that's being used in the running of the tests
-		verifier.addCliOption("-Dplatform=" + getActivatedProfile());
+		// Set the platform that's being used in the running of the tests
+		verifier.addCliOption("-P" + System.getProperty(BUILD_PLATFORM));
 
 		// use.mavenRepoLocal instructs forked tests to use the local repo
 		verProperties.setProperty("use.mavenRepoLocal", "true");
@@ -78,14 +78,5 @@ public abstract class CMakeMojoIntegrationTest
 		verifier.setAutoclean(true); // Set so clean is run before each test
 
 		return verifier;
-	}
-
-	/**
-	 * Gets the profile that's been trigger via the testing process.
-	 */
-	private String getActivatedProfile() throws VerificationException
-	{
-		// For now, the activated profile just so happens to be equal to ${cmake.classifier}
-		return System.getProperty(CMAKE_CLASSIFIER);
 	}
 }

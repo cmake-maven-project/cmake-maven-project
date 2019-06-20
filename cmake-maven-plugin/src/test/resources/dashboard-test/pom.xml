@@ -25,8 +25,8 @@
 						<configuration>
 							<sourcePath>${project.basedir}</sourcePath>
 							<targetPath>${project.build.directory}</targetPath>
-							<generator>${cmake.generator}</generator>
-							<classifier>${cmake.classifier}</classifier>
+							<generator>${generator}</generator>
+							<classifier>${platform}</classifier>
 						</configuration>
 					</execution>
 					<execution>
@@ -36,7 +36,7 @@
 						</goals>
 						<configuration>
 							<projectDirectory>${project.build.directory}/</projectDirectory>
-							<classifier>${cmake.classifier}</classifier>
+							<classifier>${platform}</classifier>
 						</configuration>
 					</execution>
 					<execution>
@@ -73,9 +73,7 @@
 								<configuration>
 									<target>
 										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows-x86_32</echo>
 										<echo>* windows-x86_64</echo>
-										<echo>* linux-x86_32</echo>
 										<echo>* linux-x86_64</echo>
 										<echo>* linux-arm_32</echo>
 										<echo>* mac-x86_64</echo>
@@ -91,60 +89,35 @@
 			</build>
 		</profile>
 		<profile>
-			<id>windows-x86_32</id>
-			<properties>
-				<cmake.classifier>windows-x86_32</cmake.classifier>
-				<cmake.generator>Visual Studio 14 2015</cmake.generator>
-				<!-- with cygwin -->
-				<!-- <cmake.generator>Unix Makefiles</cmake.generator> -->
-				<!-- with MinGW -->
-				<!-- <cmake.generator>MinGW Makefiles</cmake.generator> -->
-				<!-- with MSYS -->
-				<!-- <cmake.generator>MSYS Makefiles</cmake.generator> -->
-			</properties>
-		</profile>
-		<profile>
 			<id>windows-x86_64</id>
 			<properties>
-				<cmake.classifier>windows-x86_64</cmake.classifier>
-				<cmake.generator>Visual Studio 14 2015</cmake.generator>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-x86_32</id>
-			<properties>
-				<cmake.classifier>linux-x86_32</cmake.classifier>
-				<download.cmake>false</download.cmake>
-				<cmake.generator>Unix Makefiles</cmake.generator>
+				<platform>windows-x86_64</platform>
+				<generator>Visual Studio 14 2015</generator>
 			</properties>
 		</profile>
 		<profile>
 			<id>linux-x86_64</id>
 			<properties>
-				<cmake.classifier>linux-x86_64</cmake.classifier>
-				<cmake.generator>Unix Makefiles</cmake.generator>
+				<platform>linux-x86_64</platform>
+				<generator>Unix Makefiles</generator>
 			</properties>
 		</profile>
 		<profile>
 			<id>linux-arm_32</id>
 			<properties>
-				<cmake.classifier>linux-arm_32</cmake.classifier>
+				<platform>linux-arm_32</platform>
 				<download.cmake>false</download.cmake>
-				<cmake.generator>Unix Makefiles</cmake.generator>
+				<generator>Unix Makefiles</generator>
 			</properties>
 		</profile>
 		<profile>
 			<id>mac-x86_64</id>
 			<properties>
-				<cmake.classifier>mac-x86_64</cmake.classifier>
-				<cmake.generator>Unix Makefiles</cmake.generator>
+				<platform>mac-x86_64</platform>
+				<generator>Unix Makefiles</generator>
 				<!-- with xcode -->
-				<!-- <cmake.generator>xcode</cmake.generator> -->
+				<!-- <generator>xcode</generator> -->
 			</properties>
 		</profile>
-		<!--
-			Other cmake.generators
-			https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html
-		-->
 	</profiles>
 </project>
