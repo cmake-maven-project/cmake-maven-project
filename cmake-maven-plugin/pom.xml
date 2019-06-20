@@ -111,9 +111,9 @@
 					</excludes>
 					<systemPropertyVariables>
 						<!-- So we keep test dependencies in sync with this project -->
-						<cmake.project.version>${project.version}</cmake.project.version>
+						<cmake.plugin.version>${project.version}</cmake.plugin.version>
 						<!-- This passes the testing profile onto our test projects -->
-						<cmake.platform>${platform}</cmake.platform>
+						<platform>${platform}</platform>
 					</systemPropertyVariables>
 					<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
 				</configuration>

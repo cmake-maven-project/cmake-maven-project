@@ -15,7 +15,7 @@
 			<plugin>
 				<groupId>com.googlecode.cmake-maven-project</groupId>
 				<artifactId>cmake-maven-plugin</artifactId>
-				<version>${cmake.project.version}</version>
+				<version>${cmake.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>ctest-generate</id>

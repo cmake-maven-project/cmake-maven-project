@@ -140,12 +140,12 @@ try
                     {
                         stage(&quot;Build (windows)&quot;)
                         {
-                            bat script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Dplatform=windows-x86_64 clean install&apos;
+                            bat script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Pwindows-x86_64 clean install&apos;
                         }
                         stage(&quot;Deploy (windows)&quot;)
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
-                                call mvn --batch-mode -e -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Dplatform=windows-x86_64-release -Ddeploy deploy&quot;&quot;&quot;
+                                call mvn --batch-mode -e -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Pwindows-x86_64-release,deploy deploy&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -177,12 +177,12 @@ try
                     {
                         stage(&quot;Build (linux)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Dplatform=linux-x86_64 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Plinux-x86_64 clean install&apos;
                         }
                         stage(&quot;Deploy (linux)&quot;)
                         {
                             // Deploy both Java and native artifacts
-                            sh script: &quot;mvn --batch-mode -e -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Dplatform=linux-x86_64 -Ddeploy deploy&quot;
+                            sh script: &quot;mvn --batch-mode -e -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Plinux-x86_64,deploy deploy&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -211,12 +211,12 @@ try
                         {
                             stage(&quot;Build (mac)&quot;)
                             {
-                                sh script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Dplatform=mac-x86_64-release clean install&apos;
+                                sh script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Pmac-x86_64-release clean install&apos;
                             }
                             stage(&quot;Deploy (mac)&quot;)
                             {
                                 sh script: &quot;&quot;&quot;cd cmake-binaries
-                                    mvn --batch-mode -e -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Dplatform=mac-x86_64 -Ddeploy deploy&quot;&quot;&quot;
+                                    mvn --batch-mode -e -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Pmac-x86_64,deploy deploy&quot;&quot;&quot;
                                 archiveArtifacts artifacts: &quot;**/target/*.jar&quot;, excludes: &quot;**/target/test-classes/**&quot;
                             }
                         }

@@ -33,10 +33,10 @@ public abstract class CMakeMojoIntegrationTest
 	private static final String SETTINGS = "/settings.xml";
 
 	// CMake-Maven-Plugin version (so we don't have to manually keep in sync)
-	private static final String CMP_VERSION = "cmake.project.version";
+	private static final String PLUGIN_VERSION = "cmake.plugin.version";
 
 	// Get the platform configured by our build process
-	private static final String BUILD_PLATFORM = "cmake.platform";
+	private static final String BUILD_PLATFORM = "platform";
 
 	private static final String DOWNLOAD_CMAKE = "download.cmake";
 
@@ -63,7 +63,7 @@ public abstract class CMakeMojoIntegrationTest
 		Properties sysProperties = verifier.getSystemProperties();
 
 		// We need to pass along the version number of our parent project
-		sysProperties.setProperty(CMP_VERSION, System.getProperty(CMP_VERSION));
+		sysProperties.setProperty(PLUGIN_VERSION, System.getProperty(PLUGIN_VERSION));
 
 		if (System.getProperty(DOWNLOAD_CMAKE, "true").equals("false"))
 		{
