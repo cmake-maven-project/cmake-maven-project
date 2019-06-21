@@ -212,6 +212,9 @@
 										<echo>* mac-x86_64</echo>
 										<echo/>
 										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
+										<echo/>
+										<echo>Use mvn help:active-profiles for troubleshooting and</echo>
+										<echo>https://maven.apache.org/settings.html#Activation for reference.</echo>
 										<fail/>
 									</target>
 								</configuration>

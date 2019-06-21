@@ -55,39 +55,6 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>list-profiles</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>validate</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows-x86_64</echo>
-										<echo>* linux-x86_64</echo>
-										<echo>* linux-arm_32</echo>
-										<echo>* mac-x86_64</echo>
-										<echo/>
-										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
-										<fail/>
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
 			<id>windows-x86_64</id>
 			<properties>
 				<platform>windows-x86_64</platform>
