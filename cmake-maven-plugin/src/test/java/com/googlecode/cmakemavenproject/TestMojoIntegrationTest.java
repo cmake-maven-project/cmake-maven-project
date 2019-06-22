@@ -55,14 +55,14 @@ public class TestMojoIntegrationTest extends CMakeMojoIntegrationTest
 	}
 
 	/**
-	 * Tests running cmake with an auto-detected generator.
+	 * Tests running cmake with an explicitly-specified generator.
 	 *
 	 * @throws Exception If the test fails as a result of an exception
 	 */
 	@Test
-	public void testDetectedGenerator() throws Exception
+	public void testExplicitGenerator() throws Exception
 	{
-		Verifier verifier = getVerifier("detected-generator-test");
+		Verifier verifier = getVerifier("explicit-generator-test");
 		verifier.displayStreamBuffers();
 		verifier.executeGoal("verify");
 		verifier.resetStreams();

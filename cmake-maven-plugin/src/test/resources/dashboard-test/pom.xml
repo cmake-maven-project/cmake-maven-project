@@ -59,14 +59,12 @@
 			<id>windows-x86_64</id>
 			<properties>
 				<platform>windows-x86_64</platform>
-				<generator>Visual Studio 14 2015</generator>
 			</properties>
 		</profile>
 		<profile>
 			<id>linux-x86_64</id>
 			<properties>
 				<platform>linux-x86_64</platform>
-				<generator>Unix Makefiles</generator>
 			</properties>
 		</profile>
 		<profile>
@@ -74,16 +72,12 @@
 			<properties>
 				<platform>linux-arm_32</platform>
 				<download.cmake>false</download.cmake>
-				<generator>Unix Makefiles</generator>
 			</properties>
 		</profile>
 		<profile>
 			<id>mac-x86_64</id>
 			<properties>
 				<platform>mac-x86_64</platform>
-				<generator>Unix Makefiles</generator>
-				<!-- with xcode -->
-				<!-- <generator>xcode</generator> -->
 			</properties>
 		</profile>
 	</profiles>
