@@ -69,8 +69,8 @@ public class GetBinariesMojo
 	/**
 	 * The set of valid classifiers.
 	 */
-	private static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-x86_32",
-		"windows-x86_64", "linux-x86_32", "linux-x86_64", "linux-arm_32", "mac-x86_64");
+	private static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-x86_64", "linux-x86_64",
+		"linux-arm_32", "mac-x86_64");
 
 	/**
 	 * The release platform.
@@ -93,11 +93,6 @@ public class GetBinariesMojo
 
 		switch (classifier)
 		{
-			case "windows-x86_32":
-			{
-				suffix = "win32-x86.zip";
-				break;
-			}
 			case "windows-x86_64":
 			{
 				suffix = "win64-x64.zip";
@@ -113,7 +108,6 @@ public class GetBinariesMojo
 				suffix = "Darwin-x86_64.tar.gz";
 				break;
 			}
-			case "linux-x86_32":
 			case "linux-arm_32":
 			default:
 				throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
@@ -455,10 +449,8 @@ public class GetBinariesMojo
 	{
 		switch (classifier)
 		{
-			case "windows-x86_32":
 			case "windows-x86_64":
 				return false;
-			case "linux-x86_32":
 			case "linux-x86_64":
 			case "linux-arm_32":
 			case "mac-x86_64":
