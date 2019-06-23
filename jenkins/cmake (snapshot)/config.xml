@@ -48,6 +48,7 @@
 // Per https://issues.sonatype.org/browse/NEXUS-18753 we cannot use Staging Workflows for SNAPSHOT builds.
 // -------------------------------------------------------------------------------------------------
 
+def repository = &apos;github.com/cmake-maven-project/cmake-maven-project.git&apos;
 
 parallel windows:
 {
@@ -59,16 +60,17 @@ parallel windows:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://${repository}&apos;]]])
             }
         }
-        timeout(15)
+        timeout(20)
         {
+            // Windows needs a longer timeout due to Windows Defender (antivirus) slowing things down
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
             {
                 stage(&quot;Deploy (windows)&quot;)
                 {
-                    bat script: &apos;mvn --batch-mode -e -U -Dsurefire.useFile=false -Pwindows-x86_64,deploy clean deploy&apos;
+                    bat script: &apos;mvn --batch-mode -e -V -U -Dsurefire.useFile=false -Pwindows-x86_64,deploy clean deploy&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -84,7 +86,7 @@ parallel windows:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://${repository}&apos;]]])
             }
         }
         timeout(15)
@@ -93,7 +95,7 @@ parallel windows:
             {
                 stage(&quot;Deploy (linux)&quot;)
                 {
-                    sh script: &apos;mvn --batch-mode -e -U -Dsurefire.useFile=false -Plinux-x86_64,deploy clean deploy&apos;
+                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Plinux-x86_64,deploy clean deploy&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -109,7 +111,7 @@ parallel windows:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://github.com/cmake-maven-project/cmake-maven-project.git&apos;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &apos;https://${repository}&apos;]]])
             }
         }
         timeout(15)
@@ -119,7 +121,7 @@ parallel windows:
             {
 			          stage(&quot;Deploy (mac)&quot;)
                 {
-                    sh script: &apos;mvn --batch-mode -e -U -Dsurefire.useFile=false -Pmac-x86_64,deploy clean deploy&apos;
+                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Pmac-x86_64,deploy clean deploy&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -131,5 +133,4 @@ failFast: true</script>
   </definition>
   <triggers/>
   <quietPeriod>60</quietPeriod>
-  <disabled>false</disabled>
 </flow-definition>

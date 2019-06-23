@@ -1,5 +1,5 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.31">
+<flow-definition plugin="workflow-job@2.32">
   <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
@@ -52,6 +52,8 @@
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.63">
     <script>// Command-line options (taken from https://jenkins.io/doc/pipeline/examples/):
 // --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
+// -V : strongly recommended in CI, will display the JDK and Maven versions in use.
+//      Very useful to be quickly sure the selected versions were the ones you think.
 // -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
 //                            having to crawl the workspace files to see the cause).
 // -e : Display stack-traces on failure
@@ -98,7 +100,7 @@ node(&quot;linux&quot;)
                             git commit -m &quot;[jenkins] Releasing version ${releaseVersion}&quot;
                             git tag release-${releaseVersion}
                             git checkout master
-                            mvn --batch-mode -V -e versions:set -DnewVersion=${nextVersion} -DgenerateBackupPoms=false
+                            mvn --batch-mode -e versions:set -DnewVersion=${nextVersion} -DgenerateBackupPoms=false
                             git add -u
                             git diff-index --quiet HEAD || git commit -m &quot;[jenkins] Incrementing version to ${nextVersion}&quot;
                             git push ${authenticatedRepository} master
@@ -134,13 +136,14 @@ try
                         checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
                     }
                 }
-                timeout(15)
+                timeout(20)
                 {
-                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin;${tool &apos;git&apos;};${env.JAVA_HOME}/bin&quot;])
+                    // Windows needs a longer timeout due to Windows Defender (antivirus) slowing things down
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
                     {
                         stage(&quot;Build (windows)&quot;)
                         {
-                            bat script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Pwindows-x86_64 clean install&apos;
+                            bat script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false -Pwindows-x86_64 clean install&apos;
                         }
                         stage(&quot;Deploy (windows)&quot;)
                         {
@@ -173,11 +176,11 @@ try
                 timeout(15)
                 {
                     // gpg resides in /usr/local/bin
-                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
                     {
                         stage(&quot;Build (linux)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Plinux-x86_64 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false -Plinux-x86_64 clean install&apos;
                         }
                         stage(&quot;Deploy (linux)&quot;)
                         {
@@ -207,11 +210,12 @@ try
                     }
                     timeout(15)
                     {
-                        withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
+                        // gpg resides in /usr/local/bin
+                        withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
                         {
                             stage(&quot;Build (mac)&quot;)
                             {
-                                sh script: &apos;mvn --batch-mode -e -Dsurefire.useFile=false -Pmac-x86_64-release clean install&apos;
+                                sh script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false -Pmac-x86_64-release clean install&apos;
                             }
                             stage(&quot;Deploy (mac)&quot;)
                             {
@@ -246,9 +250,9 @@ catch (e)
                 }
                 timeout(5)
                 {
-                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
+                    withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
                     {
-                        sh script: &quot;mvn --batch-mode -e -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} nexus-staging:rc-drop&quot;
+                        sh script: &quot;mvn --batch-mode -V -e -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} nexus-staging:rc-drop&quot;
                     }
                 }
             }
@@ -277,11 +281,11 @@ node(&quot;linux&quot;)
         }
         timeout(10)
         {
-            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
             {
                 stage(&quot;Close release&quot;)
                 {
-                    sh script: &quot;mvn --batch-mode -e -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} nexus-staging:rc-close&quot;
+                    sh script: &quot;mvn --batch-mode -V -e -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} nexus-staging:rc-close&quot;
                 }
             }
         }

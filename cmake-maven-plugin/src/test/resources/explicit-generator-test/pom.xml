@@ -58,7 +58,7 @@
 			<id>windows-x86_64</id>
 			<properties>
 				<platform>windows-x86_64</platform>
-				<generator>Visual Studio 15 2017</generator>
+				<generator>Visual Studio 16 2019</generator>
 			</properties>
 		</profile>
 		<profile>
