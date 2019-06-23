@@ -70,7 +70,7 @@ parallel windows:
             {
                 stage(&quot;Deploy (windows)&quot;)
                 {
-                    bat script: &apos;mvn --batch-mode -e -V -U -Dsurefire.useFile=false -Pwindows-x86_64,deploy clean deploy&apos;
+                    bat script: &apos;mvn --batch-mode -e -V -U -Dsurefire.useFile=false -Pdeploy clean deploy&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -95,7 +95,7 @@ parallel windows:
             {
                 stage(&quot;Deploy (linux)&quot;)
                 {
-                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Plinux-x86_64,deploy clean deploy&apos;
+                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Pdeploy clean deploy&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -121,7 +121,7 @@ parallel windows:
             {
 			          stage(&quot;Deploy (mac)&quot;)
                 {
-                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Pmac-x86_64,deploy clean deploy&apos;
+                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Pdeploy clean deploy&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }

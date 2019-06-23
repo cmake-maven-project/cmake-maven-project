@@ -83,7 +83,7 @@ node(&quot;linux&quot;)
         {
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;GIT_HOME=${ tool &apos;git&apos; }&quot;, &quot;PATH+MAVEN+GIT=${tool &apos;Maven&apos;}/bin:${tool &apos;git&apos;}:${env.JAVA_HOME}/bin&quot;])
             {
-                stage(&quot;Create release branch&quot;)
+                stage(&quot;Create release tag&quot;)
                 {
                     // Check if tag already exists: http://stackoverflow.com/a/21116365/14731
                     // Commit without failure if nothing changed: http://stackoverflow.com/a/8123841/14731
@@ -136,19 +136,19 @@ try
                         checkout([$class: &apos;GitSCM&apos;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;LocalBranch&apos;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &apos;CleanCheckout&apos;], [$class: &apos;WipeWorkspace&apos;], [$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
                     }
                 }
-                timeout(25)
+                timeout(30)
                 {
                     // Windows needs a longer timeout due to Windows Defender (antivirus) slowing things down
                     withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
                     {
                         stage(&quot;Build (windows)&quot;)
                         {
-                            bat script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false -Pwindows-x86_64 clean install&apos;
+                            bat script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false clean install&apos;
                         }
                         stage(&quot;Deploy (windows)&quot;)
                         {
                             bat script: &quot;&quot;&quot;cd cmake-binaries
-                                call mvn --batch-mode -e -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Pwindows-x86_64-release,deploy deploy&quot;&quot;&quot;
+                                call mvn --batch-mode -e -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Pdeploy deploy&quot;&quot;&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -180,12 +180,12 @@ try
                     {
                         stage(&quot;Build (linux)&quot;)
                         {
-                            sh script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false -Plinux-x86_64 clean install&apos;
+                            sh script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false clean install&apos;
                         }
                         stage(&quot;Deploy (linux)&quot;)
                         {
                             // Deploy both Java and native artifacts
-                            sh script: &quot;mvn --batch-mode -e -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Plinux-x86_64,deploy deploy&quot;
+                            sh script: &quot;mvn --batch-mode -e -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Pdeploy deploy&quot;
                             archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                         }
                     }
@@ -215,12 +215,12 @@ try
                         {
                             stage(&quot;Build (mac)&quot;)
                             {
-                                sh script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false -Pmac-x86_64-release clean install&apos;
+                                sh script: &apos;mvn --batch-mode -V -e -Dsurefire.useFile=false clean install&apos;
                             }
                             stage(&quot;Deploy (mac)&quot;)
                             {
                                 sh script: &quot;&quot;&quot;cd cmake-binaries
-                                    mvn --batch-mode -e -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Pmac-x86_64,deploy deploy&quot;&quot;&quot;
+                                    mvn --batch-mode -e -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Pdeploy deploy&quot;&quot;&quot;
                                 archiveArtifacts artifacts: &quot;**/target/*.jar&quot;, excludes: &quot;**/target/test-classes/**&quot;
                             }
                         }

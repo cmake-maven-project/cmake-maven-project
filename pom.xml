@@ -284,11 +284,6 @@
 		</profile>
 		<profile>
 			<id>deploy</id>
-			<activation>
-				<property>
-					<name>deploy</name>
-				</property>
-			</activation>
 			<build>
 				<plugins>
 					<plugin>

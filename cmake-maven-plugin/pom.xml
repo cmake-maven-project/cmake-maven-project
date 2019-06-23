@@ -104,30 +104,29 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<!-- Our tests shouldn't be run as unit tests -->
-					<excludes>
-						<exclude>**/*IntegrationTest.java</exclude>
-					</excludes>
-					<systemPropertyVariables>
-						<!-- So we keep test dependencies in sync with this project -->
-						<cmake.plugin.version>${project.version}</cmake.plugin.version>
-						<!-- This passes the testing profile onto our test projects -->
-						<platform>${platform}</platform>
-					</systemPropertyVariables>
-					<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
-				</configuration>
 				<executions>
 					<execution>
-						<id>integration-test</id>
+						<id>default-test</id>
 						<goals>
 							<goal>test</goal>
 						</goals>
 						<phase>integration-test</phase>
 						<configuration>
+							<!-- Our tests shouldn't be run as unit tests -->
 							<includes>
 								<include>**/*IntegrationSuite.java</include>
 							</includes>
+							<excludes>
+								<exclude>**/*IntegrationTest.java</exclude>
+							</excludes>
+							<systemPropertyVariables>
+								<!-- So we keep test dependencies in sync with this project -->
+								<cmake.plugin.version>${project.version}</cmake.plugin.version>
+								<!-- This passes the testing profile onto our test projects -->
+								<platform>${platform}</platform>
+							</systemPropertyVariables>
+							<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+							<trimStackTrace>false</trimStackTrace>
 						</configuration>
 					</execution>
 				</executions>

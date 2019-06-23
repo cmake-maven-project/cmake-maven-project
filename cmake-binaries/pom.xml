@@ -30,11 +30,44 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<classifier>${platform}</classifier>
-					<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
-				</configuration>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>${platform}</classifier>
+							<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>deploy</id>
+			<!-- Deploy an empty main-jar to satisfy Sonatype's staging rules. -->
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-jar-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>main-jar</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<excludes>**</excludes>
+									<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
