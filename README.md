@@ -115,7 +115,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
 
 The following projects contain examples of how to use this plugin:
 
-[Requirements API](https://bitbucket.org/cowwoc/requirements/src/1906b7ad3f9c9a5e8f8b72dedd1a71a0725bce6c/native/pom.xml?at=default&fileviewer=file-view-default#pom.xml-158)
+[Requirements API](https://bitbucket.org/cowwoc/requirements.java/src/1906b7ad3f9c9a5e8f8b72dedd1a71a0725bce6c/native/pom.xml?at=default&fileviewer=file-view-default#pom.xml-158)
 
 ### Building instructions
 
@@ -134,7 +134,7 @@ By default, Maven will activate the right profile based on your JVM:
 * linux-arm_32
 * mac-x86_64
 
-If detection does not work, or you wish to override it then set `-Dplatform=<profile>`.
+If detection does not work, or you wish to override it then set `-P<profile>`.
 
 For instance, when building for 64-bit Linux machines, use:
 
