@@ -44,7 +44,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>1.4.1</version>
+					<version>3.0.0-M1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -184,7 +184,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.version>3.6.1</maven.version>
 		<maven.compiler.release>11</maven.compiler.release>
-		<maven.core.version>3.6.1</maven.core.version>
+		<maven.core.version>3.6.2</maven.core.version>
 		<maven.plugin.annotations.version>3.6.0</maven.plugin.annotations.version>
 	</properties>
 	<profiles>

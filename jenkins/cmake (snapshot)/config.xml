@@ -132,5 +132,4 @@ failFast: true</script>
     <sandbox>true</sandbox>
   </definition>
   <triggers/>
-  <quietPeriod>60</quietPeriod>
 </flow-definition>
