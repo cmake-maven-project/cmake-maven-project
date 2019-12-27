@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
-	<version>3.14.5-b2-SNAPSHOT</version>
+	<version>3.16.2-b2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
@@ -182,9 +182,9 @@
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.version>3.6.1</maven.version>
+		<maven.version>3.6.0</maven.version>
 		<maven.compiler.release>11</maven.compiler.release>
-		<maven.core.version>3.6.2</maven.core.version>
+		<maven.core.version>3.6.3</maven.core.version>
 		<maven.plugin.annotations.version>3.6.0</maven.plugin.annotations.version>
 	</properties>
 	<profiles>
