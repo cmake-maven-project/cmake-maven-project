@@ -79,7 +79,7 @@ public class CompileMojo
 		throws MojoExecutionException
 	{
 		if (cmakeChildDir == null)
-			cmakeChildDir = Mojos.getCmakePath(classifier);
+			cmakeChildDir = Mojos.getCmakePath();
 		try
 		{
 			if (!projectDirectory.exists())
@@ -90,7 +90,7 @@ public class CompileMojo
 			// We assume that someone else has extracted the cmake binaries beforehand (e.g. the
 			// "generate" mojo).
 			File cmakeFile = downloadBinaries ? new File(project.getBuild().getDirectory(),
-				"dependency/cmake/bin/cmake") : new File(cmakeRootDir + "/" + cmakeChildDir);
+				"dependency/cmake/" + cmakeChildDir) : new File(cmakeRootDir + "/" + cmakeChildDir);
 			if (!downloadBinaries)
 				getLog().info("Configured to use native CMake");
 

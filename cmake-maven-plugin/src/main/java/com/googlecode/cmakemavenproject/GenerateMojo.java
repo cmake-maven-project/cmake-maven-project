@@ -98,7 +98,7 @@ public class GenerateMojo
 		throws MojoExecutionException
 	{
 		if (cmakeChildDir == null)
-			cmakeChildDir = Mojos.getCmakePath(classifier);
+			cmakeChildDir = Mojos.getCmakePath();
 		try
 		{
 			if (!targetPath.exists() && !targetPath.mkdirs())

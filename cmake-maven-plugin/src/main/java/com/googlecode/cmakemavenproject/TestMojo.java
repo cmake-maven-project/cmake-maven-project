@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import java.lang.System;
 /**
  * Goal which runs CMake/CTest tests.
  *
@@ -104,7 +105,7 @@ public class TestMojo extends AbstractMojo
 	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
 	private String cmakeRootDir;
 
-	@Parameter(property = "cmake.ctest.dir", defaultValue = "/")
+	@Parameter(property = "cmake.ctest.dir")
 	private String ctestChildDir;
 
 	/**
@@ -125,6 +126,8 @@ public class TestMojo extends AbstractMojo
 				log.info("Tests are skipped.");
 			return;
 		}
+		if (ctestChildDir == null)
+			ctestChildDir = Mojos.getCtestPath();
 
 		if (threadCount == 0)
 			threadCount = Runtime.getRuntime().availableProcessors();
@@ -144,13 +147,13 @@ public class TestMojo extends AbstractMojo
 			if (downloadBinaries)
 			{
 				args = new ArrayList<>(Arrays.asList(
-					new File(new File(projBuildDir, "dependency/cmake").getAbsoluteFile(), "bin/ctest")
+					new File(new File(projBuildDir, "dependency/cmake").getAbsoluteFile(), ctestChildDir)
 						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 			}
 			else
 			{
 				args = new ArrayList<>(Arrays.asList(
-					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), "bin/ctest")
+					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), ctestChildDir)
 						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 			}
 

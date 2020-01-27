@@ -49,30 +49,23 @@ public class Mojos
 	}
 
 	/**
-	 * @param classifier the artifact classifier
 	 * @return the relative path to the cmake binary
-	 * @throws MojoExecutionException if classifier contains an unsupported value
 	 */
-	public static String getCmakePath(String classifier) throws MojoExecutionException
+	public static String getCmakePath()
 	{
-		switch (classifier)
-		{
-			case "windows-x86_64":
-			{
-				return "bin/cmake.exe";
-			}
-			case "linux-x86_64":
-			case "linux-arm_32":
-			case "mac-x86_64":
-			{
-				return "bin/cmake";
-			}
-			default:
-			{
-				throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
-					"\nActual: " + classifier);
-			}
-		}
+		return System.getProperty("os.name").contains("Windows")
+			? "bin/cmake.exe"
+			: "bin/cmake";
+	}
+
+	/**
+	 * @return the relative path to the ctest binary
+	 */
+	public static String getCtestPath()
+	{
+		return System.getProperty("os.name").contains("Windows")
+			? "bin/ctest.exe"
+			: "bin/ctest";
 	}
 
 	/**
