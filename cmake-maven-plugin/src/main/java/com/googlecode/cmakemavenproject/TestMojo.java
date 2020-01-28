@@ -51,6 +51,11 @@ import java.util.stream.Collectors;
 public class TestMojo extends AbstractMojo
 {
 	/**
+	 * The build type (e.g. "Debug", "Release").
+	 */
+	@Parameter(property = "ctest.build.type", defaultValue = "Release")
+	private String buildType;
+	/**
 	 * The directory containing the DartConfiguration.tcl file.
 	 */
 	@Parameter(property = "ctest.build.dir", required = true)
@@ -154,6 +159,11 @@ public class TestMojo extends AbstractMojo
 				args = new ArrayList<>(Arrays.asList(
 					new File(cmakeRootDir, ctestChildDir)
 						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
+			}
+			if (System.getProperty("os.name").contains("Windows"))
+			{
+				args.add("-C");
+				args.add(buildType);
 			}
 
 			// If set, this will post results to a pre-configured dashboard
