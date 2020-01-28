@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import java.lang.System;
 /**
  * Goal which runs CMake/CTest tests.
  *
@@ -153,7 +152,7 @@ public class TestMojo extends AbstractMojo
 			else
 			{
 				args = new ArrayList<>(Arrays.asList(
-					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), ctestChildDir)
+					new File(cmakeRootDir, ctestChildDir)
 						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
 			}
 
