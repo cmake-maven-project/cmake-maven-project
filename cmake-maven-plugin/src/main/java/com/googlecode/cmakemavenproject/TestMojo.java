@@ -45,6 +45,11 @@ import java.util.List;
 public class TestMojo extends CmakeMojo
 {
 	/**
+	 * The test configuration (e.g. "Win32|Debug", "x64|Release").
+	 */
+	@Parameter
+	private String config;
+	/**
 	 * The directory to run ctest in.
 	 */
 	@Parameter(property = "ctest.build.dir", required = true)
@@ -111,9 +116,12 @@ public class TestMojo extends CmakeMojo
 
 			ProcessBuilder processBuilder = new ProcessBuilder().directory(buildDirectory);
 			processBuilder.command().addAll(ctestPath);
+			Collections.addAll(processBuilder.command(), "--test-action", "Test");
 
 			String threadCountString = Integer.toString(threadCount);
-			Collections.addAll(processBuilder.command(), "-T", "Test", "-j", threadCountString);
+			Collections.addAll(processBuilder.command(), "--parallel", threadCountString);
+			if (config != null)
+				Collections.addAll(processBuilder.command(), "--build-config", config);
 
 			// If set, this will post results to a pre-configured dashboard
 			if (dashboard != null)
