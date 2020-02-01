@@ -1,5 +1,5 @@
 Hello-World-Test
-============
+================
 
 This test is a basic test of the generator, compiler, and tester.  It is configured to
 fail the build on a test failure, but the test returns a successful response.  The

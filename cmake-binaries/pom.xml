@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.16.2-b2-SNAPSHOT</version>
+		<version>3.16.3-b1-SNAPSHOT</version>
 	</parent>
 	<artifactId>cmake-binaries</artifactId>
 	<name>CMake Binaries</name>
@@ -13,7 +13,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.googlecode.cmake-maven-project</groupId>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>cmake-binaries-plugin</artifactId>
 				<version>${project.version}</version>
 				<executions>
@@ -22,9 +22,6 @@
 						<goals>
 							<goal>get-binaries</goal>
 						</goals>
-						<configuration>
-							<classifier>${platform}</classifier>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

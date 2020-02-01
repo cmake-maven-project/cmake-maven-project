@@ -13,30 +13,27 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.googlecode.cmake-maven-project</groupId>
+				<groupId>${cmake.plugin.groupid}</groupId>
 				<artifactId>cmake-maven-plugin</artifactId>
 				<version>${cmake.plugin.version}</version>
 				<executions>
 					<execution>
-						<id>ctest-generate</id>
+						<id>cmake-generate</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
 						<configuration>
 							<sourcePath>${project.basedir}</sourcePath>
 							<targetPath>${project.build.directory}</targetPath>
-							<generator>${generator}</generator>
-							<classifier>${platform}</classifier>
 						</configuration>
 					</execution>
 					<execution>
-						<id>basic</id>
+						<id>cmake-compile</id>
 						<goals>
 							<goal>compile</goal>
 						</goals>
 						<configuration>
 							<projectDirectory>${project.build.directory}/</projectDirectory>
-							<classifier>${platform}</classifier>
 						</configuration>
 					</execution>
 					<execution>
@@ -54,31 +51,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>windows-x86_64</id>
-			<properties>
-				<platform>windows-x86_64</platform>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-x86_64</id>
-			<properties>
-				<platform>linux-x86_64</platform>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-arm_32</id>
-			<properties>
-				<platform>linux-arm_32</platform>
-				<download.cmake>false</download.cmake>
-			</properties>
-		</profile>
-		<profile>
-			<id>mac-x86_64</id>
-			<properties>
-				<platform>mac-x86_64</platform>
-			</properties>
-		</profile>
-	</profiles>
 </project>

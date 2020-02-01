@@ -8,9 +8,7 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
@@ -26,7 +24,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -66,17 +63,8 @@ public class GetBinariesMojo
 	 * The maximum number of times to retry deleting files.
 	 */
 	private static final int MAX_RETRIES = 30;
-	/**
-	 * The set of valid classifiers.
-	 */
-	private static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-x86_64", "linux-x86_64",
-		"linux-arm_32", "mac-x86_64");
+	private final OperatingSystem os = OperatingSystem.detected();
 
-	/**
-	 * The release platform.
-	 */
-	@Parameter(property = "classifier", readonly = true, required = true)
-	private String classifier;
 	/**
 	 * The project version.
 	 */
@@ -89,49 +77,25 @@ public class GetBinariesMojo
 	public void execute()
 		throws MojoExecutionException
 	{
-		String suffix;
-
-		switch (classifier)
-		{
-			case "windows-x86_64":
-			{
-				suffix = "win64-x64.zip";
-				break;
-			}
-			case "linux-x86_64":
-			{
-				suffix = "Linux-x86_64.tar.gz";
-				break;
-			}
-			case "mac-x86_64":
-			{
-				suffix = "Darwin-x86_64.tar.gz";
-				break;
-			}
-			case "linux-arm_32":
-			default:
-				throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
-					"\nActual: " + classifier);
-		}
+		String suffix = os.getDownloadSuffix();
 
 		String cmakeVersion = getCMakeVersion(projectVersion);
 		final Path target = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
 		try
 		{
+			if (Files.exists(target.resolve("bin")))
+				return;
+			deleteRecursively(target);
+
+			// Directories not normalized, begin by unpacking the binaries
 			String majorVersion = getMajorVersion(cmakeVersion);
 			Path archive = download(new URL("https://cmake.org/files/v" + majorVersion + "/cmake-" +
 				cmakeVersion + "-" + suffix));
-			if (Files.notExists(target.resolve("bin")))
-			{
-				deleteRecursively(target);
-
-				// Directories not normalized, begin by unpacking the binaries
-				Log log = getLog();
-				if (log.isInfoEnabled())
-					log.info("Extracting " + archive + " to " + target);
-				extract(archive, target);
-				normalizeDirectories(target);
-			}
+			Log log = getLog();
+			if (log.isInfoEnabled())
+				log.info("Extracting " + archive + " to " + target);
+			extract(archive, target);
+			normalizeDirectories(target);
 		}
 		catch (IOException e)
 		{
@@ -266,7 +230,7 @@ public class GetBinariesMojo
 		try (ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(
 			new BufferedInputStream(Files.newInputStream(source))))
 		{
-			if (supportsPosix(in))
+			if (os.supportsPosix(in))
 				attributes = new FileAttribute<?>[1];
 			else
 				attributes = new FileAttribute<?>[0];
@@ -442,33 +406,11 @@ public class GetBinariesMojo
 	}
 
 	/**
-	 * @param in the InputStream associated with the archive
-	 * @return true if the platform and archive supports POSIX attributes
-	 */
-	private boolean supportsPosix(InputStream in)
-	{
-		switch (classifier)
-		{
-			case "windows-x86_64":
-				return false;
-			case "linux-x86_64":
-			case "linux-arm_32":
-			case "mac-x86_64":
-				break;
-			default:
-				throw new AssertionError("\"classifier\" must be one of " + VALID_CLASSIFIERS +
-					"\nActual: " + classifier);
-		}
-		return in instanceof ArchiveInputStream || in instanceof ZipArchiveInputStream ||
-			in instanceof TarArchiveInputStream;
-	}
-
-	/**
 	 * Converts an integer mode to a set of PosixFilePermissions.
 	 *
 	 * @param entry the archive entry
 	 * @return the PosixFilePermissions, or null if the default permissions should be used
-	 * @see http://stackoverflow.com/a/9445853/14731
+	 * @see <a href="http://stackoverflow.com/a/9445853/14731">http://stackoverflow.com/a/9445853/14731</a>
 	 */
 	private Set<PosixFilePermission> getPosixPermissions(ArchiveEntry entry)
 	{
@@ -525,7 +467,7 @@ public class GetBinariesMojo
 	 *
 	 * @param filename the filename
 	 * @return an empty string if no extension is found
-	 * @throws NullArgumentException if filename is null
+	 * @throws NullPointerException if filename is null
 	 */
 	private String getFileExtension(String filename)
 	{
