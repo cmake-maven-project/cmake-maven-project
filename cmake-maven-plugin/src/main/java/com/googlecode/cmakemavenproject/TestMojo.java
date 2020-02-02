@@ -14,14 +14,12 @@ package com.googlecode.cmakemavenproject;
  * the License.
  */
 
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -35,12 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 /**
  * Goal which runs CMake/CTest tests.
@@ -48,18 +42,13 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:ksclarke@gmail.com">Kevin S. Clarke</a>
  */
 @Mojo(name = "test", defaultPhase = LifecyclePhase.TEST)
-public class TestMojo extends AbstractMojo
+public class TestMojo extends CmakeMojo
 {
 	/**
-	 * The directory containing the DartConfiguration.tcl file.
+	 * The directory to run ctest in.
 	 */
 	@Parameter(property = "ctest.build.dir", required = true)
 	private File buildDirectory;
-	/**
-	 * The Maven project directory.
-	 */
-	@Parameter(defaultValue = "${project}", readonly = true)
-	private MavenProject project;
 	/**
 	 * Value that lets Maven tests fail without causing the build to fail.
 	 */
@@ -87,25 +76,6 @@ public class TestMojo extends AbstractMojo
 	 */
 	@Parameter(property = "dashboard")
 	private String dashboard;
-	/**
-	 * The environment variables.
-	 */
-	@Parameter
-	private Map<String, String> environmentVariables;
-	/**
-	 * Extra command-line options to pass to ctest.
-	 */
-	@Parameter
-	private List<String> options;
-
-	@Parameter(property = "download.cmake", defaultValue = "true")
-	private boolean downloadBinaries;
-
-	@Parameter(property = "cmake.root.dir", defaultValue = "/usr")
-	private String cmakeRootDir;
-
-	@Parameter(property = "cmake.ctest.dir", defaultValue = "/")
-	private String ctestChildDir;
 
 	/**
 	 * Executes the CTest run.
@@ -125,72 +95,32 @@ public class TestMojo extends AbstractMojo
 				log.info("Tests are skipped.");
 			return;
 		}
+		String buildDir = buildDirectory.getAbsolutePath();
+		if (!buildDirectory.exists())
+			throw new MojoExecutionException(buildDir + " does not exist");
+		if (!buildDirectory.isDirectory())
+			throw new MojoExecutionException(buildDir + " isn't directory");
 
 		if (threadCount == 0)
 			threadCount = Runtime.getRuntime().availableProcessors();
 
 		try
 		{
+			downloadBinariesIfNecessary();
+			List<String> ctestPath = getBinaryPath("ctest");
+
+			ProcessBuilder processBuilder = new ProcessBuilder().directory(buildDirectory);
+			processBuilder.command().addAll(ctestPath);
+
 			String threadCountString = Integer.toString(threadCount);
-			String projBuildDir = project.getBuild().getDirectory();
-			String buildDir = buildDirectory.getAbsolutePath();
-			List<String> args;
-
-			if (!buildDirectory.exists())
-				throw new MojoExecutionException(buildDir + " does not exist");
-			if (!buildDirectory.isDirectory())
-				throw new MojoExecutionException(buildDir + " isn't directory");
-
-			if (downloadBinaries)
-			{
-				args = new ArrayList<>(Arrays.asList(
-					new File(new File(projBuildDir, "dependency/cmake").getAbsoluteFile(), "bin/ctest")
-						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
-			}
-			else
-			{
-				args = new ArrayList<>(Arrays.asList(
-					new File(new File(cmakeRootDir, ctestChildDir).getAbsoluteFile(), "bin/ctest")
-						.getAbsolutePath(), "-T", "Test", "-j", threadCountString));
-			}
+			Collections.addAll(processBuilder.command(), "-T", "Test", "-j", threadCountString);
 
 			// If set, this will post results to a pre-configured dashboard
 			if (dashboard != null)
-				args.addAll(Arrays.asList("-D", dashboard));
+				Collections.addAll(processBuilder.command(), "-D", dashboard);
 
-			ProcessBuilder processBuilder = new ProcessBuilder(args);
-
-			// Set the directory with the DartConfiguration.tcl config file
-			processBuilder.directory(buildDirectory);
-
-			if (options != null)
-			{
-				// Skip undefined Maven properties:
-				// <options>
-				//   <option>${optional.property}</option>
-				// </options>
-				List<String> nonEmptyOptions = options.stream().filter(option -> !option.isEmpty()).
-					collect(Collectors.toList());
-				processBuilder.command().addAll(nonEmptyOptions);
-			}
-
-			Map<String, String> env = processBuilder.environment();
-
-			if (environmentVariables != null)
-			{
-				for (Entry<String, String> entry : environmentVariables.entrySet())
-				{
-					String value = entry.getValue();
-					if (value == null)
-					{
-						// Maven converts empty properties to null and Linux does not support null values,
-						// so we convert them back to empty strings:
-						// https://github.com/cmake-maven-project/cmake-maven-project/issues/11
-						value = "";
-					}
-					env.put(entry.getKey(), value);
-				}
-			}
+			addOptions(processBuilder);
+			overrideEnvironmentVariables(processBuilder);
 
 			if (log.isDebugEnabled())
 			{
@@ -204,7 +134,7 @@ public class TestMojo extends AbstractMojo
 			int returnCode = Mojos.waitFor(processBuilder);
 
 			// Convert ctest xml output to junit xml for better integration
-			InputStream stream = TestMojo.class.getResourceAsStream("/ct2ju.xslt");
+			InputStream stream = TestMojo.class.getResourceAsStream("/ctest2junit.xsl");
 			TransformerFactory tf = TransformerFactory.newInstance();
 			StreamSource xsltSource = new StreamSource(stream);
 			Transformer transformer = tf.newTransformer(xsltSource);
@@ -232,6 +162,7 @@ public class TestMojo extends AbstractMojo
 			String xmlTestFilePath = "/Testing/" + tag + "/Test.xml";
 			File xmlSource = new File(buildDirectory, xmlTestFilePath);
 			StreamSource source = new StreamSource(xmlSource);
+			String projBuildDir = project.getBuild().getDirectory();
 			File reportsDir = new File(projBuildDir, "surefire-reports");
 			File xmlReport = new File(reportsDir, "CTestResults.xml");
 			StreamResult result = new StreamResult(xmlReport);
@@ -252,5 +183,4 @@ public class TestMojo extends AbstractMojo
 			throw new MojoExecutionException(e.getMessage(), e);
 		}
 	}
-
 }

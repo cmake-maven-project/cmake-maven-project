@@ -13,7 +13,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.16.2-b1</version>
+      <version>3.16.3-b1</version>
       <executions>
         <execution>
           <id>cmake-generate</id>
@@ -28,18 +28,23 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
               <!-- The directory write the project files to -->
             </targetPath>
             <generator>
-              <!-- One of the generators defined at https://cmake.org/cmake/help/v3.7/manual/cmake-generators.7.html -->
+              <!--
+              Optional: Overrides the default generator used by cmake.
+              The list of available values can be found at 
+              https://cmake.org/cmake/help/v3.16/manual/cmake-generators.7.html
+              -->
             </generator>
-            <classifier>
-              <!-- The classifier of the current platform. One of [windows-x86_32, windows-x86_64, linux-x86_32, linux-x86_64, linux-arm_32, mac-x86_64]. -->
-            </classifier>
             <environmentVariables>
+              <!--
+              Optional: Additional environment variables to expose to cmake. If a variable was already set,
+              overrides the previous value.             
+              -->              
               <key>value</key>
             </environmentVariables>
             <options>
               <!--
-                Optional: One or more options found at https://cmake.org/cmake/help/v3.7/manual/cmake.1.html
-                For example:
+              Optional: One or more options found at https://cmake.org/cmake/help/v3.16/manual/cmake.1.html
+              For example:
               -->
               <option>-DBUILD_THIRDPARTY:bool=on</option>
             </options>
@@ -53,7 +58,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.16.2-b1</version>
+      <version>3.16.3-b1</version>
       <executions>
         <execution>
           <id>cmake-compile</id>
@@ -62,7 +67,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
           </goals>
           <configuration>
             <config>
-              <!-- Optional: the build configuration (e.g. "Release|x64") -->
+              <!-- Optional: the build configuration (e.g. "x64|Release") -->
             </config>
             <target>
               <!-- Optional: the build "target" -->
@@ -70,9 +75,6 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
             <projectDirectory>
               <!-- "targetPath" from the "generate" goal -->
             </projectDirectory>
-            <classifier>
-              <!-- The classifier of the current platform. One of [windows-x86_32, windows-x86_64, linux-x86_32, linux-x86_64, linux-arm_32, mac-x86_64]. -->
-            </classifier>
             <environmentVariables>
               <key>value</key>
             </environmentVariables>
@@ -86,7 +88,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.16.2-b1</version>
+      <version>3.16.3-b1</version>
       <executions>
         <execution>
           <id>cmake-test</id>
@@ -96,21 +98,21 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
           <configuration>
             <!-- "buildDirectory" is "targetPath" from the "generate" goal -->
             <buildDirectory>${project.build.directory}</buildDirectory>
-            <!-- Optional way to not fail the build on test failures -->
-            <!-- <testFailureIgnore>true</testFailureIgnore> -->
-            <!-- Optional way to skip just the ctest tests -->
-            <!-- <ctest.skip.tests>true</ctest.skip.tests> -->
-            <!-- Optional/standard way to skip all Maven tests -->
-            <!-- <maven.test.skip>true</maven.test.skip> -->
-            <!-- Optional way to configure number of threads tests should use -->
-            <!-- <threadCount>2</threadCount> -->
-            <!-- Optional dashboard configuration; used with CTestConfig.cmake -->
-            <!-- <dashboard>Experimental</dashboard> -->
+            <!-- Optional: do not fail the build on test failures. false by default. -->
+            <testFailureIgnore>true</testFailureIgnore>
+            <!-- Optional: skip only ctest tests. false by default. -->
+            <ctest.skip.tests>true</ctest.skip.tests>
+            <!-- Optional: Skip all Maven tests. false by default -->
+            <maven.test.skip>true</maven.test.skip>
+            <!-- Optional: the number of threads tests should use -->
+            <threadCount>2</threadCount>
+            <!-- Optional: dashboard configuration; used with CTestConfig.cmake -->
+            <dashboard>Experimental</dashboard>
           </configuration>
         </execution>
       </executions>
     </plugin>
-
+    
 ### Examples
 
 The following projects contain examples of how to use this plugin:
@@ -142,10 +144,13 @@ For instance, when building for 64-bit Linux machines, use:
 
 ### Using a local CMake installation
 
-cmake.org doesn't provide binaries for some platforms, such as Raspberry Pi. In such cases, users can install the binaries themselves (typically using package managers like `apt-get`) and point the plugin at them.
+Sometimes it is preferable or necessary to use a preexisting CMake installation. cmake.org doesn't provide
+binaries for some platforms, such as Raspberry Pi. In such cases, users can install the binaries themselves
+(typically using package managers like `apt-get`) and point the plugin at them.
 
-You can configure this behavior for any platform by setting `${download.cmake}` to `false`. The plugin
- looks for cmake under `${cmake.root.dir}/${cmake.child.dir}` and ctest under `${cmake.root.dir}/${cmake.ctest.dir}`. By default, `${cmake.root.dir}` resolves to `/usr`, `${cmake.child.dir}` to `/bin/cmake` and `${cmake.test.dir}` to `/`.
+1. Set `${cmake.download}` to `false`.
+2. Optionally set `${cmake.dir}` to the directory containing the binaries (e.g. `/usr/bin`). Otherwise, the
+plugin will expect the binaries to be on the PATH. 
 
 That's it! To learn more about CMake itself, consult the [CMake.org](https://cmake.org/) website.
 

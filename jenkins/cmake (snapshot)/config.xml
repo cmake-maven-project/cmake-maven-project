@@ -1,5 +1,5 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.32">
+<flow-definition plugin="workflow-job@2.36">
   <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
@@ -35,7 +35,7 @@
       <triggers/>
     </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.63">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.78">
     <script>// Command-line options (taken from https://jenkins.io/doc/pipeline/examples/):
 // --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
 // -V : strongly recommended in CI, will display the JDK and Maven versions in use.
@@ -60,7 +60,7 @@ parallel windows:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
             }
         }
         timeout(25)
@@ -86,10 +86,10 @@ parallel windows:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
             }
         }
-        timeout(15)
+        timeout(25)
         {
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
             {
@@ -111,10 +111,10 @@ parallel windows:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
             }
         }
-        timeout(15)
+        timeout(25)
         {
             // gpg resides in /usr/local/bin
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
@@ -132,4 +132,6 @@ failFast: true</script>
     <sandbox>true</sandbox>
   </definition>
   <triggers/>
+  <quietPeriod>60</quietPeriod>
+  <disabled>false</disabled>
 </flow-definition>

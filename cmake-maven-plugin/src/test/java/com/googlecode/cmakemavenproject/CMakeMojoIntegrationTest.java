@@ -32,6 +32,9 @@ public abstract class CMakeMojoIntegrationTest
 	// Maven settings.xml file to be used for the test projects
 	private static final String SETTINGS = "/settings.xml";
 
+	// Get our group id
+	private static final String PLUGIN_GROUPID = "cmake.plugin.groupid";
+
 	// CMake-Maven-Plugin version (so we don't have to manually keep in sync)
 	private static final String PLUGIN_VERSION = "cmake.plugin.version";
 
@@ -46,8 +49,8 @@ public abstract class CMakeMojoIntegrationTest
 	 *
 	 * @param testName The CMake Maven project to test
 	 * @return A configured <code>Verifier</code>
-	 * @throws IOException           If there is a problem with configuration.
-	 * @throws VerificationException If there is a problem with verification.
+	 * @throws IOException           if there is a problem with the configuration
+	 * @throws VerificationException if there is a problem with the verification
 	 */
 	protected Verifier getVerifier(String testName) throws IOException, VerificationException
 	{
@@ -62,21 +65,19 @@ public abstract class CMakeMojoIntegrationTest
 		Properties verProperties = verifier.getVerifierProperties();
 		Properties sysProperties = verifier.getSystemProperties();
 
-		// We need to pass along the version number of our parent project
+		// Pass along properties from our parent project
+		sysProperties.setProperty(PLUGIN_GROUPID, System.getProperty(PLUGIN_GROUPID));
 		sysProperties.setProperty(PLUGIN_VERSION, System.getProperty(PLUGIN_VERSION));
+		sysProperties.setProperty(BUILD_PLATFORM, System.getProperty(BUILD_PLATFORM));
 
 		if (System.getProperty(DOWNLOAD_CMAKE, "true").equals("false"))
-		{
 			sysProperties.setProperty(DOWNLOAD_CMAKE, "false");
-		}
-		// Set the platform that's being used in the running of the tests
-		verifier.addCliOption("-P" + System.getProperty(BUILD_PLATFORM));
 
 		// use.mavenRepoLocal instructs forked tests to use the local repo
 		verProperties.setProperty("use.mavenRepoLocal", "true");
 
-		verifier.setAutoclean(true); // Set so clean is run before each test
-
+		// Clean before each test
+		verifier.setAutoclean(true);
 		return verifier;
 	}
 }

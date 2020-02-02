@@ -1,14 +1,10 @@
 package com.googlecode.cmakemavenproject;
 
-import com.google.common.collect.ImmutableSet;
-import org.apache.maven.plugin.MojoExecutionException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Mojo helper functions.
@@ -17,12 +13,6 @@ import java.util.Set;
  */
 public class Mojos
 {
-	/**
-	 * The set of valid classifiers.
-	 */
-	public static final Set<String> VALID_CLASSIFIERS = ImmutableSet.of("windows-x86_64", "linux-x86_64",
-		"linux-arm_32", "mac-x86_64");
-
 	/**
 	 * Launches and waits for a process to complete.
 	 *
@@ -46,33 +36,6 @@ public class Mojos
 			}
 		}
 		return process.waitFor();
-	}
-
-	/**
-	 * @param classifier the artifact classifier
-	 * @return the relative path to the cmake binary
-	 * @throws MojoExecutionException if classifier contains an unsupported value
-	 */
-	public static String getCmakePath(String classifier) throws MojoExecutionException
-	{
-		switch (classifier)
-		{
-			case "windows-x86_64":
-			{
-				return "bin/cmake.exe";
-			}
-			case "linux-x86_64":
-			case "linux-arm_32":
-			case "mac-x86_64":
-			{
-				return "bin/cmake";
-			}
-			default:
-			{
-				throw new MojoExecutionException("\"classifier\" must be one of " + VALID_CLASSIFIERS +
-					"\nActual: " + classifier);
-			}
-		}
 	}
 
 	/**

@@ -14,8 +14,11 @@ package com.googlecode.cmakemavenproject;
  * the License.
  */
 
+import org.apache.maven.it.VerificationException;
 import org.apache.maven.it.Verifier;
 import org.junit.Test;
+
+import java.io.IOException;
 
 /**
  * An integration test that runs tests related to testing CMake projects.
@@ -25,12 +28,12 @@ import org.junit.Test;
 public class TestMojoIntegrationTest extends CMakeMojoIntegrationTest
 {
 	/**
-	 * Tests the testing of a simple Hello-World-Test project.
+	 * Runs the hello-world-test.
 	 *
 	 * @throws Exception If the test fails as a result of an exception
 	 */
 	@Test
-	public void testGenerateHelloTest() throws Exception
+	public void testGenerateHelloTest() throws IOException, VerificationException
 	{
 		Verifier verifier = getVerifier("hello-world-test");
 		verifier.displayStreamBuffers();
@@ -40,12 +43,13 @@ public class TestMojoIntegrationTest extends CMakeMojoIntegrationTest
 	}
 
 	/**
-	 * Tests the testing of a simple Dashboard-Test project.
+	 * Runs the generate-dashboard-test.
 	 *
-	 * @throws Exception If the test fails as a result of an exception
+	 * @throws IOException           if there is a problem with the test configuration
+	 * @throws VerificationException if the test fails as a result of an exception
 	 */
 	@Test
-	public void testGenerateDashboardTest() throws Exception
+	public void testGenerateDashboardTest() throws IOException, VerificationException
 	{
 		Verifier verifier = getVerifier("dashboard-test");
 		verifier.displayStreamBuffers();
@@ -55,14 +59,31 @@ public class TestMojoIntegrationTest extends CMakeMojoIntegrationTest
 	}
 
 	/**
-	 * Tests running cmake with an explicitly-specified generator.
+	 * Runs the explicit-generator-test.
 	 *
-	 * @throws Exception If the test fails as a result of an exception
+	 * @throws IOException           if there is a problem with the test configuration
+	 * @throws VerificationException if the test fails as a result of an exception
 	 */
 	@Test
-	public void testExplicitGenerator() throws Exception
+	public void testExplicitGeneratorTest() throws IOException, VerificationException
 	{
 		Verifier verifier = getVerifier("explicit-generator-test");
+		verifier.displayStreamBuffers();
+		verifier.executeGoal("verify");
+		verifier.resetStreams();
+		verifier.verifyErrorFreeLog();
+	}
+
+	/**
+	 * Runs the binaries-on-path-test.
+	 *
+	 * @throws IOException           if there is a problem with the test configuration
+	 * @throws VerificationException if the test fails as a result of an exception
+	 */
+	@Test
+	public void testBinariesOnPathTest() throws IOException, VerificationException
+	{
+		Verifier verifier = getVerifier("binaries-on-path-test");
 		verifier.displayStreamBuffers();
 		verifier.executeGoal("verify");
 		verifier.resetStreams();
