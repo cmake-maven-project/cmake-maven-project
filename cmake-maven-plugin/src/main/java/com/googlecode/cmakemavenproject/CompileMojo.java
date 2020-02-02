@@ -66,17 +66,19 @@ public class CompileMojo extends CmakeMojo
 				throw new MojoExecutionException(projectDirectory.getAbsolutePath() + " must be a directory");
 
 			downloadBinariesIfNecessary();
-			List<String> cmakePath = getBinaryPath("cmake");
 
 			ProcessBuilder processBuilder = new ProcessBuilder();
-			processBuilder.command().addAll(cmakePath);
+			overrideEnvironmentVariables(processBuilder);
+
+			String cmakePath = getBinaryPath("cmake", processBuilder).toString();
+			processBuilder.command().add(cmakePath);
+
 			Collections.addAll(processBuilder.command(), "--build", projectDirectory.getPath());
 			if (target != null)
 				Collections.addAll(processBuilder.command(), "--target", target);
 			if (config != null)
 				Collections.addAll(processBuilder.command(), "--config", config);
 			addOptions(processBuilder);
-			overrideEnvironmentVariables(processBuilder);
 
 			Log log = getLog();
 			if (log.isDebugEnabled())
@@ -87,7 +89,7 @@ public class CompileMojo extends CmakeMojo
 				log.debug("environment: " + processBuilder.environment());
 				log.debug("command-line: " + processBuilder.command());
 			}
-			int returnCode = Mojos.waitFor(processBuilder);
+			int returnCode = Mojos.waitFor(processBuilder, getLog());
 			if (returnCode != 0)
 				throw new MojoExecutionException("Return code: " + returnCode);
 		}

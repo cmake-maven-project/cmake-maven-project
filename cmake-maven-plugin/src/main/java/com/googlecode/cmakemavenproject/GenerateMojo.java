@@ -66,17 +66,18 @@ public class GenerateMojo extends CmakeMojo
 				throw new MojoExecutionException("Cannot create " + targetPath.getAbsolutePath());
 
 			downloadBinariesIfNecessary();
-			List<String> cmakePath = getBinaryPath("cmake");
 
 			ProcessBuilder processBuilder = new ProcessBuilder().directory(targetPath);
-			processBuilder.command().addAll(cmakePath);
+			overrideEnvironmentVariables(processBuilder);
+
+			String cmakePath = getBinaryPath("cmake", processBuilder).toString();
+			processBuilder.command().add(cmakePath);
+
 			if (generator != null && !generator.trim().isEmpty())
 				Collections.addAll(processBuilder.command(), "-G", generator);
 
 			addOptions(processBuilder);
 			processBuilder.command().add(sourcePath.getAbsolutePath());
-
-			overrideEnvironmentVariables(processBuilder);
 
 			Log log = getLog();
 			if (log.isDebugEnabled())
@@ -86,7 +87,7 @@ public class GenerateMojo extends CmakeMojo
 				log.debug("environment: " + processBuilder.environment());
 				log.debug("command-line: " + processBuilder.command());
 			}
-			int returnCode = Mojos.waitFor(processBuilder);
+			int returnCode = Mojos.waitFor(processBuilder, getLog());
 			if (returnCode != 0)
 				throw new MojoExecutionException("Return code: " + returnCode);
 		}

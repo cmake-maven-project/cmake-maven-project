@@ -51,7 +51,7 @@
 							<targetPath>${project.build.directory}</targetPath>
 							<downloadBinaries>false</downloadBinaries>
 							<environmentVariables>
-								<PATH>${env.PATH}${path.separator}"${cmake.binaries.dir}"</PATH>
+								<PATH>${env.PATH}${path.separator}${cmake.binaries.dir}</PATH>
 							</environmentVariables>
 						</configuration>
 					</execution>
@@ -64,7 +64,7 @@
 							<projectDirectory>${project.build.directory}/</projectDirectory>
 							<downloadBinaries>false</downloadBinaries>
 							<environmentVariables>
-								<PATH>${env.PATH}${path.separator}"${cmake.binaries.dir}"</PATH>
+								<PATH>${env.PATH}${path.separator}${cmake.binaries.dir}</PATH>
 							</environmentVariables>
 						</configuration>
 					</execution>
@@ -77,7 +77,7 @@
 							<buildDirectory>${project.build.directory}</buildDirectory>
 							<downloadBinaries>false</downloadBinaries>
 							<environmentVariables>
-								<PATH>${env.PATH}${path.separator}"${cmake.binaries.dir}"</PATH>
+								<PATH>${env.PATH}${path.separator}${cmake.binaries.dir}</PATH>
 							</environmentVariables>
 							<!-- This test fails, and that's what we're expecting; it's OK -->
 							<testFailureIgnore>true</testFailureIgnore>

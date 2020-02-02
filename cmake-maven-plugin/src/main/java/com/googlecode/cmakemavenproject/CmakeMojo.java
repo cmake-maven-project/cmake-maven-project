@@ -14,9 +14,9 @@ import org.twdata.maven.mojoexecutor.MojoExecutor;
 import org.twdata.maven.mojoexecutor.MojoExecutor.Element;
 import org.twdata.maven.mojoexecutor.MojoExecutor.ExecutionEnvironment;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -93,21 +93,23 @@ public abstract class CmakeMojo extends AbstractMojo
 	}
 
 	/**
-	 * @param filename the filename of the binary
+	 * @param filename       the filename of the binary
+	 * @param processBuilder the {@code ProcessBuilder}
 	 * @return the command-line arguments for running the binary
+	 * @throws FileNotFoundException if the binary was not found
 	 */
-	public List<String> getBinaryPath(String filename)
+	public Path getBinaryPath(String filename, ProcessBuilder processBuilder) throws FileNotFoundException
 	{
 		OperatingSystem os = OperatingSystem.detected();
 		Path cmakeDir = getCmakeDir();
 		if (cmakeDir == null)
 		{
 			getLog().info("Executing " + filename + " on PATH");
-			return os.getCommandLineForRunningBinaryOnPath(filename);
+			return os.getExecutableOnPath(filename, processBuilder.environment().get("PATH"));
 		}
-		String result = cmakeDir.resolve(filename + os.getExecutableSuffix()).toString();
+		Path result = cmakeDir.resolve(filename + os.getExecutableSuffix());
 		getLog().info("Executing " + result);
-		return Collections.singletonList(result);
+		return result;
 	}
 
 	/**
@@ -156,6 +158,5 @@ public abstract class CmakeMojo extends AbstractMojo
 			return;
 		Map<String, String> env = processBuilder.environment();
 		Mojos.overrideEnvironmentVariables(environmentVariables, env);
-		getLog().info("env: " + env);
 	}
 }

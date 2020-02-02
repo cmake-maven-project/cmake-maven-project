@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Goal which runs CMake/CTest tests.
@@ -112,10 +111,13 @@ public class TestMojo extends CmakeMojo
 		try
 		{
 			downloadBinariesIfNecessary();
-			List<String> ctestPath = getBinaryPath("ctest");
 
 			ProcessBuilder processBuilder = new ProcessBuilder().directory(buildDirectory);
-			processBuilder.command().addAll(ctestPath);
+			overrideEnvironmentVariables(processBuilder);
+
+			String ctestPath = getBinaryPath("ctest", processBuilder).toString();
+			processBuilder.command().add(ctestPath);
+
 			Collections.addAll(processBuilder.command(), "--test-action", "Test");
 
 			String threadCountString = Integer.toString(threadCount);
@@ -128,7 +130,6 @@ public class TestMojo extends CmakeMojo
 				Collections.addAll(processBuilder.command(), "-D", dashboard);
 
 			addOptions(processBuilder);
-			overrideEnvironmentVariables(processBuilder);
 
 			if (log.isDebugEnabled())
 			{
@@ -139,7 +140,7 @@ public class TestMojo extends CmakeMojo
 			}
 
 			// Run the ctest suite of tests
-			int returnCode = Mojos.waitFor(processBuilder);
+			int returnCode = Mojos.waitFor(processBuilder, getLog());
 
 			// Convert ctest xml output to junit xml for better integration
 			InputStream stream = TestMojo.class.getResourceAsStream("/ctest2junit.xsl");

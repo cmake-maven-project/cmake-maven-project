@@ -4,10 +4,12 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.bitbucket.cowwoc.pouch.ConcurrentLazyReference;
 import org.bitbucket.cowwoc.pouch.Reference;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 /**
@@ -71,20 +73,34 @@ public final class OperatingSystem
 
 	/**
 	 * @param filename the filename of a binary
-	 * @return the command-line arguments for running the binary on the path
+	 * @param path     the {@code PATH} environment variable
+	 * @return the fully-qualified path of the executable
+	 * @throws FileNotFoundException if the binary could not be found
 	 */
-	public List<String> getCommandLineForRunningBinaryOnPath(String filename)
+	public Path getExecutableOnPath(String filename, String path) throws FileNotFoundException
 	{
-		switch (type)
+		// Per https://stackoverflow.com/a/34061154/14731 it's easier to invoke a fully-qualified path
+		// than trying to quote command-line arguments properly.
+		// https://stackoverflow.com/a/32827512/14731 shows how this can be done.
+		if (path != null)
 		{
-			case LINUX:
-			case MAC:
-				return Collections.singletonList(filename);
-			case WINDOWS:
-				return Arrays.asList("cmd.exe", "/c", filename + ".exe");
-			default:
-				throw new UnsupportedOperationException("Unsupported operating system: " + type);
+			String suffix = getExecutableSuffix();
+			for (String dirname : path.split(File.pathSeparator))
+			{
+				// Strip leading/trailing quotes
+				dirname = dirname.trim();
+				if (dirname.length() >= 2 &&
+					(dirname.startsWith("\"") && dirname.endsWith("\"")) ||
+					(dirname.startsWith("'") && dirname.endsWith("'")))
+				{
+					dirname = dirname.substring(1, dirname.length() - 1);
+				}
+				Path result = Paths.get(dirname, filename + suffix);
+				if (Files.isRegularFile(result) && Files.isExecutable(result))
+					return result;
+			}
 		}
+		throw new FileNotFoundException(filename + " not found on PATH: " + path);
 	}
 
 	/**
