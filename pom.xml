@@ -285,6 +285,15 @@
 		</profile>
 		<profile>
 			<id>deploy</id>
+			<!--
+			Must use property-based activation because there is no way to activate a no-deploy profile without it.
+			See https://stackoverflow.com/a/7481347/14731
+			-->
+			<activation>
+				<property>
+					<name>deploy</name>
+				</property>
+			</activation>
 			<build>
 				<plugins>
 					<plugin>
