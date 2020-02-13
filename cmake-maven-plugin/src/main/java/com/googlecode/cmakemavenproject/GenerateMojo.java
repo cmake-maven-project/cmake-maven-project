@@ -23,7 +23,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Goal which generates project files.
@@ -48,11 +47,6 @@ public class GenerateMojo extends CmakeMojo
 	 */
 	@Parameter
 	private String generator;
-	/**
-	 * Extra command-line options to pass to cmake.
-	 */
-	@Parameter
-	private List<String> options;
 
 	@Override
 	public void execute()
