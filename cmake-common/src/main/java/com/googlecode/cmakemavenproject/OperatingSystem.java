@@ -21,7 +21,24 @@ public final class OperatingSystem
 	{
 		Type type = Type.detected();
 		Architecture architecture = Architecture.detected();
-		return new OperatingSystem(type, architecture);
+		String pathName;
+		switch (type)
+		{
+			case WINDOWS:
+			{
+				pathName = "Path";
+				break;
+			}
+			case LINUX:
+			case MAC:
+			{
+				pathName = "PATH";
+				break;
+			}
+			default:
+				throw new UnsupportedOperationException("Unsupported operating system: " + type);
+		}
+		return new OperatingSystem(type, architecture, pathName);
 	});
 
 	/**
@@ -35,6 +52,10 @@ public final class OperatingSystem
 
 	public final Type type;
 	public final Architecture architecture;
+	/**
+	 * The name of the PATH environment variable.
+	 */
+	public final String pathName;
 
 	/**
 	 * @return the classifier associated with this operating system
@@ -176,20 +197,23 @@ public final class OperatingSystem
 	/**
 	 * @param type         the type of the operating system
 	 * @param architecture the architecture of the operating system
+	 * @param pathName     the name of the PATH environment variable
 	 * @throws AssertionError if any of the arguments are null
 	 */
-	OperatingSystem(Type type, Architecture architecture)
+	OperatingSystem(Type type, Architecture architecture, String pathName)
 	{
 		assert (type != null) : "type may not be null";
 		assert (architecture != null) : "architecture may not be null";
+		assert (pathName != null) : "pathName may not be null";
 		this.type = type;
 		this.architecture = architecture;
+		this.pathName = pathName;
 	}
 
 	@Override
 	public String toString()
 	{
-		return type + " " + architecture;
+		return type + " " + architecture + ", PATH: " + pathName;
 	}
 
 	/**

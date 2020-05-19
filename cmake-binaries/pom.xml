@@ -30,6 +30,9 @@
 				<executions>
 					<execution>
 						<id>default-jar</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
 					</execution>
 					<execution>
 						<id>platform-specific-jar</id>

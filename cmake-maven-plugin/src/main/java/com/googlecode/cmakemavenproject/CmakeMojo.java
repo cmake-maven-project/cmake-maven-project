@@ -104,8 +104,8 @@ public abstract class CmakeMojo extends AbstractMojo
 		Path cmakeDir = getCmakeDir();
 		if (cmakeDir == null)
 		{
-			getLog().info("Executing " + filename + " on PATH");
-			return os.getExecutableOnPath(filename, processBuilder.environment().get("PATH"));
+			getLog().info("Executing " + filename + " on " + os.pathName);
+			return os.getExecutableOnPath(filename, processBuilder.environment().get(os.pathName));
 		}
 		Path result = cmakeDir.resolve(filename + os.getExecutableSuffix());
 		getLog().info("Executing " + result);

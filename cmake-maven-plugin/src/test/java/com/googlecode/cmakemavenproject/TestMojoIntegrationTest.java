@@ -30,7 +30,8 @@ public class TestMojoIntegrationTest extends CMakeMojoIntegrationTest
 	/**
 	 * Runs the hello-world-test.
 	 *
-	 * @throws Exception If the test fails as a result of an exception
+	 * @throws IOException           if there is a problem with the test configuration
+	 * @throws VerificationException if the test fails as a result of an exception
 	 */
 	@Test
 	public void testGenerateHelloTest() throws IOException, VerificationException
