@@ -121,7 +121,7 @@ public final class OperatingSystem
 					return result;
 			}
 		}
-		throw new FileNotFoundException(filename + " not found on PATH: " + path);
+		throw new FileNotFoundException(filename + " not found on " + pathName + ": " + path);
 	}
 
 	/**
