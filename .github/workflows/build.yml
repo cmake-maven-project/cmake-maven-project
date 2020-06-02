@@ -27,15 +27,15 @@ jobs:
       - name: Build
         run: mvn install -e
       - name: Prevent generated artifacts from getting cached
+        if: matrix.os == 'windows-latest'
         shell: cmd
         run: del /s /q %USERPROFILE%\.m2\repository\com\googlecode\cmake-maven-project
-        if: matrix.os == 'windows-latest'
       - name: Prevent generated artifacts from getting cached
-        run: rm -rf ~/.m2/repository/com/googlecodecmake-maven-project
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        run: rm -rf ~/.m2/repository/com/googlecodecmake-maven-project
       - name: irc notification
-        uses: rectalogic/notify-irc@v1
         if: matrix.os == 'ubuntu-latest' && ${{ success() }}
+        uses: rectalogic/notify-irc@v1
         with:
           channel: "#freelibrary"
           nickname: cmake-maven-project-notifier
@@ -43,8 +43,8 @@ jobs:
             [Success] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
             ${{ join(github.event.commits.*.message) }}
       - name: irc notification
-        uses: rectalogic/notify-irc@v1
         if: matrix.os == 'ubuntu-latest' && ${{ failure() }}
+        uses: rectalogic/notify-irc@v1
         with:
           channel: "#freelibrary"
           nickname: cmake-maven-project-notifier
