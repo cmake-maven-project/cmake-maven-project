@@ -33,21 +33,25 @@ jobs:
       - name: Prevent generated artifacts from getting cached
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         run: rm -rf ~/.m2/repository/com/googlecodecmake-maven-project
-      - name: irc notification
-        if: matrix.os == 'ubuntu-latest' && ${{ success() }}
-        uses: rectalogic/notify-irc@v1
-        with:
-          channel: "#freelibrary"
-          nickname: cmake-maven-project-notifier
-          message: |
-            [Success] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
-            ${{ join(github.event.commits.*.message) }}
-      - name: irc notification
-        if: matrix.os == 'ubuntu-latest' && ${{ failure() }}
-        uses: rectalogic/notify-irc@v1
-        with:
-          channel: "#freelibrary"
-          nickname: cmake-maven-project-notifier
-          message: |
-            [Failure] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
-            ${{ join(github.event.commits.*.message) }}
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    steps:
+    - name: irc notification
+      if: ${{ success() }}
+      uses: rectalogic/notify-irc@v1
+      with:
+        channel: "#freelibrary"
+        nickname: cmake-maven-project-notifier
+        message: |
+          [Success] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
+          ${{ join(github.event.commits.*.message) }}
+    - name: irc notification
+      if: ${{ failure() }}
+      uses: rectalogic/notify-irc@v1
+      with:
+        channel: "#freelibrary"
+        nickname: cmake-maven-project-notifier
+        message: |
+          [Failure] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
+          ${{ join(github.event.commits.*.message) }}
