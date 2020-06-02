@@ -35,7 +35,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       - name: irc notification
         uses: rectalogic/notify-irc@v1
-        if: ${{ success() }}
+        if: matrix.os == 'ubuntu-latest' && ${{ success() }}
         with:
           channel: "#freelibrary"
           nickname: cmake-maven-project-notifier
@@ -44,7 +44,7 @@ jobs:
             ${{ join(github.event.commits.*.message) }}
       - name: irc notification
         uses: rectalogic/notify-irc@v1
-        if: ${{ failure() }}
+        if: matrix.os == 'ubuntu-latest' && ${{ failure() }}
         with:
           channel: "#freelibrary"
           nickname: cmake-maven-project-notifier
