@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>cmake</artifactId>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
-		<version>3.16.3-b3-SNAPSHOT</version>
+		<version>3.17.3-b2-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>cmake-common</artifactId>

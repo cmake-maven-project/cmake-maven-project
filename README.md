@@ -1,4 +1,5 @@
-# CMake-Maven-Project [![Build Status](https://travis-ci.org/cmake-maven-project/cmake-maven-project.png?branch=master)](https://travis-ci.org/cmake-maven-project/cmake-maven-project)
+# CMake-Maven-Project [![build-status](../../workflows/Build/badge.svg)](../../actions?query=workflow%3ABuild)
+
 
 ## Introduction
 

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.16.3-b3-SNAPSHOT</version>
+		<version>3.17.3-b2-SNAPSHOT</version>
 	</parent>
 	<artifactId>cmake-binaries</artifactId>
 	<name>CMake Binaries</name>
@@ -30,6 +30,9 @@
 				<executions>
 					<execution>
 						<id>default-jar</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
 					</execution>
 					<execution>
 						<id>platform-specific-jar</id>

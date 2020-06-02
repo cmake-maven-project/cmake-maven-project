@@ -50,33 +50,7 @@
 
 def repository = &apos;github.com/cmake-maven-project/cmake-maven-project.git&apos;
 
-parallel windows:
-{
-    node(&quot;windows&quot;)
-    {
-        timeout(10)
-        {
-            stage(&quot;Checkout (windows)&quot;)
-            {
-                // Wipe out local repository in case it contains extra commits from a previous (broken) build
-                deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
-            }
-        }
-        timeout(25)
-        {
-            // Windows needs a longer timeout due to Windows Defender (antivirus) slowing things down
-            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
-            {
-                stage(&quot;Deploy (windows)&quot;)
-                {
-                    bat script: &apos;mvn --batch-mode -e -V -U -Dsurefire.useFile=false -Pdeploy clean deploy&apos;
-                    archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
-                }
-            }
-        }
-    }
-}, linux:
+parallel linux:
 {
     node(&quot;linux&quot;)
     {
@@ -86,16 +60,16 @@ parallel windows:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
             }
         }
-        timeout(25)
+        timeout(40)
         {
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
             {
                 stage(&quot;Deploy (linux)&quot;)
                 {
-                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Pdeploy clean deploy&apos;
+                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Ddeploy deploy&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }
@@ -111,17 +85,42 @@ parallel windows:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: &apos;https://github.com/cmake-maven-project/cmake-maven-project/&apos;], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
             }
         }
-        timeout(25)
+        timeout(40)
         {
             // gpg resides in /usr/local/bin
             withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
             {
 			          stage(&quot;Deploy (mac)&quot;)
                 {
-                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Pdeploy clean deploy&apos;
+                    sh script: &apos;mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Ddeploy deploy&apos;
+                    archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
+                }
+            }
+        }
+    }
+}, windows:
+{
+    node(&quot;windows&quot;)
+    {
+        timeout(10)
+        {
+            stage(&quot;Checkout (windows)&quot;)
+            {
+                // Wipe out local repository in case it contains extra commits from a previous (broken) build
+                deleteDir()
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+            }
+        }
+        timeout(40)
+        {
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
+            {
+                stage(&quot;Deploy (windows)&quot;)
+                {
+                    bat script: &apos;mvn --batch-mode -e -V -U -Dsurefire.useFile=false -Ddeploy deploy&apos;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
             }

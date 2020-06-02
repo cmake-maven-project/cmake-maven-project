@@ -54,15 +54,20 @@
 // --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
 // -V : strongly recommended in CI, will display the JDK and Maven versions in use.
 //      Very useful to be quickly sure the selected versions were the ones you think.
+// -U : force maven to update snapshots each time (default : once an hour, makes no sense in CI).
 // -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
 //                            having to crawl the workspace files to see the cause).
 // -e : Display stack-traces on failure
 
 // Create release candidate branch
 def unauthenticatedRepository = &quot;github.com/cmake-maven-project/cmake-maven-project.git&quot;
+def repository = &quot;https://${unauthenticatedRepository}&quot;
 // One can look up a project&apos;s profileId by running: mvn nexus-staging:rc-list-profiles
 def stagingProfileId = &quot;1a35794454094c&quot;
 def stagingRepositoryId
+def userEmail = &quot;cowwoc2020@gmail.com&quot;
+def userName = &quot;Gili Tzabari&quot;
+def repositoryIdPrefix = &quot;comgooglecodecmake-maven-project&quot;
 
 node(&quot;linux&quot;)
 {
@@ -76,7 +81,7 @@ node(&quot;linux&quot;)
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;*/${branch}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: &quot;https://github.com/cmake-maven-project/cmake-maven-project/&quot;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;${branch}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: &quot;https://${unauthenticatedRepository}&quot;]]])
+                checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;*/${branch}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;${branch}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: repository]]])
             }
         }
         timeout(10)
@@ -87,14 +92,14 @@ node(&quot;linux&quot;)
                 {
                     // Check if tag already exists: http://stackoverflow.com/a/21116365/14731
                     // Commit without failure if nothing changed: http://stackoverflow.com/a/8123841/14731
-                    def tagExists = sh(returnStdout: true, script: &quot;git ls-remote https://${unauthenticatedRepository} release-${releaseVersion} | wc -l&quot;).toBoolean()
+                    def tagExists = sh(returnStdout: true, script: &quot;git ls-remote ${repository} release-${releaseVersion} | wc -l&quot;).toBoolean()
                     if (tagExists)
                         echo &quot;Tag release-&quot; + releaseVersion + &quot; already exists&quot;
                     else
                     {
                         echo &quot;Tagging release as release-&quot; + releaseVersion
-                        sh script: &quot;&quot;&quot;git config user.email cowwoc2020@gmail.com
-                            git config user.name &quot;Gili Tzabari&quot;
+                        sh script: &quot;&quot;&quot;git config user.email ${userEmail}
+                            git config user.name ${userName}
                             mvn --batch-mode -V -e versions:set -DnewVersion=${releaseVersion} -DgenerateBackupPoms=false
                             git add -u
                             git commit -m &quot;[jenkins] Releasing version ${releaseVersion}&quot;
@@ -111,7 +116,7 @@ node(&quot;linux&quot;)
                     def output = sh returnStdout: true, script: &quot;&quot;&quot;git checkout tags/release-${releaseVersion}
                         mvn --batch-mode -e -DstagingProfileId=${stagingProfileId} nexus-staging:rc-open&quot;&quot;&quot;
                     echo output
-                    stagingRepositoryId = ( output =~ /Opened (comgooglecodecmake-maven-project-\d+)/ ) [0][1]
+                    stagingRepositoryId = ( output =~ /Opened (${repositoryIdPrefix}-\d+)/ ) [0][1]
                 }
             }
         }
@@ -135,10 +140,10 @@ try
                     {
                         // Wipe out local repository in case it contains extra commits from a previous (broken) build
                         deleteDir()
-                        checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: &quot;https://github.com/cmake-maven-project/cmake-maven-project/&quot;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: &quot;https://${unauthenticatedRepository}&quot;]]])
+                        checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: repository]]])
                     }
                 }
-                timeout(30)
+                timeout(40)
                 {
                     // gpg resides in /usr/local/bin
                     withEnv([&quot;JAVA_HOME=${ tool &quot;JAVA_HOME&quot; }&quot;, &quot;PATH+MAVEN=${tool &quot;Maven&quot;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
@@ -146,7 +151,7 @@ try
                         stage(&quot;Deploy (linux)&quot;)
                         {
                             // Deploy both Java and native artifacts
-                            sh script: &quot;&quot;&quot;mvn --batch-mode -e -V -U -Dsurefire.useFile=false -Dmaven.javadoc.skip=true clean install
+                            sh script: &quot;&quot;&quot;mvn --batch-mode -e -V -U -Dsurefire.useFile=false install
                               mvn --batch-mode -e -V -U -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Ddeploy deploy&quot;&quot;&quot;
                             archiveArtifacts artifacts: &quot;**/target/*.jar&quot;, excludes: &quot;**/target/test-classes/**&quot;
                         }
@@ -166,17 +171,17 @@ try
                     {
                         // Wipe out local repository in case it contains extra commits from a previous (broken) build
                         deleteDir()
-                        checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: &quot;https://github.com/cmake-maven-project/cmake-maven-project/&quot;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: &quot;https://${unauthenticatedRepository}&quot;]]])
+                        checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: repository]]])
                     }
                 }
-                timeout(30)
+                timeout(40)
                 {
                     // gpg resides in /usr/local/bin
                     withEnv([&quot;JAVA_HOME=${ tool &quot;JAVA_HOME&quot; }&quot;, &quot;PATH+MAVEN=${tool &quot;Maven&quot;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
                     {
                         stage(&quot;Deploy (mac)&quot;)
                         {
-                            sh script: &quot;&quot;&quot;mvn --batch-mode -e -V -U -Dsurefire.useFile=false -Dmaven.javadoc.skip=true clean install
+                            sh script: &quot;&quot;&quot;mvn --batch-mode -e -V -U -Dsurefire.useFile=false install
                                 cd cmake-binaries
                                 mvn --batch-mode -e -V -U -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Ddeploy deploy&quot;&quot;&quot;
                             archiveArtifacts artifacts: &quot;**/target/*.jar&quot;, excludes: &quot;**/target/test-classes/**&quot;
@@ -197,17 +202,17 @@ try
                     {
                         // Wipe out local repository in case it contains extra commits from a previous (broken) build
                         deleteDir()
-                        checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: &quot;https://github.com/cmake-maven-project/cmake-maven-project/&quot;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: &quot;https://${unauthenticatedRepository}&quot;]]])
+                        checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: repository]]])
                     }
                 }
-                timeout(30)
+                timeout(40)
                 {
                     // Windows needs a longer timeout due to Windows Defender (antivirus) slowing things down
                     withEnv([&quot;JAVA_HOME=${ tool &quot;JAVA_HOME&quot; }&quot;, &quot;PATH+MAVEN=${tool &quot;Maven&quot;}/bin;${env.JAVA_HOME}/bin&quot;])
                     {
                         stage(&quot;Deploy (windows)&quot;)
                         {
-                            bat script: &quot;&quot;&quot;call mvn --batch-mode -e -V -U -Dsurefire.useFile=false clean install
+                            bat script: &quot;&quot;&quot;call mvn --batch-mode -e -V -U -Dsurefire.useFile=false install
                                 cd cmake-binaries
                                 call mvn --batch-mode -e -V -U -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Ddeploy deploy&quot;&quot;&quot;
                             archiveArtifacts artifacts: &quot;**/target/*.jar&quot;, excludes: &quot;**/target/test-classes/**&quot;
@@ -221,6 +226,7 @@ try
 }
 catch (e)
 {
+    echo &quot;Dropping staging repository due to error&quot;
     try
     {
         // Drop staging repository
@@ -234,7 +240,7 @@ catch (e)
                     {
                         // Wipe out local repository in case it contains extra commits from a previous (broken) build
                         deleteDir()
-                        checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: &quot;https://github.com/cmake-maven-project/cmake-maven-project/&quot;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: &quot;https://${unauthenticatedRepository}&quot;]]])
+                        checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: repository]]])
                     }
                 }
                 timeout(5)
@@ -265,7 +271,7 @@ node(&quot;linux&quot;)
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: &quot;https://github.com/cmake-maven-project/cmake-maven-project/&quot;], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: &quot;https://${unauthenticatedRepository}&quot;]]])
+                checkout([$class: &quot;GitSCM&quot;, branches: [[name: &quot;refs/tags/release-${releaseVersion}&quot;]], browser: [$class: &quot;GithubWeb&quot;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &quot;LocalBranch&quot;, localBranch: &quot;release-${releaseVersion}&quot;], [$class: &quot;CleanCheckout&quot;], [$class: &quot;WipeWorkspace&quot;], [$class: &quot;MessageExclusion&quot;, excludedMessage: &quot;^\\[jenkins\\]&quot;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &quot;github&quot;, url: repository]]])
             }
         }
         timeout(10)
