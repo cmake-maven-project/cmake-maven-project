@@ -34,6 +34,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         run: rm -rf ~/.m2/repository/com/googlecodecmake-maven-project
   notify:
+    needs: [build]
     name: Notify
     runs-on: ubuntu-latest
     steps:
