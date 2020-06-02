@@ -34,20 +34,20 @@ jobs:
         run: rm -rf ~/.m2/repository/com/googlecodecmake-maven-project
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       - name: irc notification
-          uses: rectalogic/notify-irc@v1
-          if: ${{ success() }}
-          with:
-            channel: "#freelibrary"
-            nickname: cmake-maven-project-notifier
-            message: |
-              [Success] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
-              ${{ join(github.event.commits.*.message) }}
+        uses: rectalogic/notify-irc@v1
+        if: ${{ success() }}
+        with:
+          channel: "#freelibrary"
+          nickname: cmake-maven-project-notifier
+          message: |
+            [Success] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
+            ${{ join(github.event.commits.*.message) }}
       - name: irc notification
-          uses: rectalogic/notify-irc@v1
-          if: ${{ failure() }}
-          with:
-            channel: "#freelibrary"
-            nickname: cmake-maven-project-notifier
-            message: |
-              [Failure] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
-              ${{ join(github.event.commits.*.message) }}
+        uses: rectalogic/notify-irc@v1
+        if: ${{ failure() }}
+        with:
+          channel: "#freelibrary"
+          nickname: cmake-maven-project-notifier
+          message: |
+            [Failure] ${{ github.actor }} pushed ${{ github.event.ref }} ${{ github.event.compare }}
+            ${{ join(github.event.commits.*.message) }}
