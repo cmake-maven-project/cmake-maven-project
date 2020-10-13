@@ -100,30 +100,32 @@ public final class OperatingSystem
 	 * @param filename the filename of a binary
 	 * @param path     the {@code PATH} environment variable
 	 * @return the fully-qualified path of the executable
+	 * @throws NullPointerException  if any of the arguments are null
 	 * @throws FileNotFoundException if the binary could not be found
 	 */
 	public Path getExecutableOnPath(String filename, String path) throws FileNotFoundException
 	{
+		if (filename == null)
+			throw new NullPointerException("filename may not be null");
+		if (path == null)
+			throw new NullPointerException("path may not be null");
 		// Per https://stackoverflow.com/a/34061154/14731 it's easier to invoke a fully-qualified path
 		// than trying to quote command-line arguments properly.
 		// https://stackoverflow.com/a/32827512/14731 shows how this can be done.
-		if (path != null)
+		String suffix = getExecutableSuffix();
+		for (String dirname : path.split(File.pathSeparator))
 		{
-			String suffix = getExecutableSuffix();
-			for (String dirname : path.split(File.pathSeparator))
+			// Strip leading/trailing quotes
+			dirname = dirname.trim();
+			if (dirname.length() >= 2 &&
+				(dirname.startsWith("\"") && dirname.endsWith("\"")) ||
+				(dirname.startsWith("'") && dirname.endsWith("'")))
 			{
-				// Strip leading/trailing quotes
-				dirname = dirname.trim();
-				if (dirname.length() >= 2 &&
-					(dirname.startsWith("\"") && dirname.endsWith("\"")) ||
-					(dirname.startsWith("'") && dirname.endsWith("'")))
-				{
-					dirname = dirname.substring(1, dirname.length() - 1);
-				}
-				Path result = Paths.get(dirname, filename + suffix);
-				if (Files.isRegularFile(result) && Files.isExecutable(result))
-					return result;
+				dirname = dirname.substring(1, dirname.length() - 1);
 			}
+			Path result = Paths.get(dirname, filename + suffix);
+			if (Files.isRegularFile(result) && Files.isExecutable(result))
+				return result;
 		}
 		throw new FileNotFoundException(filename + " not found on " + pathName + ": " + path);
 	}
