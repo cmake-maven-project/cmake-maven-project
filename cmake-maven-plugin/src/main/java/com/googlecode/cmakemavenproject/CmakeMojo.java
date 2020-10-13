@@ -104,7 +104,7 @@ public abstract class CmakeMojo extends AbstractMojo
 		if (cmakeDir == null)
 		{
 			getLog().info("Executing " + filename + " on PATH");
-			String path = os.environment(processBuilder).apply("PATH");
+			String path = os.getEnvironment(processBuilder, "PATH");
 			if (path == null)
 			{
 				throw new IllegalArgumentException("PATH not found\n" +

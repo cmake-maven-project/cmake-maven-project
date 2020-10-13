@@ -13,8 +13,6 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.function.Function;
 
 /**
  * An operating system.
@@ -169,20 +167,13 @@ public final class OperatingSystem
 
 	/**
 	 * @param processBuilder a {@code ProcessBuilder}
-	 * @return the environment variables associated with the processBuilder
+	 * @param name           an environment variable
+	 * @return the value of the environment variable
 	 */
-	public Function<String, String> environment(ProcessBuilder processBuilder)
+	public String getEnvironment(ProcessBuilder processBuilder, String name)
 	{
-		// WORKAROUND: https://bugs.openjdk.java.net/browse/JDK-8245431
-		if (type == Type.WINDOWS)
-		{
-			// Map the case-insensitive name to its original value
-			TreeMap<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-			for (String name : processBuilder.environment().keySet())
-				map.put(name, name);
-			return map::get;
-		}
-		return input -> input;
+		Map<String, String> environment = processBuilder.environment();
+		return environment.get(type.getEnvironmentCanonicalName(environment, name));
 	}
 
 	/**
@@ -200,7 +191,6 @@ public final class OperatingSystem
 			return;
 
 		Map<String, String> environment = target.environment();
-		Function<String, String> nameToCanonicalName = environment(target);
 		for (Entry<String, String> entry : source.entrySet())
 		{
 			String value = entry.getValue();
@@ -212,7 +202,7 @@ public final class OperatingSystem
 				value = "";
 			}
 			String name = entry.getKey();
-			name = nameToCanonicalName.apply(name);
+			name = type.getEnvironmentCanonicalName(environment, name);
 			environment.put(name, value);
 		}
 	}
@@ -287,9 +277,34 @@ public final class OperatingSystem
 	 */
 	public enum Type
 	{
-		WINDOWS,
-		LINUX,
-		MAC;
+		WINDOWS
+			{
+				@Override
+				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
+				{
+					// WORKAROUND: https://bugs.openjdk.java.net/browse/JDK-8245431
+					for (String canonicalName : environment.keySet())
+						if (canonicalName.equalsIgnoreCase(name))
+							return canonicalName;
+					return null;
+				}
+			},
+		LINUX
+			{
+				@Override
+				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
+				{
+					return name;
+				}
+			},
+		MAC
+			{
+				@Override
+				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
+				{
+					return name;
+				}
+			};
 
 		private static final Reference<Type> DETECTED = ConcurrentLazyReference.create(() ->
 		{
@@ -322,5 +337,12 @@ public final class OperatingSystem
 		{
 			return str.regionMatches(true, 0, prefix, 0, prefix.length());
 		}
+
+		/**
+		 * @param environment a {@code ProcessBuilder}'s environment variables
+		 * @param name        an environment variable
+		 * @return the case-sensitive form of the variable
+		 */
+		abstract String getEnvironmentCanonicalName(Map<String, String> environment, String name);
 	}
 }
