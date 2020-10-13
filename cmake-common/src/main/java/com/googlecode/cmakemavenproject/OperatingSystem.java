@@ -25,24 +25,7 @@ public final class OperatingSystem
 	{
 		Type type = Type.detected();
 		Architecture architecture = Architecture.detected();
-		String pathName;
-		switch (type)
-		{
-			case WINDOWS:
-			{
-				pathName = "Path";
-				break;
-			}
-			case LINUX:
-			case MAC:
-			{
-				pathName = "PATH";
-				break;
-			}
-			default:
-				throw new UnsupportedOperationException("Unsupported operating system: " + type);
-		}
-		return new OperatingSystem(type, architecture, pathName);
+		return new OperatingSystem(type, architecture);
 	});
 
 	/**
@@ -56,10 +39,6 @@ public final class OperatingSystem
 
 	public final Type type;
 	public final Architecture architecture;
-	/**
-	 * The name of the PATH environment variable.
-	 */
-	public final String pathName;
 
 	/**
 	 * @return the classifier associated with this operating system
@@ -84,13 +63,9 @@ public final class OperatingSystem
 					return "mac-x86_64";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case WINDOWS:
-				switch (architecture)
-				{
-					case X86_64:
-						return "windows-x86_64";
-					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
-				}
+				if (architecture == Architecture.X86_64)
+					return "windows-x86_64";
+				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			default:
 				throw new UnsupportedOperationException("Unsupported operating system: " + type);
 		}
@@ -127,7 +102,7 @@ public final class OperatingSystem
 			if (Files.isRegularFile(result) && Files.isExecutable(result))
 				return result;
 		}
-		throw new FileNotFoundException(filename + " not found on " + pathName + ": " + path);
+		throw new FileNotFoundException(filename + " not found on PATH: " + path);
 	}
 
 	/**
@@ -157,25 +132,17 @@ public final class OperatingSystem
 		switch (type)
 		{
 			case LINUX:
-				switch (architecture)
-				{
-					case X86_64:
-						return "Linux-x86_64.tar.gz";
-					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
-				}
+				if (architecture == Architecture.X86_64)
+					return "Linux-x86_64.tar.gz";
+				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case MAC:
 				if (architecture == Architecture.X86_64)
 					return "Darwin-x86_64.tar.gz";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case WINDOWS:
-				switch (architecture)
-				{
-					case X86_64:
-						return "win64-x64.zip";
-					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
-				}
+				if (architecture == Architecture.X86_64)
+					return "win64-x64.zip";
+				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			default:
 				throw new UnsupportedOperationException("Unsupported operating system: " + type);
 		}
@@ -201,29 +168,39 @@ public final class OperatingSystem
 	}
 
 	/**
-	 * Overrides environment variables.
+	 * @param processBuilder a {@code ProcessBuilder}
+	 * @return the environment variables associated with the processBuilder
+	 */
+	public Function<String, String> environment(ProcessBuilder processBuilder)
+	{
+		// WORKAROUND: https://bugs.openjdk.java.net/browse/JDK-8245431
+		if (type == Type.WINDOWS)
+		{
+			// Map the case-insensitive name to its original value
+			TreeMap<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+			for (String name : processBuilder.environment().keySet())
+				map.put(name, name);
+			return map::get;
+		}
+		return input -> input;
+	}
+
+	/**
+	 * Overrides the environment variables of a process builder.
 	 *
 	 * @param source new environment variables
 	 * @param target existing environment variables
 	 * @throws NullPointerException if any of the arguments are null
 	 */
-	public void overrideEnvironmentVariables(Map<String, String> source, Map<String, String> target)
+	public void overrideEnvironmentVariables(Map<String, String> source, ProcessBuilder target)
 	{
 		assert (source != null);
 		assert (target != null);
+		if (source.isEmpty())
+			return;
 
-		Function<String, String> nameToCanonicalName;
-		if (type == Type.WINDOWS)
-		{
-			// Map the case-insensitive name to its original value
-			TreeMap<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-			for (String name : target.keySet())
-				map.put(name, name);
-			nameToCanonicalName = map::get;
-		}
-		else
-			nameToCanonicalName = input -> input;
-
+		Map<String, String> environment = target.environment();
+		Function<String, String> nameToCanonicalName = environment(target);
 		for (Entry<String, String> entry : source.entrySet())
 		{
 			String value = entry.getValue();
@@ -236,30 +213,27 @@ public final class OperatingSystem
 			}
 			String name = entry.getKey();
 			name = nameToCanonicalName.apply(name);
-			target.put(name, value);
+			environment.put(name, value);
 		}
 	}
 
 	/**
 	 * @param type         the type of the operating system
 	 * @param architecture the architecture of the operating system
-	 * @param pathName     the name of the PATH environment variable
 	 * @throws AssertionError if any of the arguments are null
 	 */
-	OperatingSystem(Type type, Architecture architecture, String pathName)
+	OperatingSystem(Type type, Architecture architecture)
 	{
 		assert (type != null) : "type may not be null";
 		assert (architecture != null) : "architecture may not be null";
-		assert (pathName != null) : "pathName may not be null";
 		this.type = type;
 		this.architecture = architecture;
-		this.pathName = pathName;
 	}
 
 	@Override
 	public String toString()
 	{
-		return type + " " + architecture + ", PATH: " + pathName;
+		return type + " " + architecture;
 	}
 
 	/**
@@ -320,11 +294,11 @@ public final class OperatingSystem
 		private static final Reference<Type> DETECTED = ConcurrentLazyReference.create(() ->
 		{
 			String osName = System.getProperty("os.name");
-			if (startsWith(osName, "windows", true))
+			if (startsWithIgnoreCase(osName, "windows"))
 				return WINDOWS;
-			if (startsWith(osName, "linux", true))
+			if (startsWithIgnoreCase(osName, "linux"))
 				return LINUX;
-			if (startsWith(osName, "mac", true))
+			if (startsWithIgnoreCase(osName, "mac"))
 				return MAC;
 			throw new AssertionError("Unsupported operating system: " + osName + "\n" +
 				"properties: " + System.getProperties());
@@ -339,15 +313,14 @@ public final class OperatingSystem
 		}
 
 		/**
-		 * @param str        a string
-		 * @param prefix     a prefix
-		 * @param ignoreCase {@code true} if case should be ignored when comparing characters
+		 * @param str    a string
+		 * @param prefix a prefix
 		 * @return true if {@code start} starts with {@code prefix}, disregarding case sensitivity
 		 * @throws NullPointerException if any of the arguments are null
 		 */
-		private static boolean startsWith(String str, String prefix, boolean ignoreCase)
+		private static boolean startsWithIgnoreCase(String str, String prefix)
 		{
-			return str.regionMatches(ignoreCase, 0, prefix, 0, prefix.length());
+			return str.regionMatches(true, 0, prefix, 0, prefix.length());
 		}
 	}
 }

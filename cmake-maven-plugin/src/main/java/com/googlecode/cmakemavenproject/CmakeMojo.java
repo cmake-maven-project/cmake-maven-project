@@ -103,11 +103,11 @@ public abstract class CmakeMojo extends AbstractMojo
 		Path cmakeDir = getCmakeDir();
 		if (cmakeDir == null)
 		{
-			getLog().info("Executing " + filename + " on " + os.pathName);
-			String path = processBuilder.environment().get(os.pathName);
+			getLog().info("Executing " + filename + " on PATH");
+			String path = os.environment(processBuilder).apply("PATH");
 			if (path == null)
 			{
-				throw new IllegalArgumentException(os.pathName + " not found\n" +
+				throw new IllegalArgumentException("PATH not found\n" +
 					"env: " + processBuilder.environment());
 			}
 			return os.getExecutableOnPath(filename, path);
@@ -159,9 +159,6 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	public void overrideEnvironmentVariables(ProcessBuilder processBuilder)
 	{
-		if (environmentVariables == null)
-			return;
-		Map<String, String> env = processBuilder.environment();
-		os.overrideEnvironmentVariables(environmentVariables, env);
+		os.overrideEnvironmentVariables(environmentVariables, processBuilder);
 	}
 }
