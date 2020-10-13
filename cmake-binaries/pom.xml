@@ -15,7 +15,6 @@
 			<plugin>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>cmake-binaries-plugin</artifactId>
-				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>cmake-binaries</id>

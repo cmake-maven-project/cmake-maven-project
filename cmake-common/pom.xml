@@ -13,12 +13,10 @@
 		<dependency>
 			<groupId>org.bitbucket.cowwoc.pouch</groupId>
 			<artifactId>pouch</artifactId>
-			<version>1.14</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>1.19</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
