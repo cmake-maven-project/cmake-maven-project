@@ -47,6 +47,7 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	@Parameter
 	private List<String> options;
+	private final OperatingSystem os = OperatingSystem.detected();
 
 	/**
 	 * Downloads cmake if necessary.
@@ -78,7 +79,6 @@ public abstract class CmakeMojo extends AbstractMojo
 		Element groupIdElement = new Element("groupId", groupId);
 		Element artifactIdElement = new Element("artifactId", binariesArtifact);
 		Element versionElement = new Element("version", version);
-		OperatingSystem os = OperatingSystem.detected();
 		Element classifierElement = new Element("classifier", os.getClassifier());
 		Element outputDirectoryElement = new Element("outputDirectory", outputDirectory.toString());
 		Element artifactItemElement = new Element("artifactItem", groupIdElement, artifactIdElement,
@@ -100,7 +100,6 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	public Path getBinaryPath(String filename, ProcessBuilder processBuilder) throws FileNotFoundException
 	{
-		OperatingSystem os = OperatingSystem.detected();
 		Path cmakeDir = getCmakeDir();
 		if (cmakeDir == null)
 		{
@@ -157,6 +156,6 @@ public abstract class CmakeMojo extends AbstractMojo
 		if (environmentVariables == null)
 			return;
 		Map<String, String> env = processBuilder.environment();
-		Mojos.overrideEnvironmentVariables(environmentVariables, env);
+		os.overrideEnvironmentVariables(environmentVariables, env);
 	}
 }

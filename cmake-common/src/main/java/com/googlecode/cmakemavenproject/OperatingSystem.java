@@ -11,6 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.function.Function;
 
 /**
  * An operating system.
@@ -195,6 +199,46 @@ public final class OperatingSystem
 	}
 
 	/**
+	 * Overrides environment variables.
+	 *
+	 * @param source new environment variables
+	 * @param target existing environment variables
+	 * @throws NullPointerException if any of the arguments are null
+	 */
+	public void overrideEnvironmentVariables(Map<String, String> source, Map<String, String> target)
+	{
+		assert (source != null);
+		assert (target != null);
+
+		Function<String, String> nameToCanonicalName;
+		if (type == Type.WINDOWS)
+		{
+			// Map the case-insensitive name to its original value
+			TreeMap<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+			for (String name : target.keySet())
+				map.put(name, name);
+			nameToCanonicalName = map::get;
+		}
+		else
+			nameToCanonicalName = input -> input;
+
+		for (Entry<String, String> entry : source.entrySet())
+		{
+			String value = entry.getValue();
+			if (value == null)
+			{
+				// Maven converts empty properties to null and Linux does not support null values,
+				// so we convert them back to empty strings:
+				// https://github.com/cmake-maven-project/cmake-maven-project/issues/11
+				value = "";
+			}
+			String name = entry.getKey();
+			name = nameToCanonicalName.apply(name);
+			target.put(name, value);
+		}
+	}
+
+	/**
 	 * @param type         the type of the operating system
 	 * @param architecture the architecture of the operating system
 	 * @param pathName     the name of the PATH environment variable
@@ -299,7 +343,7 @@ public final class OperatingSystem
 		 * @return true if {@code start} starts with {@code prefix}, disregarding case sensitivity
 		 * @throws NullPointerException if any of the arguments are null
 		 */
-		public static boolean startsWith(String str, String prefix, boolean ignoreCase)
+		private static boolean startsWith(String str, String prefix, boolean ignoreCase)
 		{
 			return str.regionMatches(ignoreCase, 0, prefix, 0, prefix.length());
 		}

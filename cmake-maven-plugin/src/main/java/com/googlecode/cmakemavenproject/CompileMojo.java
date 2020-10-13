@@ -80,8 +80,8 @@ public class CompileMojo extends CmakeMojo
 				log.debug("projectDirectory: " + projectDirectory);
 				log.debug("target: " + target);
 				log.debug("config: " + config);
-				log.debug("environment: " + processBuilder.environment());
-				log.debug("command-line: " + processBuilder.command());
+				log.debug("Environment: " + processBuilder.environment());
+				log.debug("Command-line: " + processBuilder.command());
 			}
 			int returnCode = Mojos.waitFor(processBuilder, getLog());
 			if (returnCode != 0)

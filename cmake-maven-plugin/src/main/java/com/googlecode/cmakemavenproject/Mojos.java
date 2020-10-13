@@ -5,8 +5,6 @@ import org.apache.maven.plugin.logging.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Mojo helper functions.
@@ -47,31 +45,6 @@ public class Mojos
 			log.warn("Exit code: " + result);
 		}
 		return result;
-	}
-
-	/**
-	 * Overrides environment variables.
-	 *
-	 * @param source new environment variables
-	 * @param target existing environment variables
-	 */
-	public static void overrideEnvironmentVariables(Map<String, String> source,
-	                                                Map<String, String> target)
-	{
-		assert (source != null);
-		assert (target != null);
-		for (Entry<String, String> entry : source.entrySet())
-		{
-			String value = entry.getValue();
-			if (value == null)
-			{
-				// Maven converts empty properties to null and Linux does not support null values,
-				// so we convert them back to empty strings:
-				// https://github.com/cmake-maven-project/cmake-maven-project/issues/11
-				value = "";
-			}
-			target.put(entry.getKey(), value);
-		}
 	}
 
 	/**
