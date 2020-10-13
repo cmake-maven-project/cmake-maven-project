@@ -159,6 +159,8 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	public void overrideEnvironmentVariables(ProcessBuilder processBuilder)
 	{
+		if (environmentVariables == null)
+			return;
 		os.overrideEnvironmentVariables(environmentVariables, processBuilder);
 	}
 }
