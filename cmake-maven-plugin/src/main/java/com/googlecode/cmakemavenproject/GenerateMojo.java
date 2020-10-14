@@ -78,8 +78,8 @@ public class GenerateMojo extends CmakeMojo
 			{
 				log.debug("sourcePath: " + sourcePath);
 				log.debug("targetPath: " + targetPath);
-				log.debug("environment: " + processBuilder.environment());
-				log.debug("command-line: " + processBuilder.command());
+				log.debug("Environment: " + processBuilder.environment());
+				log.debug("Command-line: " + processBuilder.command());
 			}
 			int returnCode = Mojos.waitFor(processBuilder, getLog());
 			if (returnCode != 0)

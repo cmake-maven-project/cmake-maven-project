@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * An operating system.
@@ -21,24 +23,7 @@ public final class OperatingSystem
 	{
 		Type type = Type.detected();
 		Architecture architecture = Architecture.detected();
-		String pathName;
-		switch (type)
-		{
-			case WINDOWS:
-			{
-				pathName = "Path";
-				break;
-			}
-			case LINUX:
-			case MAC:
-			{
-				pathName = "PATH";
-				break;
-			}
-			default:
-				throw new UnsupportedOperationException("Unsupported operating system: " + type);
-		}
-		return new OperatingSystem(type, architecture, pathName);
+		return new OperatingSystem(type, architecture);
 	});
 
 	/**
@@ -52,10 +37,6 @@ public final class OperatingSystem
 
 	public final Type type;
 	public final Architecture architecture;
-	/**
-	 * The name of the PATH environment variable.
-	 */
-	public final String pathName;
 
 	/**
 	 * @return the classifier associated with this operating system
@@ -80,13 +61,9 @@ public final class OperatingSystem
 					return "mac-x86_64";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case WINDOWS:
-				switch (architecture)
-				{
-					case X86_64:
-						return "windows-x86_64";
-					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
-				}
+				if (architecture == Architecture.X86_64)
+					return "windows-x86_64";
+				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			default:
 				throw new UnsupportedOperationException("Unsupported operating system: " + type);
 		}
@@ -96,32 +73,34 @@ public final class OperatingSystem
 	 * @param filename the filename of a binary
 	 * @param path     the {@code PATH} environment variable
 	 * @return the fully-qualified path of the executable
+	 * @throws NullPointerException  if any of the arguments are null
 	 * @throws FileNotFoundException if the binary could not be found
 	 */
 	public Path getExecutableOnPath(String filename, String path) throws FileNotFoundException
 	{
+		if (filename == null)
+			throw new NullPointerException("filename may not be null");
+		if (path == null)
+			throw new NullPointerException("path may not be null");
 		// Per https://stackoverflow.com/a/34061154/14731 it's easier to invoke a fully-qualified path
 		// than trying to quote command-line arguments properly.
 		// https://stackoverflow.com/a/32827512/14731 shows how this can be done.
-		if (path != null)
+		String suffix = getExecutableSuffix();
+		for (String dirname : path.split(File.pathSeparator))
 		{
-			String suffix = getExecutableSuffix();
-			for (String dirname : path.split(File.pathSeparator))
+			// Strip leading/trailing quotes
+			dirname = dirname.trim();
+			if (dirname.length() >= 2 &&
+				(dirname.startsWith("\"") && dirname.endsWith("\"")) ||
+				(dirname.startsWith("'") && dirname.endsWith("'")))
 			{
-				// Strip leading/trailing quotes
-				dirname = dirname.trim();
-				if (dirname.length() >= 2 &&
-					(dirname.startsWith("\"") && dirname.endsWith("\"")) ||
-					(dirname.startsWith("'") && dirname.endsWith("'")))
-				{
-					dirname = dirname.substring(1, dirname.length() - 1);
-				}
-				Path result = Paths.get(dirname, filename + suffix);
-				if (Files.isRegularFile(result) && Files.isExecutable(result))
-					return result;
+				dirname = dirname.substring(1, dirname.length() - 1);
 			}
+			Path result = Paths.get(dirname, filename + suffix);
+			if (Files.isRegularFile(result) && Files.isExecutable(result))
+				return result;
 		}
-		throw new FileNotFoundException(filename + " not found on " + pathName + ": " + path);
+		throw new FileNotFoundException(filename + " not found on PATH: " + path);
 	}
 
 	/**
@@ -151,25 +130,17 @@ public final class OperatingSystem
 		switch (type)
 		{
 			case LINUX:
-				switch (architecture)
-				{
-					case X86_64:
-						return "Linux-x86_64.tar.gz";
-					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
-				}
+				if (architecture == Architecture.X86_64)
+					return "Linux-x86_64.tar.gz";
+				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case MAC:
 				if (architecture == Architecture.X86_64)
 					return "Darwin-x86_64.tar.gz";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case WINDOWS:
-				switch (architecture)
-				{
-					case X86_64:
-						return "win64-x64.zip";
-					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
-				}
+				if (architecture == Architecture.X86_64)
+					return "win64-x64.zip";
+				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			default:
 				throw new UnsupportedOperationException("Unsupported operating system: " + type);
 		}
@@ -195,25 +166,64 @@ public final class OperatingSystem
 	}
 
 	/**
+	 * @param processBuilder a {@code ProcessBuilder}
+	 * @param name           an environment variable
+	 * @return the value of the environment variable
+	 */
+	public String getEnvironment(ProcessBuilder processBuilder, String name)
+	{
+		Map<String, String> environment = processBuilder.environment();
+		return environment.get(type.getEnvironmentCanonicalName(environment, name));
+	}
+
+	/**
+	 * Overrides the environment variables of a process builder.
+	 *
+	 * @param source new environment variables
+	 * @param target existing environment variables
+	 * @throws NullPointerException if any of the arguments are null
+	 */
+	public void overrideEnvironmentVariables(Map<String, String> source, ProcessBuilder target)
+	{
+		assert (source != null);
+		assert (target != null);
+		if (source.isEmpty())
+			return;
+
+		Map<String, String> environment = target.environment();
+		for (Entry<String, String> entry : source.entrySet())
+		{
+			String value = entry.getValue();
+			if (value == null)
+			{
+				// Maven converts empty properties to null and Linux does not support null values,
+				// so we convert them back to empty strings:
+				// https://github.com/cmake-maven-project/cmake-maven-project/issues/11
+				value = "";
+			}
+			String name = entry.getKey();
+			name = type.getEnvironmentCanonicalName(environment, name);
+			environment.put(name, value);
+		}
+	}
+
+	/**
 	 * @param type         the type of the operating system
 	 * @param architecture the architecture of the operating system
-	 * @param pathName     the name of the PATH environment variable
 	 * @throws AssertionError if any of the arguments are null
 	 */
-	OperatingSystem(Type type, Architecture architecture, String pathName)
+	OperatingSystem(Type type, Architecture architecture)
 	{
 		assert (type != null) : "type may not be null";
 		assert (architecture != null) : "architecture may not be null";
-		assert (pathName != null) : "pathName may not be null";
 		this.type = type;
 		this.architecture = architecture;
-		this.pathName = pathName;
 	}
 
 	@Override
 	public String toString()
 	{
-		return type + " " + architecture + ", PATH: " + pathName;
+		return type + " " + architecture;
 	}
 
 	/**
@@ -267,18 +277,43 @@ public final class OperatingSystem
 	 */
 	public enum Type
 	{
-		WINDOWS,
-		LINUX,
-		MAC;
+		WINDOWS
+			{
+				@Override
+				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
+				{
+					// WORKAROUND: https://bugs.openjdk.java.net/browse/JDK-8245431
+					for (String canonicalName : environment.keySet())
+						if (canonicalName.equalsIgnoreCase(name))
+							return canonicalName;
+					return null;
+				}
+			},
+		LINUX
+			{
+				@Override
+				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
+				{
+					return name;
+				}
+			},
+		MAC
+			{
+				@Override
+				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
+				{
+					return name;
+				}
+			};
 
 		private static final Reference<Type> DETECTED = ConcurrentLazyReference.create(() ->
 		{
 			String osName = System.getProperty("os.name");
-			if (startsWith(osName, "windows", true))
+			if (startsWithIgnoreCase(osName, "windows"))
 				return WINDOWS;
-			if (startsWith(osName, "linux", true))
+			if (startsWithIgnoreCase(osName, "linux"))
 				return LINUX;
-			if (startsWith(osName, "mac", true))
+			if (startsWithIgnoreCase(osName, "mac"))
 				return MAC;
 			throw new AssertionError("Unsupported operating system: " + osName + "\n" +
 				"properties: " + System.getProperties());
@@ -293,15 +328,21 @@ public final class OperatingSystem
 		}
 
 		/**
-		 * @param str        a string
-		 * @param prefix     a prefix
-		 * @param ignoreCase {@code true} if case should be ignored when comparing characters
+		 * @param str    a string
+		 * @param prefix a prefix
 		 * @return true if {@code start} starts with {@code prefix}, disregarding case sensitivity
 		 * @throws NullPointerException if any of the arguments are null
 		 */
-		public static boolean startsWith(String str, String prefix, boolean ignoreCase)
+		private static boolean startsWithIgnoreCase(String str, String prefix)
 		{
-			return str.regionMatches(ignoreCase, 0, prefix, 0, prefix.length());
+			return str.regionMatches(true, 0, prefix, 0, prefix.length());
 		}
+
+		/**
+		 * @param environment a {@code ProcessBuilder}'s environment variables
+		 * @param name        an environment variable
+		 * @return the case-sensitive form of the variable
+		 */
+		abstract String getEnvironmentCanonicalName(Map<String, String> environment, String name);
 	}
 }

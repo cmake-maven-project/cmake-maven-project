@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>cmake</artifactId>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
-		<version>3.17.3-b2-SNAPSHOT</version>
+		<version>3.18.4-b2-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>cmake-common</artifactId>
@@ -13,12 +13,10 @@
 		<dependency>
 			<groupId>org.bitbucket.cowwoc.pouch</groupId>
 			<artifactId>pouch</artifactId>
-			<version>1.14</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>1.19</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
