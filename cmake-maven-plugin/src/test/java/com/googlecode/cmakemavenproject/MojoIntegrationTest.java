@@ -1,5 +1,3 @@
-package com.googlecode.cmakemavenproject;
-
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
  *
@@ -13,10 +11,11 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.googlecode.cmakemavenproject;
 
 import org.apache.maven.it.VerificationException;
 import org.apache.maven.it.Verifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
@@ -25,7 +24,7 @@ import java.io.IOException;
  *
  * @author <a href="mailto:ksclarke@gmail.com">Kevin S. Clarke</a>
  */
-public class TestMojoIntegrationTest extends CMakeMojoIntegrationTest
+public class MojoIntegrationTest extends AbstractIntegrationTest
 {
 	/**
 	 * Runs the hello-world-test.

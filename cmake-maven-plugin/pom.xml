@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.18.4-b2-SNAPSHOT</version>
+		<version>3.19.2-b1-SNAPSHOT</version>
 	</parent>
 	<prerequisites>
 		<maven>${maven.version}</maven>
@@ -112,13 +112,6 @@
 						</goals>
 						<phase>integration-test</phase>
 						<configuration>
-							<!-- Our tests shouldn't be run as unit tests -->
-							<includes>
-								<include>**/*IntegrationSuite.java</include>
-							</includes>
-							<excludes>
-								<exclude>**/*IntegrationTest.java</exclude>
-							</excludes>
 							<systemPropertyVariables>
 								<!-- Pass parameters onto our test projects -->
 								<cmake.plugin.groupid>${project.groupId}</cmake.plugin.groupid>
@@ -160,6 +153,7 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>cmake-common</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<!-- Below here are testing dependencies -->
 		<dependency>
@@ -168,8 +162,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
