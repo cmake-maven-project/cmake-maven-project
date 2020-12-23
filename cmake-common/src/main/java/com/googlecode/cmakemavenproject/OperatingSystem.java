@@ -141,7 +141,7 @@ public final class OperatingSystem
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case MAC:
 				if (architecture == Architecture.X86_64)
-					return "Darwin-x86_64.tar.gz";
+					return "universal.tar.gz";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case WINDOWS:
 				if (architecture == Architecture.X86_64)
