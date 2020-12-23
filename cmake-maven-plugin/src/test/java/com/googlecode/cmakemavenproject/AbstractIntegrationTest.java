@@ -1,5 +1,3 @@
-package com.googlecode.cmakemavenproject;
-
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
  *
@@ -13,6 +11,7 @@ package com.googlecode.cmakemavenproject;
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.googlecode.cmakemavenproject;
 
 import org.apache.maven.it.VerificationException;
 import org.apache.maven.it.Verifier;
@@ -27,7 +26,7 @@ import java.util.Properties;
  *
  * @author <a href="mailto:ksclarke@gmail.com">Kevin S. Clarke</a>
  */
-public abstract class CMakeMojoIntegrationTest
+public abstract class AbstractIntegrationTest
 {
 	// Maven settings.xml file to be used for the test projects
 	private static final String SETTINGS = "/settings.xml";
@@ -54,7 +53,7 @@ public abstract class CMakeMojoIntegrationTest
 	 */
 	protected Verifier getVerifier(String testName) throws IOException, VerificationException
 	{
-		Class<? extends CMakeMojoIntegrationTest> cls = getClass();
+		Class<? extends AbstractIntegrationTest> cls = getClass();
 		String name = testName.startsWith("/") ? testName : "/" + testName;
 		File config = ResourceExtractor.simpleExtractResources(cls, SETTINGS);
 		File test = ResourceExtractor.simpleExtractResources(cls, name);
