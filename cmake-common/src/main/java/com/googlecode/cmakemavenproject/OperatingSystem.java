@@ -35,7 +35,13 @@ public final class OperatingSystem
 		return DETECTED.getValue();
 	}
 
+	/**
+	 * The type of the operating system.
+	 */
 	public final Type type;
+	/**
+	 * The architecture of the operating system.
+	 */
 	public final Architecture architecture;
 
 	/**
@@ -233,7 +239,13 @@ public final class OperatingSystem
 	 */
 	public enum Architecture
 	{
+		/**
+		 * x86, 32-bit.
+		 */
 		X86_32,
+		/**
+		 * x86, 64-bit.
+		 */
 		X86_64;
 
 		private static final Reference<Architecture> DETECTED = ConcurrentLazyReference.create(() ->
@@ -277,6 +289,9 @@ public final class OperatingSystem
 	 */
 	public enum Type
 	{
+		/**
+		 * Windows.
+		 */
 		WINDOWS
 			{
 				@Override
@@ -286,9 +301,12 @@ public final class OperatingSystem
 					for (String canonicalName : environment.keySet())
 						if (canonicalName.equalsIgnoreCase(name))
 							return canonicalName;
-					return null;
+					return name;
 				}
 			},
+		/**
+		 * Linux.
+		 */
 		LINUX
 			{
 				@Override
@@ -297,6 +315,9 @@ public final class OperatingSystem
 					return name;
 				}
 			},
+		/**
+		 * macOS.
+		 */
 		MAC
 			{
 				@Override
