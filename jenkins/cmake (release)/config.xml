@@ -1,5 +1,5 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.36">
+<flow-definition plugin="workflow-job@2.40">
   <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
@@ -14,20 +14,20 @@
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <com.gem.persistentparameter.PersistentStringParameterDefinition plugin="persistent-parameter@1.1">
+        <com.gem.persistentparameter.PersistentStringParameterDefinition plugin="persistent-parameter@1.2">
           <name>branch</name>
           <description>What branch should be built?</description>
           <defaultValue>master</defaultValue>
           <successfulOnly>true</successfulOnly>
         </com.gem.persistentparameter.PersistentStringParameterDefinition>
-        <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.4">
+        <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.5">
           <name>releaseVersion</name>
           <description>What version number should be released?</description>
           <defaultValue></defaultValue>
           <regex>\d+\.\d+\.\d+-b\d+</regex>
           <failedValidationMessage>releaseVersion number must have format: &lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;-b&lt;build&gt;</failedValidationMessage>
         </hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition>
-        <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.4">
+        <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.5">
           <name>nextVersion</name>
           <description>What SNAPSHOT version should be used after the release?</description>
           <defaultValue></defaultValue>
@@ -36,7 +36,7 @@
         </hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.3">
       <maxConcurrentPerNode>0</maxConcurrentPerNode>
       <maxConcurrentTotal>0</maxConcurrentTotal>
       <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
@@ -49,7 +49,7 @@
       <triggers/>
     </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.78">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.87">
     <script>// Command-line options (taken from https://jenkins.io/doc/pipeline/examples/):
 // --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
 // -V : strongly recommended in CI, will display the JDK and Maven versions in use.
@@ -74,7 +74,7 @@ node(&quot;linux&quot;)
     // http://stackoverflow.com/a/33630506/14731
     withCredentials([[$class: &quot;UsernamePasswordMultiBinding&quot;, credentialsId: &quot;github&quot;, usernameVariable: &quot;GIT_USERNAME&quot;, passwordVariable: &quot;GIT_PASSWORD&quot;]])
     {
-        def authenticatedRepository = &quot;https://${GIT_USERNAME}:${GIT_PASSWORD}@${unauthenticatedRepository}&quot;
+        def authenticatedRepository = &apos;https://${GIT_USERNAME}:${GIT_PASSWORD}@&apos; + unauthenticatedRepository
         timeout(10)
         {
             stage(&quot;Checkout (linux)&quot;)
@@ -86,7 +86,7 @@ node(&quot;linux&quot;)
         }
         timeout(10)
         {
-            withEnv([&quot;JAVA_HOME=${ tool &quot;JAVA_HOME&quot; }&quot;, &quot;GIT_HOME=${ tool &quot;git&quot; }&quot;, &quot;PATH+MAVEN+GIT=${tool &quot;Maven&quot;}/bin:${tool &quot;git&quot;}:${env.JAVA_HOME}/bin&quot;])
+            withEnv([&quot;JAVA_HOME=${tool &quot;JAVA_HOME&quot;}&quot;, &quot;GIT_HOME=${tool &quot;git&quot;}&quot;, &quot;PATH+MAVEN+GIT=${tool &quot;Maven&quot;}/bin:${tool &quot;git&quot;}:${env.JAVA_HOME}/bin&quot;])
             {
                 stage(&quot;Create release tag&quot;)
                 {
@@ -152,7 +152,7 @@ try
                         {
                             // Deploy both Java and native artifacts
                             sh script: &quot;&quot;&quot;mvn --batch-mode -e -V -U -Dsurefire.useFile=false install
-                              mvn --batch-mode -e -V -U -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Ddeploy deploy&quot;&quot;&quot;
+                              mvn --batch-mode -e -V -U -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Ddeploy -Dportable deploy&quot;&quot;&quot;
                             archiveArtifacts artifacts: &quot;**/target/*.jar&quot;, excludes: &quot;**/target/test-classes/**&quot;
                         }
                     }
