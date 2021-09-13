@@ -118,7 +118,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
 
 The following projects contain examples of how to use this plugin:
 
-[Requirements API](https://bitbucket.org/cowwoc/requirements.java/src/759c13be200744e31f0d3f1c6df5d49ac079dfbf/natives/pom.xml#lines-69)
+[Requirements API](https://github.com/cowwoc/requirements.java/blob/ed0fb648947284ddb1a28959bf8003c0807e3bef/natives/pom.xml#L69)
 
 ### Building instructions
 
