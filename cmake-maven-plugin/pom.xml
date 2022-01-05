@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.19.2-b2-SNAPSHOT</version>
+		<version>3.22.1-b1-SNAPSHOT</version>
 	</parent>
 	<prerequisites>
 		<maven>${maven.version}</maven>
@@ -228,6 +228,24 @@
 				<os>
 					<family>mac</family>
 					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>cmake-binaries</artifactId>
+					<version>${project.version}</version>
+					<classifier>${platform}</classifier>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>mac-aarch64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
 				</os>
 			</activation>
 			<dependencies>

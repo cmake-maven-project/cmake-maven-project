@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>cmake</artifactId>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
-		<version>3.19.2-b2-SNAPSHOT</version>
+		<version>3.22.1-b1-SNAPSHOT</version>
 	</parent>
 	<artifactId>cmake-common</artifactId>
 	<dependencies>

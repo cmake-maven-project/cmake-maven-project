@@ -103,5 +103,19 @@
 				<!-- <generator>xcode</generator> -->
 			</properties>
 		</profile>
+		<profile>
+			<id>mac-aarch64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<generator>Unix Makefiles</generator>
+				<!-- with xcode -->
+				<!-- <generator>xcode</generator> -->
+			</properties>
+		</profile>
 	</profiles>
 </project>

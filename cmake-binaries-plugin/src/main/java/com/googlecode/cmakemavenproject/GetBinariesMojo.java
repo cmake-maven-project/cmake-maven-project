@@ -88,9 +88,8 @@ public class GetBinariesMojo
 			deleteRecursively(target);
 
 			// Directories not normalized, begin by unpacking the binaries
-			String majorVersion = getMajorVersion(cmakeVersion);
-			Path archive = download(new URL("https://cmake.org/files/v" + majorVersion + "/cmake-" +
-				cmakeVersion + "-" + suffix));
+			Path archive = download(new URL("https://github.com/Kitware/CMake/releases/download/v" + cmakeVersion +
+				"/cmake-" + cmakeVersion + "-" + suffix));
 			Log log = getLog();
 			if (log.isInfoEnabled())
 				log.info("Extracting " + archive + " to " + target);
@@ -124,26 +123,6 @@ public class GetBinariesMojo
 	}
 
 	/**
-	 * Returns the major version number of a version.
-	 *
-	 * @param version the full version number
-	 * @return the major version number
-	 * @throws NullPointerException     if version is null
-	 * @throws IllegalArgumentException if version is empty or has an unexpected format
-	 */
-	private String getMajorVersion(String version)
-	{
-		Preconditions.checkNotNull(version, "version may not be null");
-		Preconditions.checkArgument(!version.isEmpty(), "version may not be empty");
-
-		Pattern pattern = Pattern.compile("^[\\d]*\\.[\\d]*");
-		Matcher matcher = pattern.matcher(version);
-		if (!matcher.find())
-			throw new IllegalArgumentException("Unexpected version format: " + version);
-		return matcher.group();
-	}
-
-	/**
 	 * Downloads a file.
 	 *
 	 * @param url the file to download
@@ -160,7 +139,7 @@ public class GetBinariesMojo
 			{
 				Log log = getLog();
 				if (log.isInfoEnabled())
-					log.info("Downloading: " + url.toString());
+					log.info("Downloading: " + url);
 				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 				try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream()))
@@ -489,11 +468,10 @@ public class GetBinariesMojo
 	private void normalizeDirectories(final Path source) throws IOException
 	{
 		final Path[] topDirectory = new Path[1];
-		Files.walkFileTree(source, new SimpleFileVisitor<Path>()
+		Files.walkFileTree(source, new SimpleFileVisitor<>()
 		{
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-				throws IOException
 			{
 				if (dir.getFileName().toString().equals("bin"))
 				{
@@ -506,7 +484,7 @@ public class GetBinariesMojo
 		if (topDirectory[0] == null)
 			throw new IOException("Could not find \"bin\" in: " + source);
 
-		Files.walkFileTree(source, new SimpleFileVisitor<Path>()
+		Files.walkFileTree(source, new SimpleFileVisitor<>()
 		{
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -551,7 +529,7 @@ public class GetBinariesMojo
 		// BUG: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7148952
 		if (Files.notExists(path))
 			return;
-		Files.walkFileTree(path, new SimpleFileVisitor<Path>()
+		Files.walkFileTree(path, new SimpleFileVisitor<>()
 		{
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
