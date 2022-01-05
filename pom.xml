@@ -256,6 +256,7 @@
 										<echo>* linux-x86_64</echo>
 										<echo>* linux-arm_32</echo>
 										<echo>* mac-x86_64</echo>
+										<echo>* mac-aarch64</echo>
 										<echo/>
 										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
 										<echo/>
@@ -322,7 +323,22 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>mac-x86_64</platform>
+				<platform>mac-universal</platform>
+			</properties>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>mac-aarch64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<platform>mac-universal</platform>
 			</properties>
 			<modules>
 				<module>cmake-binaries</module>

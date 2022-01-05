@@ -155,7 +155,7 @@ public final class OperatingSystem
 				}
 			case WINDOWS:
 				if (architecture == Architecture.X86_64)
-					return "windows-x64.zip";
+					return "windows-x86_64.zip";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			default:
 				throw new UnsupportedOperationException("Unsupported operating system: " + type);
