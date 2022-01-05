@@ -1,11 +1,12 @@
 # CMake-Maven-Project [![build-status](../../workflows/Build/badge.svg)](../../actions?query=workflow%3ABuild)
 
-
 ## Introduction
 
-A Maven project for the CMake build system. It can be used by including it as a plugin within your Maven project's pom.xml file.
+A Maven project for the CMake build system. It can be used by including it as a plugin within your Maven
+project's pom.xml file.
 
-This repository [originally lived](https://code.google.com/p/cmake-maven-project/) on Google Code and was migrated to GitHub (and Git) after Google Code shut down.
+This repository [originally lived](https://code.google.com/p/cmake-maven-project/) on Google Code and was
+migrated to GitHub (and Git) after Google Code shut down.
 
 ## Sample Usage
 
@@ -14,7 +15,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.19.2-b1</version>
+      <version>3.22.1-b1</version>
       <executions>
         <execution>
           <id>cmake-generate</id>
@@ -32,7 +33,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
               <!--
               Optional: Overrides the default generator used by cmake.
               The list of available values can be found at 
-              https://cmake.org/cmake/help/v3.16/manual/cmake-generators.7.html
+              https://cmake.org/cmake/help/v3.22/manual/cmake-generators.7.html
               -->
             </generator>
             <environmentVariables>
@@ -44,7 +45,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
             </environmentVariables>
             <options>
               <!--
-              Optional: One or more options found at https://cmake.org/cmake/help/v3.16/manual/cmake.1.html
+              Optional: One or more options found at https://cmake.org/cmake/help/v3.22/manual/cmake.1.html
               For example:
               -->
               <option>-DBUILD_THIRDPARTY:bool=on</option>
@@ -59,7 +60,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.19.2-b1</version>
+      <version>3.22.1-b1</version>
       <executions>
         <execution>
           <id>cmake-compile</id>
@@ -89,7 +90,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.19.2-b1</version>
+      <version>3.22.1-b1</version>
       <executions>
         <execution>
           <id>cmake-test</id>
@@ -113,7 +114,7 @@ This repository [originally lived](https://code.google.com/p/cmake-maven-project
         </execution>
       </executions>
     </plugin>
-    
+
 ### Examples
 
 The following projects contain examples of how to use this plugin:
@@ -151,7 +152,7 @@ binaries for some platforms, such as Raspberry Pi. In such cases, users can inst
 
 1. Set `${cmake.download}` to `false`.
 2. Optionally set `${cmake.dir}` to the directory containing the binaries (e.g. `/usr/bin`). Otherwise, the
-plugin will expect the binaries to be on the PATH. 
+   plugin will expect the binaries to be on the PATH.
 
 That's it! To learn more about CMake itself, consult the [CMake.org](https://cmake.org/) website.
 

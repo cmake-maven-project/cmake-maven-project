@@ -88,7 +88,7 @@ public abstract class CmakeMojo extends AbstractMojo
 		ExecutionEnvironment environment = MojoExecutor.executionEnvironment(project, session,
 			pluginManager);
 		Plugin dependencyPlugin = MojoExecutor.plugin("org.apache.maven.plugins",
-			"maven-dependency-plugin", "3.1.1");
+			"maven-dependency-plugin", "3.2.0");
 		MojoExecutor.executeMojo(dependencyPlugin, "unpack", configuration, environment);
 	}
 

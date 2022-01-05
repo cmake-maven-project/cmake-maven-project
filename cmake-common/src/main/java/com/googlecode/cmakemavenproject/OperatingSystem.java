@@ -63,9 +63,14 @@ public final class OperatingSystem
 						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 				}
 			case MAC:
-				if (architecture == Architecture.X86_64)
-					return "mac-x86_64";
-				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				switch (architecture)
+				{
+					case X86_64:
+					case ARM_64:
+						return "mac-universal";
+					default:
+						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				}
 			case WINDOWS:
 				if (architecture == Architecture.X86_64)
 					return "windows-x86_64";
@@ -140,9 +145,14 @@ public final class OperatingSystem
 					return "Linux-x86_64.tar.gz";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case MAC:
-				if (architecture == Architecture.X86_64)
-					return "macos-universal.tar.gz";
-				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				switch (architecture)
+				{
+					case X86_64:
+					case ARM_64:
+						return "macos-universal.tar.gz";
+					default:
+						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				}
 			case WINDOWS:
 				if (architecture == Architecture.X86_64)
 					return "win64-x64.zip";
@@ -246,7 +256,11 @@ public final class OperatingSystem
 		/**
 		 * x86, 64-bit.
 		 */
-		X86_64;
+		X86_64,
+		/**
+		 * ARM, 64-bit.
+		 */
+		ARM_64;
 
 		private static final Reference<Architecture> DETECTED = ConcurrentLazyReference.create(() ->
 		{
@@ -269,6 +283,8 @@ public final class OperatingSystem
 				case "em64t":
 				case "x64":
 					return X86_64;
+				case "aarch64":
+					return ARM_64;
 				default:
 					throw new AssertionError("Unsupported architecture: " + osArch + "\n" +
 						"properties: " + System.getProperties());
