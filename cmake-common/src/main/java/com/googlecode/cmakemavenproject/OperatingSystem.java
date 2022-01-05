@@ -142,7 +142,7 @@ public final class OperatingSystem
 		{
 			case LINUX:
 				if (architecture == Architecture.X86_64)
-					return "Linux-x86_64.tar.gz";
+					return "linux-x86_64.tar.gz";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			case MAC:
 				switch (architecture)
@@ -155,7 +155,7 @@ public final class OperatingSystem
 				}
 			case WINDOWS:
 				if (architecture == Architecture.X86_64)
-					return "win64-x64.zip";
+					return "windows-x64.zip";
 				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 			default:
 				throw new UnsupportedOperationException("Unsupported operating system: " + type);
