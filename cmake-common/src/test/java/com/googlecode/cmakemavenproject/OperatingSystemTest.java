@@ -8,7 +8,7 @@ import java.util.Map;
 public final class OperatingSystemTest
 {
 	/**
-	 * OperatingSystem.overrideEnvironmentVariables() used to throws a NullPointerException if the key did not
+	 * OperatingSystem.overrideEnvironmentVariables() used to throw a NullPointerException if the key did not
 	 * already exist.
 	 */
 	@Test

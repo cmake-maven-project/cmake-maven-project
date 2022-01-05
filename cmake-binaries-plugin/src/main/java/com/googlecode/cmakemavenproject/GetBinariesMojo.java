@@ -452,7 +452,7 @@ public class GetBinariesMojo
 	{
 		Preconditions.checkNotNull(filename, "filename may not be null");
 
-		Pattern pattern = Pattern.compile("[^\\.]+(\\.[\\p{Alnum}]+)$");
+		Pattern pattern = Pattern.compile("[^.]+(\\.[\\p{Alnum}]+)$");
 		Matcher matcher = pattern.matcher(filename);
 		if (!matcher.find())
 			return "";
@@ -524,7 +524,7 @@ public class GetBinariesMojo
 	 */
 	private void deleteRecursively(Path path) throws IOException
 	{
-		// This method is vulnerable to race-conditions but it's the best we can do.
+		// This method is vulnerable to race-conditions, but it's the best we can do.
 		//
 		// BUG: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7148952
 		if (Files.notExists(path))
