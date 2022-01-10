@@ -132,12 +132,6 @@
 			<artifactId>mojo-executor</artifactId>
 		</dependency>
 
-		<!-- Upgrade transitive dependency of maven-plugin-plugin to avoid parsing error for Java9+ classes -->
-		<dependency>
-			<groupId>org.sonatype.sisu</groupId>
-			<artifactId>sisu-inject-plexus</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
