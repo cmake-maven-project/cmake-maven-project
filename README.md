@@ -137,6 +137,7 @@ By default, Maven will activate the right profile based on your JVM:
 * linux-x86_64
 * linux-arm_32
 * mac-x86_64
+* mac-aarch64
 
 If detection does not work, or you wish to override it then set `-P<profile>`.
 
