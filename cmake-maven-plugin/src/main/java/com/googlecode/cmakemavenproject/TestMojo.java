@@ -14,7 +14,6 @@
 package com.googlecode.cmakemavenproject;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -84,14 +83,13 @@ public class TestMojo extends CmakeMojo
 	 * Executes the CTest run.
 	 *
 	 * @throws MojoExecutionException if an unexpected problem occurs
-	 * @throws MojoFailureException   if the test(s) fail
 	 */
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException
+	public void execute() throws MojoExecutionException
 	{
 		Log log = getLog();
 
-		// Surefire skips tests with properties so we'll do it this way too
+		// Surefire skips tests with properties, so we'll do it this way too
 		if (skipTests || ctestSkip)
 		{
 			if (log.isInfoEnabled())
