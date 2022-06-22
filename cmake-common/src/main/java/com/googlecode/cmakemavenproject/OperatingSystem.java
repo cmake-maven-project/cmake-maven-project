@@ -27,6 +27,8 @@ public final class OperatingSystem
 	});
 
 	/**
+	 * Returns the detected operating system.
+	 *
 	 * @return the detected operating system
 	 * @throws AssertionError if the operating system is unsupported
 	 */
@@ -45,6 +47,8 @@ public final class OperatingSystem
 	public final Architecture architecture;
 
 	/**
+	 * Returns the classifier associated with this operating system.
+	 *
 	 * @return the classifier associated with this operating system
 	 * @throws UnsupportedOperationException if the operating system was unsupported
 	 */
@@ -81,6 +85,8 @@ public final class OperatingSystem
 	}
 
 	/**
+	 * Returns the fully-qualified path of the executable.
+	 *
 	 * @param filename the filename of a binary
 	 * @param path     the {@code PATH} environment variable
 	 * @return the fully-qualified path of the executable
@@ -115,6 +121,8 @@ public final class OperatingSystem
 	}
 
 	/**
+	 * Returns the suffix to append to the cmake executables.
+	 *
 	 * @return the suffix to append to the cmake executables
 	 * @throws UnsupportedOperationException if the operating system was unsupported
 	 */
@@ -133,6 +141,8 @@ public final class OperatingSystem
 	}
 
 	/**
+	 * Returns the suffix to append to the cmake download filename.
+	 *
 	 * @return the suffix to append to the cmake download filename
 	 * @throws UnsupportedOperationException if the operating system was unsupported
 	 */
@@ -163,6 +173,8 @@ public final class OperatingSystem
 	}
 
 	/**
+	 * Indicates if the operating system supports POSIX attributes.
+	 *
 	 * @param in the InputStream associated with the archive
 	 * @return true if the operating system supports POSIX attributes
 	 * @throws UnsupportedOperationException if the operating system was unsupported
@@ -182,6 +194,8 @@ public final class OperatingSystem
 	}
 
 	/**
+	 * Returns the value of a {@code ProcessBuilder}'s environment variable.
+	 *
 	 * @param processBuilder a {@code ProcessBuilder}
 	 * @param name           an environment variable
 	 * @return the value of the environment variable
@@ -292,6 +306,8 @@ public final class OperatingSystem
 		});
 
 		/**
+		 * Returns the architecture of the detected operating system.
+		 *
 		 * @return the architecture of the detected operating system
 		 */
 		public static Architecture detected()
@@ -357,6 +373,8 @@ public final class OperatingSystem
 		});
 
 		/**
+		 * Returns the type of the detected operating system.
+		 *
 		 * @return the type of the detected operating system
 		 */
 		public static Type detected()

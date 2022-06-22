@@ -15,7 +15,7 @@ migrated to GitHub (and Git) after Google Code shut down.
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.22.1-b1</version>
+      <version>3.23.2-b1</version>
       <executions>
         <execution>
           <id>cmake-generate</id>
@@ -60,7 +60,7 @@ migrated to GitHub (and Git) after Google Code shut down.
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.22.1-b1</version>
+      <version>3.23.2-b1</version>
       <executions>
         <execution>
           <id>cmake-compile</id>
@@ -90,7 +90,7 @@ migrated to GitHub (and Git) after Google Code shut down.
     <plugin>
       <groupId>com.googlecode.cmake-maven-project</groupId>
       <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.22.1-b1</version>
+      <version>3.23.2-b1</version>
       <executions>
         <execution>
           <id>cmake-test</id>
