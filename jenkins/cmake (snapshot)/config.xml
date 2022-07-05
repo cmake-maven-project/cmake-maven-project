@@ -1,5 +1,5 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.36">
+<flow-definition plugin="workflow-job@1189.va_d37a_e9e4eda_">
   <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
@@ -14,28 +14,20 @@
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <com.gem.persistentparameter.PersistentStringParameterDefinition plugin="persistent-parameter@1.1">
+        <com.gem.persistentparameter.PersistentStringParameterDefinition plugin="persistent-parameter@1.3">
           <name>branch</name>
           <description>What branch should be built?</description>
           <defaultValue>master</defaultValue>
           <successfulOnly>true</successfulOnly>
+          <trim>false</trim>
         </com.gem.persistentparameter.PersistentStringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
-      <maxConcurrentPerNode>0</maxConcurrentPerNode>
-      <maxConcurrentTotal>0</maxConcurrentTotal>
-      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
-      <throttleEnabled>false</throttleEnabled>
-      <throttleOption>project</throttleOption>
-      <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
-      <paramsToUseForLimit></paramsToUseForLimit>
-    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
       <triggers/>
     </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.78">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2725.v7b_c717eb_12ce">
     <script>// Command-line options (taken from https://jenkins.io/doc/pipeline/examples/):
 // --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
 // -V : strongly recommended in CI, will display the JDK and Maven versions in use.
@@ -60,12 +52,12 @@ parallel linux:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github-cmake-maven-project&apos;, url: &quot;https://${repository}&quot;]]])
             }
         }
         timeout(40)
         {
-            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JDK11_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin&quot;])
             {
                 stage(&quot;Deploy (linux)&quot;)
                 {
@@ -85,13 +77,13 @@ parallel linux:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github-cmake-maven-project&apos;, url: &quot;https://${repository}&quot;]]])
             }
         }
         timeout(40)
         {
             // gpg resides in /usr/local/bin
-            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JDK11_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin:${env.JAVA_HOME}/bin:/usr/local/bin&quot;])
             {
 			          stage(&quot;Deploy (mac)&quot;)
                 {
@@ -111,12 +103,12 @@ parallel linux:
             {
                 // Wipe out local repository in case it contains extra commits from a previous (broken) build
                 deleteDir()
-                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github&apos;, url: &quot;https://${repository}&quot;]]])
+                checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/${branch}&apos;]], browser: [$class: &apos;GithubWeb&apos;, repoUrl: repository], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;MessageExclusion&apos;, excludedMessage: &apos;^\\[jenkins\\]&apos;]], gitTool: &apos;jgit&apos;, submoduleCfg: [], userRemoteConfigs: [[credentialsId: &apos;github-cmake-maven-project&apos;, url: &quot;https://${repository}&quot;]]])
             }
         }
         timeout(40)
         {
-            withEnv([&quot;JAVA_HOME=${ tool &apos;JAVA_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
+            withEnv([&quot;JAVA_HOME=${ tool &apos;JDK11_HOME&apos; }&quot;, &quot;PATH+MAVEN=${tool &apos;Maven&apos;}/bin;${env.JAVA_HOME}/bin&quot;])
             {
                 stage(&quot;Deploy (windows)&quot;)
                 {
