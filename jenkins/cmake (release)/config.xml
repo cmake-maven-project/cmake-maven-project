@@ -166,7 +166,8 @@ try
                         // sudo apt-get install cmake gcc-6 g++-6 -y
                         // export CC=/usr/bin/gcc-6
                         // export CXX=/usr/bin/g++-6                        
-                        sh script: &quot;&quot;&quot;mvn --batch-mode -e -V -U -Dsurefire.useFile=false install
+                        sh script: &quot;&quot;&quot;sudo apt-get install build-essential -y
+                          mvn --batch-mode -e -V -U -Dsurefire.useFile=false install
                           mvn --batch-mode -e -V -U -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Ddeploy -Dportable deploy&quot;&quot;&quot;
                         archiveArtifacts artifacts: &quot;**/target/*.jar&quot;, excludes: &quot;**/target/test-classes/**&quot;
                     }
