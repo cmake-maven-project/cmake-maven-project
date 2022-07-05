@@ -62,7 +62,7 @@
 				</os>
 			</activation>
 			<properties>
-				<generator>Visual Studio 16 2019</generator>
+				<generator>Visual Studio 17 2022</generator>
 			</properties>
 		</profile>
 		<profile>
