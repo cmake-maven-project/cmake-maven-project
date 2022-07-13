@@ -61,7 +61,8 @@ parallel linux:
             {
                 stage(&quot;Deploy (linux)&quot;)
                 {
-                    sh script: &quot;&quot;&quot;sudo apt-get install build-essential -y
+                    sh script: &quot;&quot;&quot;sudo apt-get update
+                        sudo apt-get install build-essential -y
                         mvn --batch-mode -V -e -U -Dsurefire.useFile=false -Ddeploy deploy&quot;&quot;&quot;
                     archiveArtifacts artifacts: &apos;**/target/*.jar&apos;, excludes: &apos;**/target/test-classes/**&apos;
                 }
