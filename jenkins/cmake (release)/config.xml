@@ -163,7 +163,8 @@ try
                         // Deploy both Java and native artifacts
                         // Use the same GCC version as AWS. See top of this script for more information.
 
-                        sh script: &quot;&quot;&quot;sudo apt-get install build-essential -y
+                        sh script: &quot;&quot;&quot;sudo apt-get update
+                          sudo apt-get install build-essential -y
                           mvn --batch-mode -e -V -U -Dsurefire.useFile=false install
                           mvn --batch-mode -e -V -U -Dsurefire.useFile=false -DstagingProfileId=${stagingProfileId} -DstagingRepositoryId=${stagingRepositoryId} -Ddeploy -Dportable deploy&quot;&quot;&quot;
                         archiveArtifacts artifacts: &quot;**/target/*.jar&quot;, excludes: &quot;**/target/test-classes/**&quot;
