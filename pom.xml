@@ -255,6 +255,7 @@
 										<echo>Please activate one of the following profiles:</echo>
 										<echo>* windows-x86_64</echo>
 										<echo>* linux-x86_64</echo>
+										<echo>* linux-aarch64</echo>
 										<echo>* linux-arm_32</echo>
 										<echo>* mac-x86_64</echo>
 										<echo>* mac-aarch64</echo>
@@ -297,6 +298,21 @@
 			</activation>
 			<properties>
 				<platform>linux-x86_64</platform>
+			</properties>
+			<modules>
+				<module>cmake-binaries</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>linux-aarch64</id>
+			<activation>
+				<os>
+                                        <family>linux</family>
+                                        <arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<platform>linux-aarch64</platform>
 			</properties>
 			<modules>
 				<module>cmake-binaries</module>
