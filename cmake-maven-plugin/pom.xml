@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.23.2-b1</version>
+		<version>3.25.2-b1</version>
 	</parent>
 	<prerequisites>
 		<maven>${maven.version}</maven>
@@ -15,23 +15,6 @@
 	<name>CMake Maven Plugin</name>
 	<description>Builds native code using CMake makefile generator</description>
 	<build>
-		<!-- Filter the settings.xml file but not the test projects -->
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-				<includes>
-					<include>settings.xml</include>
-				</includes>
-				<filtering>true</filtering>
-			</testResource>
-			<testResource>
-				<directory>src/test/resources</directory>
-				<excludes>
-					<exclude>settings.xml</exclude>
-				</excludes>
-				<filtering>false</filtering>
-			</testResource>
-		</testResources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -56,70 +39,28 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Install the cmake-maven-plugin to the test repository -->
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
+				<artifactId>maven-invoker-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>install-plugin-for-it</id>
+						<id>integration-test</id>
 						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<phase>pre-integration-test</phase>
-						<configuration>
-							<file>${project.build.directory}/${project.build.finalName}.jar</file>
-							<generatePom>true</generatePom>
-							<pomFile>pom.xml</pomFile>
-							<packaging>jar</packaging>
-							<version>${project.version}</version>
-							<localRepositoryPath>${test-repo}</localRepositoryPath>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- Copy cmake-maven-plugin dependencies to the test repository -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-it-dependencies</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-							<!-- There is a go-offline goal but it's broken
-							https://issues.apache.org/jira/browse/MDEP-82 -->
+							<goal>install</goal>
+							<goal>run</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${test-repo}</outputDirectory>
-							<useRepositoryLayout>true</useRepositoryLayout>
-							<addParentPoms>true</addParentPoms>
-							<copyPom>true</copyPom>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- Integration testing of cmake-maven-plugin's mojos -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>default-test</id>
-						<goals>
-							<goal>test</goal>
-						</goals>
-						<phase>integration-test</phase>
-						<configuration>
-							<systemPropertyVariables>
-								<!-- Pass parameters onto our test projects -->
+							<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+							<localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+							<postBuildHookScript>verify</postBuildHookScript>
+							<failIfNoProjects>true</failIfNoProjects>
+							<streamLogs>true</streamLogs>
+							<properties>
 								<cmake.plugin.groupid>${project.groupId}</cmake.plugin.groupid>
 								<cmake.plugin.version>${project.version}</cmake.plugin.version>
 								<platform>${platform}</platform>
-							</systemPropertyVariables>
-							<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
-							<trimStackTrace>false</trimStackTrace>
+							</properties>
 						</configuration>
 					</execution>
 				</executions>
@@ -131,10 +72,10 @@
 			<groupId>org.twdata.maven</groupId>
 			<artifactId>mojo-executor</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>
@@ -149,108 +90,11 @@
 			<artifactId>cmake-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!-- Below here are testing dependencies -->
 		<dependency>
-			<groupId>org.apache.maven.shared</groupId>
-			<artifactId>maven-verifier</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>cmake-binaries</artifactId>
+			<version>${project.version}</version>
+			<classifier>${platform}</classifier>
 		</dependency>
 	</dependencies>
-
-	<!-- Run tests from ${test-repo} repository instead of the local repo -->
-	<properties>
-		<test-repo>${project.build.directory}/test-classes/test-repo</test-repo>
-	</properties>
-
-	<profiles>
-		<profile>
-			<id>windows-x86_64</id>
-			<activation>
-				<os>
-					<family>windows</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>${project.groupId}</groupId>
-					<artifactId>cmake-binaries</artifactId>
-					<version>${project.version}</version>
-					<classifier>${platform}</classifier>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>linux-x86_64</id>
-			<activation>
-				<os>
-					<family>linux</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>${project.groupId}</groupId>
-					<artifactId>cmake-binaries</artifactId>
-					<version>${project.version}</version>
-					<classifier>${platform}</classifier>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>linux-arm</id>
-			<activation>
-				<os>
-					<family>linux</family>
-					<arch>arm</arch>
-				</os>
-			</activation>
-			<properties>
-				<download.cmake>false</download.cmake>
-			</properties>
-		</profile>
-		<profile>
-			<id>mac-x86_64</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>${project.groupId}</groupId>
-					<artifactId>cmake-binaries</artifactId>
-					<version>${project.version}</version>
-					<classifier>${platform}</classifier>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>mac-aarch64</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<arch>aarch64</arch>
-				</os>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>${project.groupId}</groupId>
-					<artifactId>cmake-binaries</artifactId>
-					<version>${project.version}</version>
-					<classifier>${platform}</classifier>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
 </project>

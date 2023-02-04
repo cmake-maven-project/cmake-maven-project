@@ -5,11 +5,12 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.23.2-b1</version>
+		<version>3.25.2-b1</version>
 	</parent>
 	<artifactId>cmake-binaries</artifactId>
 	<name>CMake Binaries</name>
 	<description>CMake Binaries</description>
+	<packaging>pom</packaging>
 	<build>
 		<plugins>
 			<plugin>

@@ -57,15 +57,7 @@ public final class OperatingSystem
 		switch (type)
 		{
 			case LINUX:
-				switch (architecture)
-				{
-					case X86_32:
-						return "linux-arm_32";
-					case X86_64:
-						return "linux-x86_64";
-					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
-				}
+				return "linux-" + architecture.name().toLowerCase(Locale.US);
 			case MAC:
 				switch (architecture)
 				{
@@ -151,9 +143,15 @@ public final class OperatingSystem
 		switch (type)
 		{
 			case LINUX:
-				if (architecture == Architecture.X86_64)
-					return "linux-x86_64.tar.gz";
-				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				switch (architecture)
+				{
+					case X86_64:
+						return "linux-x86_64.tar.gz";
+					case ARM_64:
+						return "linux-aarch64.tar.gz";
+					default:
+						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				}
 			case MAC:
 				switch (architecture)
 				{

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
-	<version>3.23.2-b1</version>
+	<version>3.25.2-b1</version>
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
@@ -59,7 +59,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-				<version>1.21</version>
+				<version>1.22</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.cowwoc.pouch</groupId>
@@ -72,14 +72,14 @@
 				<version>2.4.0</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.maven.shared</groupId>
-				<artifactId>maven-verifier</artifactId>
-				<version>1.8.0</version>
-			</dependency>
-			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
-				<version>5.8.2</version>
+				<version>5.9.2</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>31.1-jre</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -89,7 +89,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -97,19 +97,14 @@
 					<version>2.5.3</version>
 				</plugin>
 				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.6.8</version>
-				</plugin>
-				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
+					<version>3.10.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.4.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -119,7 +114,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.4</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -128,41 +123,41 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M5</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-antrun-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.1.0</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-install-plugin</artifactId>
-					<version>2.5.2</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>3.9.0</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-jar-plugin</artifactId>
 					<version>3.2.0</version>
 				</plugin>
 				<plugin>
-					<artifactId>maven-resources-plugin</artifactId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-install-plugin</artifactId>
 					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.12.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.3.0</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.3.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-invoker-plugin</artifactId>
+					<version>3.5.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -223,16 +218,13 @@
 		</plugins>
 	</build>
 	<modules>
-		<module>cmake-binaries-plugin</module>
-		<module>cmake-maven-plugin</module>
 		<module>cmake-common</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.version>3.6.0</maven.version>
+		<maven.version>3.9.0</maven.version>
 		<maven.compiler.release>11</maven.compiler.release>
-		<maven.core.version>3.8.6</maven.core.version>
-		<maven.plugin.annotations.version>3.6.4</maven.plugin.annotations.version>
+		<maven.core.version>3.9.0</maven.core.version>
 	</properties>
 	<profiles>
 		<profile>
@@ -256,6 +248,7 @@
 										<echo>* windows-x86_64</echo>
 										<echo>* linux-x86_64</echo>
 										<echo>* linux-arm_32</echo>
+										<echo>* linux-arm_64</echo>
 										<echo>* mac-x86_64</echo>
 										<echo>* mac-aarch64</echo>
 										<echo/>
@@ -285,6 +278,8 @@
 			</properties>
 			<modules>
 				<module>cmake-binaries</module>
+				<module>cmake-binaries-plugin</module>
+				<module>cmake-maven-plugin</module>
 			</modules>
 		</profile>
 		<profile>
@@ -300,6 +295,8 @@
 			</properties>
 			<modules>
 				<module>cmake-binaries</module>
+				<module>cmake-binaries-plugin</module>
+				<module>cmake-maven-plugin</module>
 			</modules>
 		</profile>
 		<profile>
@@ -313,7 +310,28 @@
 			<properties>
 				<platform>linux-arm_32</platform>
 			</properties>
-			<!-- The binaries ship with the OS so we skip cmake-binaries -->
+			<modules>
+				<!-- The binaries ship with the OS so we skip cmake-binaries -->
+				<module>cmake-binaries-plugin</module>
+				<module>cmake-maven-plugin</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>linux-arm_64</id>
+			<activation>
+				<os>
+					<family>linux</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<platform>linux-arm_64</platform>
+			</properties>
+			<modules>
+				<module>cmake-binaries</module>
+				<module>cmake-binaries-plugin</module>
+				<module>cmake-maven-plugin</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>mac-x86_64</id>
@@ -328,6 +346,8 @@
 			</properties>
 			<modules>
 				<module>cmake-binaries</module>
+				<module>cmake-binaries-plugin</module>
+				<module>cmake-maven-plugin</module>
 			</modules>
 		</profile>
 		<profile>
@@ -343,6 +363,8 @@
 			</properties>
 			<modules>
 				<module>cmake-binaries</module>
+				<module>cmake-binaries-plugin</module>
+				<module>cmake-maven-plugin</module>
 			</modules>
 		</profile>
 		<profile>
@@ -372,7 +394,7 @@
 					</plugin>
 					<plugin>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.3.1</version>
+						<version>3.4.1</version>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>

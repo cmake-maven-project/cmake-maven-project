@@ -85,10 +85,9 @@ public abstract class CmakeMojo extends AbstractMojo
 			versionElement, classifierElement, outputDirectoryElement);
 		Element artifactItemsItem = new Element("artifactItems", artifactItemElement);
 		Xpp3Dom configuration = MojoExecutor.configuration(artifactItemsItem);
-		ExecutionEnvironment environment = MojoExecutor.executionEnvironment(project, session,
-			pluginManager);
+		ExecutionEnvironment environment = MojoExecutor.executionEnvironment(project, session, pluginManager);
 		Plugin dependencyPlugin = MojoExecutor.plugin("org.apache.maven.plugins",
-			"maven-dependency-plugin", "3.2.0");
+			"maven-dependency-plugin", "3.5.0");
 		MojoExecutor.executeMojo(dependencyPlugin, "unpack", configuration, environment);
 	}
 
