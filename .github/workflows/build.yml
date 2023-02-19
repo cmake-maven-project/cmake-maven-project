@@ -29,13 +29,23 @@ jobs:
       - name: Show versions
         run: |
           java --version
-          mvn --version
+          ./mvnw --version
 
       - name: Build
-        run: mvn install -e
+        run: ./mvnw install -e
 
-  build-arm64:
+  build-arm:
     runs-on: ubuntu-latest
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
+    strategy:
+      matrix:
+        include:
+          - arch: armv6
+            distro: alpine_latest
+          - arch: armv7
+            distro: alpine_latest
+          - arch: aarch64
+            distro: alpine_latest
 
     # Source: https://github.com/lh3/bwa/blob/139f68fc4c3747813783a488aef2adc86626b01b/.github/workflows/ci.yaml#L33-L46
     #  gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi
@@ -52,28 +62,27 @@ jobs:
             !~/.m2/repository/com/googlecode/cmake-maven-project
           key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            arm64-maven-
+            ${{ runner.OS }}-maven-
 
       - name: Build
         uses: uraimo/run-on-arch-action@v2
         with:
-          arch: aarch64
-          distro: ubuntu_latest
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
           githubToken: ${{ github.token }}
           install: |
-            apt-get update -q -y
-            apt install -y gnupg ca-certificates curl
-            curl -s https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg
-            echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" | tee /etc/apt/sources.list.d/zulu.list
-            apt-get update -q -y
-            apt-get install -q -y zulu11-jdk
-            apt-get install -q -y build-essential
+            apk update
+            apk add gnupg ca-certificates wget
+            
+            wget -P /etc/apk/keys/ https://cdn.azul.com/public_keys/alpine-signing@azul.com-5d5dc44c.rsa.pub
+            echo "https://repos.azul.com/zulu/alpine" | tee -a /etc/apk/repositories
+            apk update
+            apk add zulu11-jdk
+            
+            apk add build-base
           setup: mkdir -p "${PWD}/.m2"
           dockerRunArgs: --volume "${PWD}/.m2:/.m2" -e GITHUB_WORKSPACE=${GITHUB_WORKSPACE}
           run: |
             export JAVA_HOME=`which java | xargs readlink -f | xargs dirname | xargs dirname`
             cd "${GITHUB_WORKSPACE}"
             ./mvnw install -e
-            echo "*** pre-m2"
-            ls -la .m2/
-            echo "*** post-m2"

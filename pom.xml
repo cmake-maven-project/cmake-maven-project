@@ -225,6 +225,7 @@
 		<maven.version>3.9.0</maven.version>
 		<maven.compiler.release>11</maven.compiler.release>
 		<maven.core.version>3.9.0</maven.core.version>
+		<maven.plugin.annotations.version>3.7.1</maven.plugin.annotations.version>
 	</properties>
 	<profiles>
 		<profile>

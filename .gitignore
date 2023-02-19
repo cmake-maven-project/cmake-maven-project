@@ -14,3 +14,6 @@ nbactions*.xml
 # IDEA files
 .idea
 *.iml
+
+# Maven Wrapper (which is re-generated if it's missing)
+.mvn/wrapper/maven-wrapper.jar
