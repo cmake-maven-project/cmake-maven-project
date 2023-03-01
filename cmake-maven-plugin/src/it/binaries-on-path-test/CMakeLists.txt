@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23.2)
+cmake_minimum_required(VERSION 3.18.4)
 project(BinariesOnPathTest)
 add_executable(binaries-on-path-test main.c)
 

@@ -291,7 +291,8 @@
 			<id>linux-x86_64</id>
 			<activation>
 				<os>
-					<family>linux</family>
+					<!-- Per https://stackoverflow.com/a/19031165/14731 the family name of linux is "unix" -->
+					<family>unix</family>
 					<arch>amd64</arch>
 				</os>
 			</activation>
@@ -308,7 +309,7 @@
 			<id>linux-arm_32</id>
 			<activation>
 				<os>
-					<family>linux</family>
+					<family>unix</family>
 					<arch>arm</arch>
 				</os>
 			</activation>
@@ -325,7 +326,7 @@
 			<id>linux-arm_64</id>
 			<activation>
 				<os>
-					<family>linux</family>
+					<family>unix</family>
 					<arch>aarch64</arch>
 				</os>
 			</activation>

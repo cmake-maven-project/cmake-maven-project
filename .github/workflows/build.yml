@@ -28,7 +28,7 @@ jobs:
 
       - name: Show versions
         run: |
-          java --version
+          java -version
           ./mvnw --version
 
       - name: Build
@@ -41,11 +41,11 @@ jobs:
       matrix:
         include:
           - arch: armv6
-            distro: alpine_latest
+            distro: bullseye
           - arch: armv7
-            distro: alpine_latest
+            distro: ubuntu_latest
           - arch: aarch64
-            distro: alpine_latest
+            distro: ubuntu_latest
 
     # Source: https://github.com/lh3/bwa/blob/139f68fc4c3747813783a488aef2adc86626b01b/.github/workflows/ci.yaml#L33-L46
     #  gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi
@@ -71,15 +71,35 @@ jobs:
           distro: ${{ matrix.distro }}
           githubToken: ${{ github.token }}
           install: |
-            apk update
-            apk add gnupg ca-certificates wget
+            apt-get update --allow-releaseinfo-change -y
             
-            wget -P /etc/apk/keys/ https://cdn.azul.com/public_keys/alpine-signing@azul.com-5d5dc44c.rsa.pub
-            echo "https://repos.azul.com/zulu/alpine" | tee -a /etc/apk/repositories
-            apk update
-            apk add zulu8-jdk
+            case "${{ matrix.arch }}" in
+              armv6|armv7)
+                apt-get install wget cmake -y
+
+                mkdir /opt/jdk/
+                cd /opt/jdk
+                wget https://cdn.azul.com/zulu-embedded/bin/zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf.tar.gz
+                tar -xzvf zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf.tar.gz
             
-            apk add build-base
+                update-alternatives --install /usr/bin/java java /opt/jdk/zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf/bin/java 181
+                update-alternatives --install /usr/bin/javac javac /opt/jdk/zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf/bin/javac 181
+            
+                rm zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf.tar.gz
+                ;;
+              aarch64)
+                apt-get install gnupg ca-certificates curl -y
+                curl -s https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg
+                echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" | tee /etc/apt/sources.list.d/zulu.list
+                apt-get update --allow-releaseinfo-change -y
+                apt-get install zulu8-jdk -y
+                ;;
+              *)
+                echo "Unsupported distro: ${{ matrix.distro }}"
+                exit 1
+                ;;
+            esac
+            apt-get install build-essential -y
           setup: mkdir -p "${PWD}/.m2"
           dockerRunArgs: --volume "${PWD}/.m2:/.m2" -e GITHUB_WORKSPACE=${GITHUB_WORKSPACE}
           run: |

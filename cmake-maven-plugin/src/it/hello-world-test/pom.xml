@@ -12,7 +12,23 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<cmake.download>true</cmake.download>
 	</properties>
+
+	<profiles>
+		<profile>
+			<id>linux-arm_32</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<arch>arm</arch>
+				</os>
+			</activation>
+			<properties>
+				<cmake.download>false</cmake.download>
+			</properties>
+		</profile>
+	</profiles>
 
 	<build>
 		<plugins>
@@ -37,7 +53,7 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<projectDirectory>${project.build.directory}/</projectDirectory>
+							<projectDirectory>${project.build.directory}</projectDirectory>
 						</configuration>
 					</execution>
 					<execution>

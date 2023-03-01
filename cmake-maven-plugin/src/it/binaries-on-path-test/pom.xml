@@ -15,6 +15,7 @@
 		<cmake.binaries.dir>
 			${project.build.directory}${file.separator}manual-download${file.separator}bin
 		</cmake.binaries.dir>
+		<cmake.download>false</cmake.download>
 	</properties>
 
 	<build>
@@ -29,6 +30,7 @@
 							<goal>unpack</goal>
 						</goals>
 						<configuration>
+							<skip>${skipUnpackBinaries}</skip>
 							<artifactItems>
 								<artifactItem>
 									<groupId>${cmake.plugin.groupid}</groupId>
@@ -56,7 +58,6 @@
 						<configuration>
 							<sourcePath>${project.basedir}</sourcePath>
 							<targetPath>${project.build.directory}</targetPath>
-							<downloadBinaries>false</downloadBinaries>
 							<environmentVariables>
 								<PATH>${env.PATH}${path.separator}${cmake.binaries.dir}</PATH>
 							</environmentVariables>
@@ -68,8 +69,7 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<projectDirectory>${project.build.directory}/</projectDirectory>
-							<downloadBinaries>false</downloadBinaries>
+							<projectDirectory>${project.build.directory}</projectDirectory>
 							<environmentVariables>
 								<PATH>${env.PATH}${path.separator}${cmake.binaries.dir}</PATH>
 							</environmentVariables>
@@ -82,7 +82,6 @@
 						</goals>
 						<configuration>
 							<buildDirectory>${project.build.directory}</buildDirectory>
-							<downloadBinaries>false</downloadBinaries>
 							<environmentVariables>
 								<PATH>${env.PATH}${path.separator}${cmake.binaries.dir}</PATH>
 							</environmentVariables>

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23.2)
+cmake_minimum_required(VERSION 3.18.4)
 project(ExplicitGeneratorTest)
 add_executable(explicit-generator main.c)
 

@@ -14,6 +14,74 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>windows-x86_64</id>
+			<activation>
+				<os>
+					<family>windows</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<generator>Visual Studio 17 2022</generator>
+				<cmake.download>true</cmake.download>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-x86_64</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<generator>Unix Makefiles</generator>
+				<cmake.download>true</cmake.download>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-arm_32</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<arch>arm</arch>
+				</os>
+			</activation>
+			<properties>
+				<generator>Unix Makefiles</generator>
+				<cmake.download>false</cmake.download>
+			</properties>
+		</profile>
+		<profile>
+			<id>mac-x86_64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<properties>
+				<generator>Unix Makefiles</generator>
+				<cmake.download>true</cmake.download>
+			</properties>
+		</profile>
+		<profile>
+			<id>mac-aarch64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<generator>Unix Makefiles</generator>
+				<cmake.download>true</cmake.download>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -38,7 +106,7 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<projectDirectory>${project.build.directory}/</projectDirectory>
+							<projectDirectory>${project.build.directory}</projectDirectory>
 						</configuration>
 					</execution>
 					<execution>
@@ -54,71 +122,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>windows-x86_64</id>
-			<activation>
-				<os>
-					<family>windows</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Visual Studio 17 2022</generator>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-x86_64</id>
-			<activation>
-				<os>
-					<family>linux</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Unix Makefiles</generator>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-arm_32</id>
-			<activation>
-				<os>
-					<family>linux</family>
-					<arch>arm</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Unix Makefiles</generator>
-			</properties>
-		</profile>
-		<profile>
-			<id>mac-x86_64</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Unix Makefiles</generator>
-				<!-- with xcode -->
-				<!-- <generator>xcode</generator> -->
-			</properties>
-		</profile>
-		<profile>
-			<id>mac-aarch64</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<arch>aarch64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Unix Makefiles</generator>
-				<!-- with xcode -->
-				<!-- <generator>xcode</generator> -->
-			</properties>
-		</profile>
-	</profiles>
 </project>

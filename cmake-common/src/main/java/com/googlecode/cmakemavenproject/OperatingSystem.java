@@ -62,6 +62,7 @@ public final class OperatingSystem
 				switch (architecture)
 				{
 					case X86_64:
+					case ARM_32:
 					case ARM_64:
 						return "mac-universal";
 					default:
@@ -149,6 +150,8 @@ public final class OperatingSystem
 						return "linux-x86_64.tar.gz";
 					case ARM_64:
 						return "linux-aarch64.tar.gz";
+					case ARM_32:
+						// cmake is assumed to ship with the operating system
 					default:
 						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 				}
@@ -156,6 +159,7 @@ public final class OperatingSystem
 				switch (architecture)
 				{
 					case X86_64:
+					case ARM_32:
 					case ARM_64:
 						return "macos-universal.tar.gz";
 					default:
@@ -270,6 +274,10 @@ public final class OperatingSystem
 		 */
 		X86_64,
 		/**
+		 * ARM, 32-bit.
+		 */
+		ARM_32,
+		/**
 		 * ARM, 64-bit.
 		 */
 		ARM_64;
@@ -295,6 +303,9 @@ public final class OperatingSystem
 				case "em64t":
 				case "x64":
 					return X86_64;
+				case "arm":
+				case "arm32":
+					return ARM_32;
 				case "aarch64":
 					return ARM_64;
 				default:

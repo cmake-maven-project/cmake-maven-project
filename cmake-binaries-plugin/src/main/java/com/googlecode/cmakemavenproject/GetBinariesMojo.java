@@ -87,9 +87,9 @@ public class GetBinariesMojo
 				return;
 			deleteRecursively(target);
 
-			// Directories not normalized, begin by unpacking the binaries
-			Path archive = download(new URL("https://github.com/Kitware/CMake/releases/download/v" + cmakeVersion +
-				"/cmake-" + cmakeVersion + "-" + suffix));
+			// Directories are not normalized, begin by unpacking the binaries.
+			Path archive = download(new URL("https://github.com/Kitware/CMake/releases/download/v" +
+				cmakeVersion + "/cmake-" + cmakeVersion + "-" + suffix));
 			Log log = getLog();
 			if (log.isInfoEnabled())
 				log.info("Extracting " + archive + " to " + target);
@@ -107,8 +107,8 @@ public class GetBinariesMojo
 	 *
 	 * @param version the project version
 	 * @return the cmake version
-	 * @throws NullPointerException     if version is null
-	 * @throws IllegalArgumentException if version is empty or has an unexpected format
+	 * @throws NullPointerException     if {@code version} is null
+	 * @throws IllegalArgumentException if {@code version} is empty or has an unexpected format
 	 */
 	private String getCMakeVersion(String version)
 	{
@@ -452,7 +452,7 @@ public class GetBinariesMojo
 	{
 		Preconditions.checkNotNull(filename, "filename may not be null");
 
-		Pattern pattern = Pattern.compile("[^.]+(\\.[\\p{Alnum}]+)$");
+		Pattern pattern = Pattern.compile("[^.]+(\\.\\p{Alnum}+)$");
 		Matcher matcher = pattern.matcher(filename);
 		if (!matcher.find())
 			return "";

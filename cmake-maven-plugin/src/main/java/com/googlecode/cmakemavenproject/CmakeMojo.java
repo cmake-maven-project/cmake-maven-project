@@ -6,6 +6,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -56,6 +57,8 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	protected void downloadBinariesIfNecessary() throws MojoExecutionException
 	{
+		Log log = getLog();
+		log.debug("downloadBinaries: " + downloadBinaries);
 		if (!downloadBinaries)
 			return;
 		Path outputDirectory = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
@@ -99,10 +102,11 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	public Path getBinaryPath(String filename, ProcessBuilder processBuilder) throws FileNotFoundException
 	{
+		Log log = getLog();
 		Path cmakeDir = getCmakeDir();
 		if (cmakeDir == null)
 		{
-			getLog().info("Executing " + filename + " on PATH");
+			log.info("Executing " + filename + " on PATH");
 			String path = os.getEnvironment(processBuilder, "PATH");
 			if (path == null)
 			{
@@ -112,7 +116,7 @@ public abstract class CmakeMojo extends AbstractMojo
 			return os.getExecutableOnPath(filename, path);
 		}
 		Path result = cmakeDir.resolve(filename + os.getExecutableSuffix());
-		getLog().info("Executing " + result);
+		log.info("Executing " + result);
 		return result;
 	}
 
@@ -123,6 +127,8 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	private Path getCmakeDir()
 	{
+		Log log = getLog();
+		log.debug("downloadBinaries: " + downloadBinaries);
 		if (downloadBinaries)
 		{
 			Path outputDirectory = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
