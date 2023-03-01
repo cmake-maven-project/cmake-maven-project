@@ -1,8 +1,8 @@
 package com.googlecode.cmakemavenproject;
 
+import com.github.cowwoc.pouch.core.ConcurrentLazyReference;
+import com.github.cowwoc.pouch.core.Reference;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.bitbucket.cowwoc.pouch.ConcurrentLazyReference;
-import org.bitbucket.cowwoc.pouch.Reference;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -257,7 +257,7 @@ public final class OperatingSystem
 	/**
 	 * The architecture of an operating system.
 	 * <p>
-	 * Naming convention based on https://github.com/trustin/os-maven-plugin.
+	 * Naming convention based on <a href="https://github.com/trustin/os-maven-plugin">os-maven-plugin</a>.
 	 */
 	public enum Architecture
 	{

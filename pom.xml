@@ -34,6 +34,15 @@
 		</developer>
 	</developers>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.version>3.9.0</maven.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.core.version>3.9.0</maven.core.version>
+		<maven.plugin.annotations.version>3.7.1</maven.plugin.annotations.version>
+	</properties>
+
 	<distributionManagement>
 		<snapshotRepository>
 			<id>maven-central-snapshots</id>
@@ -62,9 +71,9 @@
 				<version>1.22</version>
 			</dependency>
 			<dependency>
-				<groupId>org.bitbucket.cowwoc.pouch</groupId>
-				<artifactId>pouch</artifactId>
-				<version>1.14</version>
+				<groupId>com.github.cowwoc.pouch</groupId>
+				<artifactId>core</artifactId>
+				<version>3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.twdata.maven</groupId>
@@ -217,16 +226,11 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<modules>
 		<module>cmake-common</module>
 	</modules>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.version>3.9.0</maven.version>
-		<maven.compiler.release>11</maven.compiler.release>
-		<maven.core.version>3.9.0</maven.core.version>
-		<maven.plugin.annotations.version>3.7.1</maven.plugin.annotations.version>
-	</properties>
+
 	<profiles>
 		<profile>
 			<id>list-profiles</id>

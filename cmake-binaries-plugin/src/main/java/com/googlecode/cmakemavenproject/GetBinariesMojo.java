@@ -295,7 +295,7 @@ public class GetBinariesMojo
 	private void copyDirectory(final Path source, final Path target) throws IOException
 	{
 		Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
-			new FileVisitor<>()
+			new FileVisitor<Path>()
 			{
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
@@ -468,7 +468,7 @@ public class GetBinariesMojo
 	private void normalizeDirectories(final Path source) throws IOException
 	{
 		final Path[] topDirectory = new Path[1];
-		Files.walkFileTree(source, new SimpleFileVisitor<>()
+		Files.walkFileTree(source, new SimpleFileVisitor<Path>()
 		{
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
@@ -484,7 +484,7 @@ public class GetBinariesMojo
 		if (topDirectory[0] == null)
 			throw new IOException("Could not find \"bin\" in: " + source);
 
-		Files.walkFileTree(source, new SimpleFileVisitor<>()
+		Files.walkFileTree(source, new SimpleFileVisitor<Path>()
 		{
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -529,7 +529,7 @@ public class GetBinariesMojo
 		// BUG: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7148952
 		if (Files.notExists(path))
 			return;
-		Files.walkFileTree(path, new SimpleFileVisitor<>()
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>()
 		{
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException

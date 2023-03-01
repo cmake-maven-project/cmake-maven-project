@@ -4,15 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>cmake</artifactId>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
+		<artifactId>cmake</artifactId>
 		<version>3.25.2-b1</version>
 	</parent>
 	<artifactId>cmake-common</artifactId>
 	<dependencies>
 		<dependency>
-			<groupId>org.bitbucket.cowwoc.pouch</groupId>
-			<artifactId>pouch</artifactId>
+			<groupId>com.github.cowwoc.pouch</groupId>
+			<artifactId>core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
