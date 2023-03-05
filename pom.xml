@@ -214,6 +214,9 @@
 						<arg>-Xdiags:verbose</arg>
 						<arg>-Werror</arg>
 					</compilerArgs>
+					<jdkToolchain>
+						<version>8</version>
+					</jdkToolchain>
 				</configuration>
 			</plugin>
 			<plugin>
