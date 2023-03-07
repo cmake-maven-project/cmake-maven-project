@@ -2,8 +2,13 @@
 name: Deploy to Maven Central
 on:
   workflow_dispatch:
+env:
+  STAGING_PROFILE_ID: "1a35794454094c"
+  OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+  OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+  MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 jobs:
-  deploy:
+  open-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -14,15 +19,57 @@ jobs:
           distribution: zulu
           java-version: 8
           server-id: maven-central-releases
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
+          # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Show versions
+      - name: Configure Git User
         run: |
-          java --version
-          ./mvnw --version
+          git config user.email "cowwoc2020@gmail.com"
+          git config user.name "Gili"
+
+      # Maven command-line options:
+      # --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
+      # -V : strongly recommended in CI, will display the JDK and Maven versions in use.
+      #      Very useful to be quickly sure the selected versions were the ones you think.
+      # -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
+      #                            having to crawl the workspace files to see the cause).
+      # -e : Display stack-traces on failure
+      #
+      # Getting the current git tag: https://stackoverflow.com/a/50465671/14731
+      #
+      # Setting a GitHub Action output parameter:
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
+      #
+      # "release:prepare" must skip integration tests because "binaries-on-path-test" requires artifacts
+      # to be deployed to local repository.
+      - name: Open staging repository
+        run: |
+          ./mvnw release:prepare --batch-mode -Darguments="-Ddeploy -Dinvoker.skip=true" -e          
+          
+          echo "TAG=$(git describe --tag --abbrev=0)" >> $GITHUB_OUTPUT
+          echo "STAGING_REPOSITORY_ID=$(./mvnw --batch-mode -e \ 
+            -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} nexus-staging:rc-open)"
+
+  deploy-portable-artifacts:
+    needs: open-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.open-release.outputs.TAG }}
+      - uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 8
+          server-id: maven-central-releases
+          # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Configure Git User
         run: |
@@ -30,8 +77,99 @@ jobs:
           git config user.name "Gili"
 
       - name: Deploy to Maven Central
-        run: ./mvnw release:prepare release:perform --batch-mode -Darguments="-Ddeploy" -e
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: ./mvnw --batch-mode -V -Dsurefire.useFile=false -e \
+          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
+          -DstagingRepositoryId=${{ steps.open-release.outputs.STAGING_REPOSITORY_ID }} \
+          -Darguments="-Ddeploy -Dportable" deploy
+
+  deploy-native-artifacts:
+    needs: open-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.open-release.outputs.TAG }}
+      - uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 8
+          server-id: maven-central-releases
+          # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Configure Git User
+        run: |
+          git config user.email "cowwoc2020@gmail.com"
+          git config user.name "Gili"
+
+      - name: Deploy to Maven Central
+        run: ./mvnw --batch-mode -V -Dsurefire.useFile=false -e \
+          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
+          -DstagingRepositoryId=${{ steps.open-release.outputs.STAGING_REPOSITORY_ID }} \
+          -Darguments="-Ddeploy" deploy
+
+  close-release:
+    needs: deploy-native-artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.open-release.outputs.TAG }}
+      - uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 8
+          server-id: maven-central-releases
+          # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Configure Git User
+        run: |
+          git config user.email "cowwoc2020@gmail.com"
+          git config user.name "Gili"
+
+      - name: Close staging repository
+        run: ./mvnw --batch-mode -V -Dsurefire.useFile=false -e \
+          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
+          -DstagingRepositoryId=${{ steps.open-release.outputs.STAGING_REPOSITORY_ID }} \
+          nexus-staging:rc-close
+
+  # Cleanup on failure: https://stackoverflow.com/a/74562058/14731
+  on-failure:
+    needs: [ open-release, deploy-portable-artifacts, deploy-native-artifacts, close-release ]
+    runs-on: ubuntu-latest
+    if: ${{ always() && contains(needs.*.result, 'failure') }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.open-release.outputs.TAG }}
+      - uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 8
+          server-id: maven-central-releases
+          # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Configure Git User
+        run: |
+          git config user.email "cowwoc2020@gmail.com"
+          git config user.name "Gili"
+
+      - name: Drop staging repository
+        run: ./mvnw --batch-mode -V -Dsurefire.useFile=false -e \
+          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
+          -DstagingRepositoryId=${{ steps.open-release.outputs.STAGING_REPOSITORY_ID }} \
+          nexus-staging:rc-drop
