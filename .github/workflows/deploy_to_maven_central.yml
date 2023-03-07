@@ -10,6 +10,9 @@ env:
 jobs:
   open-release:
     runs-on: ubuntu-latest
+    outputs:
+      TAG: ${{ steps.open-staging.outputs.TAG }}
+      STAGING_REPOSITORY_ID: ${{ steps.open-staging.outputs.STAGING_REPOSITORY_ID }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -46,12 +49,14 @@ jobs:
       # "release:prepare" must skip integration tests because "binaries-on-path-test" requires artifacts
       # to be deployed to local repository.
       - name: Open staging repository
+        id: open-staging
         run: |
-          ./mvnw release:prepare --batch-mode -Darguments="-Ddeploy -Dinvoker.skip=true" -e          
-          
+          ./mvnw release:prepare --batch-mode -Darguments="-Ddeploy -Dinvoker.skip=true" -e
           echo "TAG=$(git describe --tag --abbrev=0)" >> $GITHUB_OUTPUT
-          echo "STAGING_REPOSITORY_ID=$(./mvnw --batch-mode -e \ 
-            -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} nexus-staging:rc-open)"
+          output=$(./mvnw --batch-mode -e -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} nexus-staging:rc-open)
+          [[ "$output" =~ Opened\ (comgooglecodecmake-maven-project-[[:digit:]]+) ]]
+          stagingRepositoryId="${BASH_REMATCH[1]}"
+          echo "STAGING_REPOSITORY_ID=$stagingRepositoryId" >> $GITHUB_OUTPUT
 
   deploy-portable-artifacts:
     needs: open-release
@@ -59,7 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ steps.open-release.outputs.TAG }}
+          ref: "${{ needs.open-release.outputs.TAG }}"
       - uses: actions/setup-java@v3
         with:
           distribution: zulu
@@ -77,10 +82,11 @@ jobs:
           git config user.name "Gili"
 
       - name: Deploy to Maven Central
-        run: ./mvnw --batch-mode -V -Dsurefire.useFile=false -e \
-          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
-          -DstagingRepositoryId=${{ steps.open-release.outputs.STAGING_REPOSITORY_ID }} \
-          -Darguments="-Ddeploy -Dportable" deploy
+        run: >
+          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" "-Dinvoker.skip=true" -Ddeploy -Dportable -e
+          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+          -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
+          deploy
 
   deploy-native-artifacts:
     needs: open-release
@@ -91,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ steps.open-release.outputs.TAG }}
+          ref: "${{ needs.open-release.outputs.TAG }}"
       - uses: actions/setup-java@v3
         with:
           distribution: zulu
@@ -109,18 +115,19 @@ jobs:
           git config user.name "Gili"
 
       - name: Deploy to Maven Central
-        run: ./mvnw --batch-mode -V -Dsurefire.useFile=false -e \
-          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
-          -DstagingRepositoryId=${{ steps.open-release.outputs.STAGING_REPOSITORY_ID }} \
-          -Darguments="-Ddeploy" deploy
+        run: >
+          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" -Ddeploy -e
+          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+          -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
+          deploy
 
   close-release:
-    needs: deploy-native-artifacts
+    needs: [ open-release, deploy-native-artifacts ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ steps.open-release.outputs.TAG }}
+          ref: "${{ needs.open-release.outputs.TAG }}"
       - uses: actions/setup-java@v3
         with:
           distribution: zulu
@@ -138,9 +145,10 @@ jobs:
           git config user.name "Gili"
 
       - name: Close staging repository
-        run: ./mvnw --batch-mode -V -Dsurefire.useFile=false -e \
-          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
-          -DstagingRepositoryId=${{ steps.open-release.outputs.STAGING_REPOSITORY_ID }} \
+        run: >
+          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" -e
+          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+          -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
           nexus-staging:rc-close
 
   # Cleanup on failure: https://stackoverflow.com/a/74562058/14731
@@ -151,7 +159,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ steps.open-release.outputs.TAG }}
+          ref: "${{ needs.open-release.outputs.TAG }}"
       - uses: actions/setup-java@v3
         with:
           distribution: zulu
@@ -169,7 +177,8 @@ jobs:
           git config user.name "Gili"
 
       - name: Drop staging repository
-        run: ./mvnw --batch-mode -V -Dsurefire.useFile=false -e \
-          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
-          -DstagingRepositoryId=${{ steps.open-release.outputs.STAGING_REPOSITORY_ID }} \
+        run: >
+          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" -e
+          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+          -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
           nexus-staging:rc-drop

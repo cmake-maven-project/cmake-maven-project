@@ -19,7 +19,7 @@
 	<scm>
 		<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
 		<connection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git</connection>
-		<developerConnection>scm:git:git@github.com:cmake-maven-project/cmake-maven-project.git
+		<developerConnection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git
 		</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
@@ -113,7 +113,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.4.1</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -392,6 +392,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
+						<version>3.2.1</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -403,7 +404,7 @@
 					</plugin>
 					<plugin>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.4.1</version>
+						<version>3.5.0</version>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
