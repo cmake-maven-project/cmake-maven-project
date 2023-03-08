@@ -12,108 +12,114 @@ migrated to GitHub (and Git) after Google Code shut down.
 
 ### Generate Goal
 
-    <plugin>
-      <groupId>com.googlecode.cmake-maven-project</groupId>
-      <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.25.2-b1</version>
-      <executions>
-        <execution>
-          <id>cmake-generate</id>
-          <goals>
-            <goal>generate</goal>
-          </goals>
-          <configuration>
-            <sourcePath>
-              <!-- The directory containing CMakeLists -->
-            </sourcePath>
-            <targetPath>
-              <!-- The directory write the project files to -->
-            </targetPath>
-            <generator>
-              <!--
-              Optional: Overrides the default generator used by cmake.
-              The list of available values can be found at 
-              https://cmake.org/cmake/help/v3.22/manual/cmake-generators.7.html
-              -->
-            </generator>
-            <environmentVariables>
-              <!--
-              Optional: Additional environment variables to expose to cmake. If a variable was already set,
-              overrides the previous value.             
-              -->              
-              <key>value</key>
-            </environmentVariables>
-            <options>
-              <!--
-              Optional: One or more options found at https://cmake.org/cmake/help/v3.22/manual/cmake.1.html
-              For example:
-              -->
-              <option>-DBUILD_THIRDPARTY:bool=on</option>
-            </options>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
+```xml
+<plugin>
+  <groupId>com.googlecode.cmake-maven-project</groupId>
+  <artifactId>cmake-maven-plugin</artifactId>
+  <version>3.25.2-b1</version>
+  <executions>
+    <execution>
+      <id>cmake-generate</id>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+      <configuration>
+        <sourcePath>
+          <!-- The directory containing CMakeLists -->
+        </sourcePath>
+        <targetPath>
+          <!-- The directory write the project files to -->
+        </targetPath>
+        <generator>
+          <!--
+          Optional: Overrides the default generator used by cmake.
+          The list of available values can be found at 
+          https://cmake.org/cmake/help/v3.22/manual/cmake-generators.7.html
+          -->
+        </generator>
+        <environmentVariables>
+          <!--
+          Optional: Additional environment variables to expose to cmake. If a variable was already set,
+          overrides the previous value.             
+          -->              
+          <key>value</key>
+        </environmentVariables>
+        <options>
+          <!--
+          Optional: One or more options found at https://cmake.org/cmake/help/v3.22/manual/cmake.1.html
+          For example:
+          -->
+          <option>-DBUILD_THIRDPARTY:bool=on</option>
+        </options>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+```
 
 ### Compile Goal
 
-    <plugin>
-      <groupId>com.googlecode.cmake-maven-project</groupId>
-      <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.25.2-b1</version>
-      <executions>
-        <execution>
-          <id>cmake-compile</id>
-          <goals>
-            <goal>compile</goal>
-          </goals>
-          <configuration>
-            <config>
-              <!-- Optional: the build configuration (e.g. "x64|Release") -->
-            </config>
-            <target>
-              <!-- Optional: the build "target" -->
-            </target>
-            <projectDirectory>
-              <!-- "targetPath" from the "generate" goal -->
-            </projectDirectory>
-            <environmentVariables>
-              <key>value</key>
-            </environmentVariables>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
+```xml
+<plugin>
+  <groupId>com.googlecode.cmake-maven-project</groupId>
+  <artifactId>cmake-maven-plugin</artifactId>
+  <version>3.25.2-b1</version>
+  <executions>
+    <execution>
+      <id>cmake-compile</id>
+      <goals>
+        <goal>compile</goal>
+      </goals>
+      <configuration>
+        <config>
+          <!-- Optional: the build configuration (e.g. "x64|Release") -->
+        </config>
+        <target>
+          <!-- Optional: the build "target" -->
+        </target>
+        <projectDirectory>
+          <!-- "targetPath" from the "generate" goal -->
+        </projectDirectory>
+        <environmentVariables>
+          <key>value</key>
+        </environmentVariables>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+```
 
 ### Test Goal
 
-    <plugin>
-      <groupId>com.googlecode.cmake-maven-project</groupId>
-      <artifactId>cmake-maven-plugin</artifactId>
-      <version>3.25.2-b1</version>
-      <executions>
-        <execution>
-          <id>cmake-test</id>
-          <goals>
-            <goal>test</goal>
-          </goals>
-          <configuration>
-            <!-- "buildDirectory" is "targetPath" from the "generate" goal -->
-            <buildDirectory>${project.build.directory}</buildDirectory>
-            <!-- Optional: do not fail the build on test failures. false by default. -->
-            <testFailureIgnore>true</testFailureIgnore>
-            <!-- Optional: skip only ctest tests. false by default. -->
-            <ctest.skip.tests>true</ctest.skip.tests>
-            <!-- Optional: Skip all Maven tests. false by default -->
-            <maven.test.skip>true</maven.test.skip>
-            <!-- Optional: the number of threads tests should use -->
-            <threadCount>2</threadCount>
-            <!-- Optional: dashboard configuration; used with CTestConfig.cmake -->
-            <dashboard>Experimental</dashboard>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
+```xml
+<plugin>
+  <groupId>com.googlecode.cmake-maven-project</groupId>
+  <artifactId>cmake-maven-plugin</artifactId>
+  <version>3.25.2-b1</version>
+  <executions>
+    <execution>
+      <id>cmake-test</id>
+      <goals>
+        <goal>test</goal>
+      </goals>
+      <configuration>
+        <!-- "buildDirectory" is "targetPath" from the "generate" goal -->
+        <buildDirectory>${project.build.directory}</buildDirectory>
+        <!-- Optional: do not fail the build on test failures. false by default. -->
+        <testFailureIgnore>true</testFailureIgnore>
+        <!-- Optional: skip only ctest tests. false by default. -->
+        <ctest.skip.tests>true</ctest.skip.tests>
+        <!-- Optional: Skip all Maven tests. false by default -->
+        <maven.test.skip>true</maven.test.skip>
+        <!-- Optional: the number of threads tests should use -->
+        <threadCount>2</threadCount>
+        <!-- Optional: dashboard configuration; used with CTestConfig.cmake -->
+        <dashboard>Experimental</dashboard>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+```
 
 ### Examples
 
