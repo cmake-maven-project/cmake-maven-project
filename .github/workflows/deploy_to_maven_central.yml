@@ -58,40 +58,12 @@ jobs:
           stagingRepositoryId="${BASH_REMATCH[1]}"
           echo "STAGING_REPOSITORY_ID=$stagingRepositoryId" >> $GITHUB_OUTPUT
 
-  deploy-portable-artifacts:
-    needs: open-release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: "${{ needs.open-release.outputs.TAG }}"
-      - uses: actions/setup-java@v3
-        with:
-          distribution: zulu
-          java-version: 8
-          server-id: maven-central-releases
-          # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_TOKEN
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
-
-      - name: Configure Git User
-        run: |
-          git config user.email "cowwoc2020@gmail.com"
-          git config user.name "Gili"
-
-      - name: Deploy to Maven Central
-        run: >
-          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" "-Dinvoker.skip=true" -Ddeploy -Dportable -e
-          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
-          -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
-          deploy
-
-  deploy-native-artifacts:
+  # Concurrent deploys of the files that are common across all platforms may lead to corruption
+  deploy:
     needs: open-release
     runs-on: ${{ matrix.os }}
     strategy:
+      max-parallel: 1
       matrix:
         os: [ windows-latest, ubuntu-latest, macos-latest ]
     steps:
@@ -116,13 +88,13 @@ jobs:
 
       - name: Deploy to Maven Central
         run: >
-          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" -Ddeploy -e
+          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" -Ddeploy -Dportable -e
           -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
           -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
           deploy
 
   close-release:
-    needs: [ open-release, deploy-native-artifacts ]
+    needs: [ open-release, deploy ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -153,7 +125,7 @@ jobs:
 
   # Cleanup on failure: https://stackoverflow.com/a/74562058/14731
   on-failure:
-    needs: [ open-release, deploy-portable-artifacts, deploy-native-artifacts, close-release ]
+    needs: [ open-release, deploy, close-release ]
     runs-on: ubuntu-latest
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     steps:
@@ -175,6 +147,9 @@ jobs:
         run: |
           git config user.email "cowwoc2020@gmail.com"
           git config user.name "Gili"
+
+      - name: Delete tag
+        run: git push --delete origin ${{ needs.open-release.outputs.TAG }}
 
       - name: Drop staging repository
         run: >
