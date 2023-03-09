@@ -3,6 +3,8 @@ name: Deploy to Maven Central
 on:
   workflow_dispatch:
 env:
+  # One can look up a project's profileId by running:
+  # mvn nexus-staging:rc-list-profiles -DserverId=maven-central-releases -DnexusUrl=https://oss.sonatype.org/
   STAGING_PROFILE_ID: "1a35794454094c"
   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
   OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
@@ -11,8 +13,8 @@ jobs:
   open-release:
     runs-on: ubuntu-latest
     outputs:
-      TAG: ${{ steps.open-staging.outputs.TAG }}
-      STAGING_REPOSITORY_ID: ${{ steps.open-staging.outputs.STAGING_REPOSITORY_ID }}
+      TAG: ${{ steps.capture-staging.outputs.TAG }}
+      STAGING_REPOSITORY_ID: ${{ steps.capture-staging.outputs.STAGING_REPOSITORY_ID }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -34,12 +36,10 @@ jobs:
           git config user.name "Gili"
 
       # Maven command-line options:
-      # --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
-      # -V : strongly recommended in CI, will display the JDK and Maven versions in use.
+      # --batch-mode: recommended in CI to inform maven to not run in interactive mode (less logs)
+      # -V: strongly recommended in CI, will display the JDK and Maven versions in use.
       #      Very useful to be quickly sure the selected versions were the ones you think.
-      # -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
-      #                            having to crawl the workspace files to see the cause).
-      # -e : Display stack-traces on failure
+      # -e: Display stack-traces on failure
       #
       # Getting the current git tag: https://stackoverflow.com/a/50465671/14731
       #
@@ -50,8 +50,10 @@ jobs:
       # to be deployed to local repository.
       - name: Open staging repository
         id: open-staging
+        run: ./mvnw release:prepare --batch-mode -V -e -Darguments="-Ddeploy -Dinvoker.skip=true"
+        
+      - id: capture-staging
         run: |
-          ./mvnw release:prepare --batch-mode -Darguments="-Ddeploy -Dinvoker.skip=true" -e
           echo "TAG=$(git describe --tag --abbrev=0)" >> $GITHUB_OUTPUT
           output=$(./mvnw --batch-mode -e -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} nexus-staging:rc-open)
           [[ "$output" =~ Opened\ (comgooglecodecmake-maven-project-[[:digit:]]+) ]]
@@ -88,8 +90,7 @@ jobs:
 
       - name: Deploy to Maven Central
         run: >
-          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" -Ddeploy -Dportable -e
-          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+          ./mvnw --batch-mode -V -e -Ddeploy -Dportable -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
           -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
           deploy
 
@@ -118,8 +119,7 @@ jobs:
 
       - name: Close staging repository
         run: >
-          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" -e
-          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+          ./mvnw --batch-mode -V -e -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
           -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
           nexus-staging:rc-close
 
@@ -153,7 +153,6 @@ jobs:
 
       - name: Drop staging repository
         run: >
-          ./mvnw --batch-mode -V "-Dsurefire.useFile=false" -e
-          -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+          ./mvnw --batch-mode -V -e -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
           -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
           nexus-staging:rc-drop
