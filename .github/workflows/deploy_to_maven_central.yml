@@ -76,6 +76,8 @@ jobs:
 
   deploy:
     needs: open-release
+    # If the OS is 'arm64-latest' deploy to 'ubuntu-latest' instead
+    # https://github.com/actions/runner/issues/409#issuecomment-752775072
     runs-on: ${{ matrix.os == 'arm64-latest' && 'ubuntu-latest' || matrix.os }}
     name: Deploy (${{ matrix.os }})
     strategy:
