@@ -35,9 +35,11 @@ jobs:
       # --batch-mode: recommended in CI to inform maven to not run in interactive mode (less logs)
       # -V: strongly recommended in CI, will display the JDK and Maven versions in use.
       #      Very useful to be quickly sure the selected versions were the ones you think.
-      # -e: Display stack-traces on failure
+      # -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
+      #                            having to crawl the workspace files to see the cause).
+      # -e : Display stack-traces on failure
       - name: Build
-        run: ./mvnw install --batch-mode -V -e
+        run: ./mvnw install --batch-mode -V "-Dsurefire.useFile=false" -e
 
   build-arm:
     runs-on: ubuntu-latest
@@ -84,13 +86,13 @@ jobs:
 
                 mkdir /opt/jdk/
                 cd /opt/jdk
-                wget https://cdn.azul.com/zulu-embedded/bin/zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf.tar.gz
-                tar -xzvf zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf.tar.gz
+                wget https://cdn.azul.com/zulu-embedded/bin/zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf.tar.gz
+                tar -xzvf zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf.tar.gz
             
-                update-alternatives --install /usr/bin/java java /opt/jdk/zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf/bin/java 181
-                update-alternatives --install /usr/bin/javac javac /opt/jdk/zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf/bin/javac 181
+                update-alternatives --install /usr/bin/java java /opt/jdk/zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf/bin/java 181
+                update-alternatives --install /usr/bin/javac javac /opt/jdk/zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf/bin/javac 181
             
-                rm zulu8.68.0.21-ca-jdk8.0.362-linux_aarch32hf.tar.gz
+                rm zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf.tar.gz
                 ;;
               aarch64)
                 apt-get install gnupg ca-certificates curl -y

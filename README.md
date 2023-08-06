@@ -16,7 +16,7 @@ migrated to GitHub (and Git) after Google Code shut down.
 <plugin>
   <groupId>com.googlecode.cmake-maven-project</groupId>
   <artifactId>cmake-maven-plugin</artifactId>
-  <version>3.26.3-b1</version>
+  <version>3.27.1-b1</version>
   <executions>
     <execution>
       <id>cmake-generate</id>
@@ -63,7 +63,7 @@ migrated to GitHub (and Git) after Google Code shut down.
 <plugin>
   <groupId>com.googlecode.cmake-maven-project</groupId>
   <artifactId>cmake-maven-plugin</artifactId>
-  <version>3.26.3-b1</version>
+  <version>3.27.1-b1</version>
   <executions>
     <execution>
       <id>cmake-compile</id>
@@ -95,7 +95,7 @@ migrated to GitHub (and Git) after Google Code shut down.
 <plugin>
   <groupId>com.googlecode.cmake-maven-project</groupId>
   <artifactId>cmake-maven-plugin</artifactId>
-  <version>3.26.3-b1</version>
+  <version>3.27.1-b1</version>
   <executions>
     <execution>
       <id>cmake-test</id>
@@ -140,6 +140,7 @@ To clean an old build, run:
 By default, Maven will activate the right profile based on your JVM:
 
 * windows-x86_64
+* windows-aarch64
 * linux-x86_64
 * linux-arm_32
 * mac-x86_64

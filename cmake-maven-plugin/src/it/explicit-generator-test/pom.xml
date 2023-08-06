@@ -29,6 +29,19 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>windows-aarch64</id>
+			<activation>
+				<os>
+					<family>windows</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<generator>Visual Studio 17 2022</generator>
+				<cmake.download>true</cmake.download>
+			</properties>
+		</profile>
+		<profile>
 			<id>linux-x86_64</id>
 			<activation>
 				<os>
