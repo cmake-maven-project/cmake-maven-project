@@ -23,6 +23,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
+          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           distribution: zulu
@@ -75,11 +76,11 @@ jobs:
           echo "STAGING_REPOSITORY_ID=$stagingRepositoryId" >> $GITHUB_OUTPUT
 
   deploy:
+    name: Deploy (${{ matrix.os }})
     needs: open-release
     # If the OS is 'arm64-latest' deploy to 'ubuntu-latest' instead
     # https://github.com/actions/runner/issues/409#issuecomment-752775072
     runs-on: ${{ matrix.os == 'arm64-latest' && 'ubuntu-latest' || matrix.os }}
-    name: Deploy (${{ matrix.os }})
     strategy:
       # Concurrent deploys of the files that are common across platforms may lead to data corruption
       max-parallel: 1
@@ -109,9 +110,6 @@ jobs:
           key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.OS }}-maven-
-
-      - run: |
-          cat ~/.m2/settings.xml
 
       - if: ${{ matrix.os != 'arm64-latest' }}
         name: Deploy to Maven Central

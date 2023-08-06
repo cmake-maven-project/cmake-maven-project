@@ -69,9 +69,15 @@ public final class OperatingSystem
 						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 				}
 			case WINDOWS:
-				if (architecture == Architecture.X86_64)
-					return "windows-x86_64";
-				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				switch (architecture)
+				{
+					case X86_64:
+						return "windows-x86_64";
+					case ARM_64:
+						return "windows-arm64";
+					default:
+						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				}
 			default:
 				throw new UnsupportedOperationException("Unsupported operating system: " + type);
 		}
@@ -166,9 +172,15 @@ public final class OperatingSystem
 						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
 				}
 			case WINDOWS:
-				if (architecture == Architecture.X86_64)
-					return "windows-x86_64.zip";
-				throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				switch (architecture)
+				{
+					case X86_64:
+						return "windows-x86_64.zip";
+					case ARM_64:
+						return "windows-arm64.zip";
+					default:
+						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+				}
 			default:
 				throw new UnsupportedOperationException("Unsupported operating system: " + type);
 		}
