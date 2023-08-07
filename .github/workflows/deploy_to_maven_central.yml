@@ -100,7 +100,7 @@ jobs:
             os: macOS-latest
 
           - runtime: win-x64
-            os: windows-2019
+            os: windows-2022
 
           - runtime: win-arm64
             os: windows-latest
