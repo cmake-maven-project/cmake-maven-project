@@ -115,7 +115,7 @@ public class TestMojo extends CmakeMojo
 			String ctestPath = getBinaryPath("ctest", processBuilder).toString();
 			processBuilder.command().add(ctestPath);
 
-			Collections.addAll(processBuilder.command(), "--test-action", "Test");
+			Collections.addAll(processBuilder.command(), "--test-action", "Test", "--output-on-failure");
 
 			String threadCountString = Integer.toString(threadCount);
 			Collections.addAll(processBuilder.command(), "--parallel", threadCountString);
