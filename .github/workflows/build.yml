@@ -7,10 +7,31 @@ concurrency:
 jobs:
   build:
     name: Build
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-latest, macos-latest ]
+        runtime: [ linux-x64, linux-arm64, linux-arm, win-x64, osx-x64, osx-arm64, win-arm64 ]
+        include:
+          - runtime: linux-x64
+            os: ubuntu-latest
+
+          - runtime: linux-arm64
+            os: ubuntu-latest
+
+          - runtime: linux-arm
+            os: ubuntu-latest
+
+          - runtime: osx-x64
+            os: macOS-latest
+
+          - runtime: osx-arm64
+            os: macOS-latest
+
+          - runtime: win-x64
+            os: windows-2019
+
+          - runtime: win-arm64
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -40,76 +61,3 @@ jobs:
       # -e : Display stack-traces on failure
       - name: Build
         run: ./mvnw install --batch-mode -V "-Dsurefire.useFile=false" -e
-
-  build-arm:
-    runs-on: ubuntu-latest
-    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
-    strategy:
-      matrix:
-        include:
-          - arch: armv6
-            distro: bullseye
-          - arch: armv7
-            distro: ubuntu_latest
-          - arch: aarch64
-            distro: ubuntu_latest
-
-    # Source: https://github.com/lh3/bwa/blob/139f68fc4c3747813783a488aef2adc86626b01b/.github/workflows/ci.yaml#L33-L46
-    #  gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-
-      - name: Cache Dependencies
-        uses: actions/cache@v3
-        with:
-          # Avoid caching generated artifacts
-          path: |
-            ~/.m2/repository/*
-            !~/.m2/repository/com/googlecode/cmake-maven-project
-          key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.OS }}-maven-
-
-      - name: Build
-        uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: ${{ matrix.arch }}
-          distro: ${{ matrix.distro }}
-          githubToken: ${{ github.token }}
-          install: |
-            apt-get update --allow-releaseinfo-change -y
-            
-            case "${{ matrix.arch }}" in
-              armv6|armv7)
-                apt-get install wget cmake -y
-
-                mkdir /opt/jdk/
-                cd /opt/jdk
-                wget https://cdn.azul.com/zulu-embedded/bin/zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf.tar.gz
-                tar -xzvf zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf.tar.gz
-            
-                update-alternatives --install /usr/bin/java java /opt/jdk/zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf/bin/java 181
-                update-alternatives --install /usr/bin/javac javac /opt/jdk/zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf/bin/javac 181
-            
-                rm zulu8.72.0.17-ca-jdk8.0.382-linux_aarch32hf.tar.gz
-                ;;
-              aarch64)
-                apt-get install gnupg ca-certificates curl -y
-                curl -s https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg
-                echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" | tee /etc/apt/sources.list.d/zulu.list
-                apt-get update --allow-releaseinfo-change -y
-                apt-get install zulu8-jdk -y
-                ;;
-              *)
-                echo "Unsupported distro: ${{ matrix.distro }}"
-                exit 1
-                ;;
-            esac
-            apt-get install build-essential -y
-          setup: mkdir -p "${PWD}/.m2"
-          dockerRunArgs: --volume "${PWD}/.m2:/.m2" -e GITHUB_WORKSPACE=${GITHUB_WORKSPACE}
-          run: |
-            export JAVA_HOME=`which java | xargs readlink -f | xargs dirname | xargs dirname`
-            cd "${GITHUB_WORKSPACE}"
-            ./mvnw install --batch-mode -V -e
