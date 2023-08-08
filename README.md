@@ -140,11 +140,11 @@ To clean an old build, run:
 By default, Maven will activate the right profile based on your JVM:
 
 * windows-x86_64
-* windows-aarch64
+* windows-arm_64
 * linux-x86_64
 * linux-arm_32
 * mac-x86_64
-* mac-aarch64
+* mac-arm_64
 
 If detection does not work, or you wish to override it then set `-P<profile>`.
 

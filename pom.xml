@@ -265,12 +265,12 @@
 									<target>
 										<echo>Please activate one of the following profiles:</echo>
 										<echo>* windows-x86_64</echo>
-										<echo>* windows-aarch64</echo>
+										<echo>* windows-arm_64</echo>
 										<echo>* linux-x86_64</echo>
 										<echo>* linux-arm_32</echo>
 										<echo>* linux-arm_64</echo>
 										<echo>* mac-x86_64</echo>
-										<echo>* mac-aarch64</echo>
+										<echo>* mac-arm_64</echo>
 										<echo />
 										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
 										<echo />
@@ -303,7 +303,7 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>windows-aarch64</id>
+			<id>windows-arm_64</id>
 			<activation>
 				<os>
 					<family>windows</family>
@@ -311,7 +311,7 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>windows-aarch64</platform>
+				<platform>windows-arm_64</platform>
 			</properties>
 			<modules>
 				<module>cmake-binaries</module>
@@ -389,7 +389,7 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>mac-aarch64</id>
+			<id>mac-arm_64</id>
 			<activation>
 				<os>
 					<family>mac</family>

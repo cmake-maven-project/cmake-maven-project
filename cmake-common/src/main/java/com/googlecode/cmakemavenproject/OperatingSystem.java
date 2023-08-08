@@ -57,7 +57,7 @@ public final class OperatingSystem
 		switch (type)
 		{
 			case LINUX:
-				return "linux-" + architecture.name().toLowerCase(Locale.US);
+				return "linux-" + architecture.name().toLowerCase(Locale.ENGLISH);
 			case MAC:
 				switch (architecture)
 				{
@@ -297,7 +297,7 @@ public final class OperatingSystem
 		private static final Reference<Architecture> DETECTED = ConcurrentLazyReference.create(() ->
 		{
 			String osArch = System.getProperty("os.arch");
-			osArch = osArch.toLowerCase(Locale.US).replaceAll("[^a-z0-9]+", "");
+			osArch = osArch.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9]+", "");
 			switch (osArch)
 			{
 				case "x8632":
@@ -318,6 +318,7 @@ public final class OperatingSystem
 				case "arm":
 				case "arm32":
 					return ARM_32;
+				case "arm64":
 				case "aarch64":
 					return ARM_64;
 				default:
