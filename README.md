@@ -106,7 +106,7 @@ migrated to GitHub (and Git) after Google Code shut down.
         <!-- "buildDirectory" is "targetPath" from the "generate" goal -->
         <buildDirectory>${project.build.directory}</buildDirectory>
         <!-- Optional: do not fail the build on test failures. false by default. -->
-        <testFailureIgnore>true</testFailureIgnore>
+        <ignoreTestFailure>true</ignoreTestFailure>
         <!-- Optional: skip only ctest tests. false by default. -->
         <ctest.skip.tests>true</ctest.skip.tests>
         <!-- Optional: Skip all Maven tests. false by default -->
