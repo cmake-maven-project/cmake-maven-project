@@ -76,7 +76,7 @@ jobs:
           echo "STAGING_REPOSITORY_ID=$stagingRepositoryId" >> $GITHUB_OUTPUT
 
   deploy:
-    name: Deploy (${{ matrix.os }})
+    name: Deploy (${{ matrix.runtime }} - ${{ matrix.os }})
     needs: open-release
     strategy:
       # Concurrent deploys of the files that are common across platforms may lead to data corruption
