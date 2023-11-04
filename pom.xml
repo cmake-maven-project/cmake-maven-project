@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
-	<version>3.27.1-b1-SNAPSHOT</version>
+	<version>3.27.7-b1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
@@ -39,6 +39,22 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.core.version>3.9.5</maven.core.version>
+
+		<!--
+		We have three kinds of platforms:
+
+		1. Binaries provided by https://cmake.org/download/, Platform supported by GitHub-hosted runners.
+			 * Example: linux-x86_64
+			 * Download binaries, run tests
+		2. Binaries provided by https://cmake.org/download/, Platform not supported by GitHub-hosted runners
+			 * Example: windows-arm_64
+			 * Download binaries, skip tests
+		3. Binaries not provided by https://cmake.org/download/, Platform not supported by GitHub-hosted runners
+			 * Example: BSD variants
+			 * Don't download binaries or run tests
+		-->
+		<shipsWithCmake>true</shipsWithCmake>
+		<skipTests>false</skipTests>
 	</properties>
 
 	<distributionManagement>
@@ -243,6 +259,9 @@
 
 	<modules>
 		<module>cmake-common</module>
+		<module>cmake-binaries</module>
+		<module>cmake-binaries-plugin</module>
+		<module>cmake-maven-plugin</module>
 	</modules>
 
 	<profiles>
@@ -271,12 +290,12 @@
 										<echo>* linux-arm_64</echo>
 										<echo>* mac-x86_64</echo>
 										<echo>* mac-arm_64</echo>
-										<echo />
+										<echo/>
 										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
-										<echo />
+										<echo/>
 										<echo>Use mvn help:active-profiles for troubleshooting and</echo>
 										<echo>https://maven.apache.org/settings.html#Activation for reference.</echo>
-										<fail />
+										<fail/>
 									</target>
 								</configuration>
 							</execution>
@@ -296,11 +315,6 @@
 			<properties>
 				<platform>windows-x86_64</platform>
 			</properties>
-			<modules>
-				<module>cmake-binaries</module>
-				<module>cmake-binaries-plugin</module>
-				<module>cmake-maven-plugin</module>
-			</modules>
 		</profile>
 		<profile>
 			<id>windows-arm_64</id>
@@ -312,12 +326,8 @@
 			</activation>
 			<properties>
 				<platform>windows-arm_64</platform>
+				<skipTests>true</skipTests>
 			</properties>
-			<modules>
-				<module>cmake-binaries</module>
-				<module>cmake-binaries-plugin</module>
-				<module>cmake-maven-plugin</module>
-			</modules>
 		</profile>
 		<profile>
 			<id>linux-x86_64</id>
@@ -331,11 +341,6 @@
 			<properties>
 				<platform>linux-x86_64</platform>
 			</properties>
-			<modules>
-				<module>cmake-binaries</module>
-				<module>cmake-binaries-plugin</module>
-				<module>cmake-maven-plugin</module>
-			</modules>
 		</profile>
 		<profile>
 			<id>linux-arm_32</id>
@@ -347,12 +352,8 @@
 			</activation>
 			<properties>
 				<platform>linux-arm_32</platform>
+				<shipsWithCmake>true</shipsWithCmake>
 			</properties>
-			<modules>
-				<!-- The binaries ship with the OS so we skip cmake-binaries -->
-				<module>cmake-binaries-plugin</module>
-				<module>cmake-maven-plugin</module>
-			</modules>
 		</profile>
 		<profile>
 			<id>linux-arm_64</id>
@@ -365,11 +366,6 @@
 			<properties>
 				<platform>linux-arm_64</platform>
 			</properties>
-			<modules>
-				<module>cmake-binaries</module>
-				<module>cmake-binaries-plugin</module>
-				<module>cmake-maven-plugin</module>
-			</modules>
 		</profile>
 		<profile>
 			<id>mac-x86_64</id>
@@ -382,11 +378,6 @@
 			<properties>
 				<platform>mac-universal</platform>
 			</properties>
-			<modules>
-				<module>cmake-binaries</module>
-				<module>cmake-binaries-plugin</module>
-				<module>cmake-maven-plugin</module>
-			</modules>
 		</profile>
 		<profile>
 			<id>mac-arm_64</id>
@@ -399,11 +390,6 @@
 			<properties>
 				<platform>mac-universal</platform>
 			</properties>
-			<modules>
-				<module>cmake-binaries</module>
-				<module>cmake-binaries-plugin</module>
-				<module>cmake-maven-plugin</module>
-			</modules>
 		</profile>
 		<profile>
 			<id>deploy</id>

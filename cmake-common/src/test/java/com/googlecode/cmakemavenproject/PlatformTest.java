@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class OperatingSystemTest
+public final class PlatformTest
 {
 	/**
 	 * OperatingSystem.overrideEnvironmentVariables() used to throw a NullPointerException if the key did not
@@ -14,10 +14,10 @@ public final class OperatingSystemTest
 	@Test
 	public void overrideEnvironmentVariablesWithNonExistentKey()
 	{
-		OperatingSystem os = OperatingSystem.detected();
+		Platform platform = Platform.detected();
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		Map<String, String> source = new HashMap<>();
 		source.put("doesn't-exist", "value");
-		os.overrideEnvironmentVariables(source, processBuilder);
+		platform.overrideEnvironmentVariables(source, processBuilder);
 	}
 }

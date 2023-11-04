@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.27.1-b1-SNAPSHOT</version>
+		<version>3.27.7-b1-SNAPSHOT</version>
 	</parent>
 	<prerequisites>
 		<maven>${maven.version}</maven>
@@ -15,23 +15,8 @@
 	<description>Builds native code using CMake makefile generator</description>
 
 	<properties>
-		<skipUnpackBinaries>false</skipUnpackBinaries>
+		<shipsWithCmake>false</shipsWithCmake>
 	</properties>
-
-	<profiles>
-		<profile>
-			<id>linux-arm_32</id>
-			<activation>
-				<os>
-					<family>unix</family>
-					<arch>arm</arch>
-				</os>
-			</activation>
-			<properties>
-				<skipUnpackBinaries>true</skipUnpackBinaries>
-			</properties>
-		</profile>
-	</profiles>
 
 	<build>
 		<plugins>
@@ -46,6 +31,8 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
+							<skipInstallation>${skipTests}</skipInstallation>
+							<skipInvocation>${skipTests}</skipInvocation>
 							<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
 							<localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
 							<failIfNoProjects>true</failIfNoProjects>
@@ -59,7 +46,7 @@
 								<cmake.plugin.groupid>${project.groupId}</cmake.plugin.groupid>
 								<cmake.plugin.version>${project.version}</cmake.plugin.version>
 								<platform>${platform}</platform>
-								<skipUnpackBinaries>${skipUnpackBinaries}</skipUnpackBinaries>
+								<shipsWithCmake>${shipsWithCmake}</shipsWithCmake>
 							</properties>
 						</configuration>
 					</execution>

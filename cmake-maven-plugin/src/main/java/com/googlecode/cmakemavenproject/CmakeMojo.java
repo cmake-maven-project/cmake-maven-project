@@ -48,7 +48,7 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	@Parameter
 	private List<String> options;
-	private final OperatingSystem os = OperatingSystem.detected();
+	private final Platform platform = Platform.detected();
 
 	/**
 	 * Downloads cmake if necessary.
@@ -82,7 +82,7 @@ public abstract class CmakeMojo extends AbstractMojo
 		Element groupIdElement = new Element("groupId", groupId);
 		Element artifactIdElement = new Element("artifactId", binariesArtifact);
 		Element versionElement = new Element("version", version);
-		Element classifierElement = new Element("classifier", os.getClassifier());
+		Element classifierElement = new Element("classifier", platform.getClassifier());
 		Element outputDirectoryElement = new Element("outputDirectory", outputDirectory.toString());
 		Element artifactItemElement = new Element("artifactItem", groupIdElement, artifactIdElement,
 			versionElement, classifierElement, outputDirectoryElement);
@@ -107,15 +107,15 @@ public abstract class CmakeMojo extends AbstractMojo
 		if (cmakeDir == null)
 		{
 			log.info("Executing " + filename + " on PATH");
-			String path = os.getEnvironment(processBuilder, "PATH");
+			String path = platform.getEnvironment(processBuilder, "PATH");
 			if (path == null)
 			{
 				throw new IllegalArgumentException("PATH not found\n" +
 					"env: " + processBuilder.environment());
 			}
-			return os.getExecutableOnPath(filename, path);
+			return platform.getExecutableOnPath(filename, path);
 		}
-		Path result = cmakeDir.resolve(filename + os.getExecutableSuffix());
+		Path result = cmakeDir.resolve(filename + platform.getExecutableSuffix());
 		log.info("Executing " + result);
 		return result;
 	}
@@ -166,6 +166,6 @@ public abstract class CmakeMojo extends AbstractMojo
 	{
 		if (environmentVariables == null)
 			return;
-		os.overrideEnvironmentVariables(environmentVariables, processBuilder);
+		platform.overrideEnvironmentVariables(environmentVariables, processBuilder);
 	}
 }
