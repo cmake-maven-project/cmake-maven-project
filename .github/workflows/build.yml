@@ -60,4 +60,8 @@ jobs:
       #                            having to crawl the workspace files to see the cause).
       # -e : Display stack-traces on failure
       - name: Build
+        if: ${{ matrix.runtime != 'win-arm64' }}
         run: ./mvnw install --batch-mode -V "-Dsurefire.useFile=false" -e
+      - name: Build
+        if: ${{ matrix.runtime == 'win-arm64' }}
+        run: ./mvnw -Pwindows-arm_64 install --batch-mode -V "-Dsurefire.useFile=false" -e
