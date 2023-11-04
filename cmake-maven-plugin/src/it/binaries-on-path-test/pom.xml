@@ -30,7 +30,7 @@
 							<goal>unpack</goal>
 						</goals>
 						<configuration>
-							<skip>${skipUnpackBinaries}</skip>
+							<skip>${shipsWithCmake}</skip>
 							<artifactItems>
 								<artifactItem>
 									<groupId>${cmake.plugin.groupid}</groupId>

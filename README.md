@@ -16,7 +16,7 @@ migrated to GitHub (and Git) after Google Code shut down.
 <plugin>
   <groupId>com.googlecode.cmake-maven-project</groupId>
   <artifactId>cmake-maven-plugin</artifactId>
-  <version>3.27.1-b1</version>
+  <version>3.27.7-b1</version>
   <executions>
     <execution>
       <id>cmake-generate</id>
@@ -63,7 +63,7 @@ migrated to GitHub (and Git) after Google Code shut down.
 <plugin>
   <groupId>com.googlecode.cmake-maven-project</groupId>
   <artifactId>cmake-maven-plugin</artifactId>
-  <version>3.27.1-b1</version>
+  <version>3.27.7-b1</version>
   <executions>
     <execution>
       <id>cmake-compile</id>
@@ -95,7 +95,7 @@ migrated to GitHub (and Git) after Google Code shut down.
 <plugin>
   <groupId>com.googlecode.cmake-maven-project</groupId>
   <artifactId>cmake-maven-plugin</artifactId>
-  <version>3.27.1-b1</version>
+  <version>3.27.7-b1</version>
   <executions>
     <execution>
       <id>cmake-test</id>
@@ -106,7 +106,7 @@ migrated to GitHub (and Git) after Google Code shut down.
         <!-- "buildDirectory" is "targetPath" from the "generate" goal -->
         <buildDirectory>${project.build.directory}</buildDirectory>
         <!-- Optional: do not fail the build on test failures. false by default. -->
-        <testFailureIgnore>true</testFailureIgnore>
+        <ignoreTestFailure>true</ignoreTestFailure>
         <!-- Optional: skip only ctest tests. false by default. -->
         <ctest.skip.tests>true</ctest.skip.tests>
         <!-- Optional: Skip all Maven tests. false by default -->
@@ -140,11 +140,11 @@ To clean an old build, run:
 By default, Maven will activate the right profile based on your JVM:
 
 * windows-x86_64
-* windows-aarch64
+* windows-arm_64
 * linux-x86_64
 * linux-arm_32
 * mac-x86_64
-* mac-aarch64
+* mac-arm_64
 
 If detection does not work, or you wish to override it then set `-P<profile>`.
 

@@ -63,7 +63,7 @@
 						</goals>
 						<configuration>
 							<buildDirectory>${project.build.directory}</buildDirectory>
-							<testFailureIgnore>true</testFailureIgnore>
+							<ignoreTestFailure>true</ignoreTestFailure>
 							<dashboard>Experimental</dashboard>
 						</configuration>
 					</execution>

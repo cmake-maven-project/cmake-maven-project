@@ -76,90 +76,72 @@ jobs:
           echo "STAGING_REPOSITORY_ID=$stagingRepositoryId" >> $GITHUB_OUTPUT
 
   deploy:
-    name: Deploy (${{ matrix.os }})
+    name: Deploy (${{ matrix.runtime }} - ${{ matrix.os }})
     needs: open-release
-    # If the OS is 'arm64-latest' deploy to 'ubuntu-latest' instead
-    # https://github.com/actions/runner/issues/409#issuecomment-752775072
-    runs-on: ${{ matrix.os == 'arm64-latest' && 'ubuntu-latest' || matrix.os }}
     strategy:
       # Concurrent deploys of the files that are common across platforms may lead to data corruption
       max-parallel: 1
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest, arm64-latest ]
+        runtime: [ linux-x64, linux-arm64, linux-arm, win-x64, osx-x64, osx-arm64, win-arm64 ]
+        include:
+          - runtime: linux-x64
+            os: ubuntu-latest
+
+          - runtime: linux-arm64
+            os: ubuntu-latest
+
+          - runtime: linux-arm
+            os: ubuntu-latest
+
+          - runtime: osx-x64
+            os: macOS-latest
+
+          - runtime: osx-arm64
+            os: macOS-latest
+
+          - runtime: win-x64
+            os: windows-latest
+
+          - runtime: win-arm64
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ needs.open-release.outputs.TAG }}
-      - uses: actions/setup-java@v3
-        with:
-          distribution: zulu
-          java-version: 8
-          server-id: maven-central-releases
-          # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_TOKEN
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
-      - name: Cache Dependencies
-        uses: actions/cache@v3
-        with:
-          # Avoid caching generated artifacts
-          path: |
-            ~/.m2/repository/*
-            !~/.m2/repository/com/googlecode/cmake-maven-project
-          key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.OS }}-maven-
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ needs.open-release.outputs.TAG }}
+    - uses: actions/setup-java@v3
+      with:
+        distribution: zulu
+        java-version: 8
+        server-id: maven-central-releases
+        # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
+        server-username: OSSRH_USERNAME
+        server-password: OSSRH_TOKEN
+        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+    - name: Cache Dependencies
+      uses: actions/cache@v3
+      with:
+        # Avoid caching generated artifacts
+        path: |
+          ~/.m2/repository/*
+          !~/.m2/repository/com/googlecode/cmake-maven-project
+        key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.OS }}-maven-
 
-      - if: ${{ matrix.os != 'arm64-latest' }}
-        name: Deploy to Maven Central
-        run: >
-          ./mvnw --batch-mode -V -e -Ddeploy -Dportable -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
-          -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
-          deploy
-
-      # Source: https://github.com/lh3/bwa/blob/139f68fc4c3747813783a488aef2adc86626b01b/.github/workflows/ci.yaml#L33-L46
-      #  gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi
-      - if: ${{ matrix.os == 'arm64-latest' }}
-        uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: aarch64
-          distro: ubuntu_latest
-          githubToken: ${{ github.token }}
-          install: |
-            apt-get update --allow-releaseinfo-change -y
-
-            apt-get install gnupg ca-certificates curl -y
-            curl -s https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg
-            echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" | tee /etc/apt/sources.list.d/zulu.list
-            apt-get update --allow-releaseinfo-change -y
-            apt-get install zulu8-jdk -y
-            apt-get install build-essential -y
-          setup: |
-            ls -la ${HOME}/.gnupg
-            ls -la ${HOME}/.m2
-          dockerRunArgs: |
-            --volume "${HOME}/.m2:/root/.host-m2" --volume "${HOME}/.gnupg:/root/.host-gnupg" 
-            -e GITHUB_WORKSPACE -e MAVEN_GPG_PASSPHRASE -e OSSRH_USERNAME -e OSSRH_TOKEN
-          run: |
-            # Avoid copying JDK toolchain, as paths will be different
-            mkdir -p ~/.m2
-            cp -va ~/.host-m2/settings.xml ~/.m2/settings.xml
-            
-            # Fix "gpg: WARNING: unsafe ownership on homedir '/root/.gnupg'"
-            mkdir -p ~/.gnupg
-            cp -av ~/.host-gnupg/. ~/.gnupg/
-            chown -R root ~/.gnupg
-            
-            ls -la ~/.m2
-            ls -la ~/.gnupg
-
-            export JAVA_HOME=$(which java | xargs readlink -f | xargs dirname | xargs dirname)
-            cd "${GITHUB_WORKSPACE}"
-            
-            ./mvnw --batch-mode -V -e -Ddeploy -Dportable -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} \
-            -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }} \
-            deploy
+    - name: Deploy to Maven Central
+      if: ${{ matrix.runtime != 'win-arm64' }}
+      run: >
+        ./mvnw --batch-mode -V -e -Ddeploy -Dportable -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+        -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
+        deploy
+    - name: Deploy to Maven Central
+      if: ${{ matrix.runtime == 'win-arm64' }}
+      run: >
+        ./mvnw -Pwindows-arm_64 --batch-mode -V -e -Ddeploy -Dportable
+        -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
+        -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }} deploy
 
   close-release:
     needs: [ open-release, deploy ]

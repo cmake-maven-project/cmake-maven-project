@@ -15,49 +15,67 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * An operating system.
+ * A combination of a system's architecture and operating system.
  */
-public final class OperatingSystem
+public final class Platform
 {
-	private static final Reference<OperatingSystem> DETECTED = ConcurrentLazyReference.create(() ->
+	private static final Reference<Platform> DETECTED = ConcurrentLazyReference.create(() ->
 	{
-		Type type = Type.detected();
+		OperatingSystem operatingSystem = OperatingSystem.detected();
 		Architecture architecture = Architecture.detected();
-		return new OperatingSystem(type, architecture);
+		return new Platform(operatingSystem, architecture);
 	});
 
 	/**
-	 * Returns the detected operating system.
+	 * Returns the detected platform.
 	 *
-	 * @return the detected operating system
-	 * @throws AssertionError if the operating system is unsupported
+	 * @return the detected platform
 	 */
-	public static OperatingSystem detected()
+	public static Platform detected()
 	{
 		return DETECTED.getValue();
 	}
 
 	/**
-	 * The type of the operating system.
+	 * @return the system properties used to detect the platform
 	 */
-	public final Type type;
+	public static String getDetectionProperties()
+	{
+		return OperatingSystem.getDetectionProperty() + "/" + Architecture.getDetectionProperty();
+	}
+
 	/**
-	 * The architecture of the operating system.
+	 * @return true if the platform binaries are available on
+	 * <a href="https://cmake.org/download/">CMake's website</a>
+	 */
+	public boolean isDownloadAvailable()
+	{
+		return operatingSystem != OperatingSystem.UNSUPPORTED && architecture != Architecture.UNSUPPORTED &&
+			!(operatingSystem == OperatingSystem.LINUX && architecture == Architecture.ARM_32);
+	}
+
+	/**
+	 * The operating system of the platform.
+	 */
+	public final OperatingSystem operatingSystem;
+	/**
+	 * The architecture of the platform.
 	 */
 	public final Architecture architecture;
 
 	/**
-	 * Returns the classifier associated with this operating system.
+	 * Returns the classifier associated with this platform.
 	 *
-	 * @return the classifier associated with this operating system
-	 * @throws UnsupportedOperationException if the operating system was unsupported
+	 * @return the classifier associated with this platform
+	 * @throws UnsupportedOperationException if <a href="https://cmake.org/download/">CMake's website</a>
+	 * does not provide binaries for this platform
 	 */
 	public String getClassifier()
 	{
-		switch (type)
+		switch (operatingSystem)
 		{
 			case LINUX:
-				return "linux-" + architecture.name().toLowerCase(Locale.US);
+				return "linux-" + architecture.name().toLowerCase(Locale.ENGLISH);
 			case MAC:
 				switch (architecture)
 				{
@@ -66,7 +84,7 @@ public final class OperatingSystem
 					case ARM_64:
 						return "mac-universal";
 					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 				}
 			case WINDOWS:
 				switch (architecture)
@@ -76,19 +94,19 @@ public final class OperatingSystem
 					case ARM_64:
 						return "windows-arm64";
 					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 				}
 			default:
-				throw new UnsupportedOperationException("Unsupported operating system: " + type);
+				throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 		}
 	}
 
 	/**
-	 * Returns the fully-qualified path of the executable.
+	 * Returns the fully qualified path of the executable.
 	 *
 	 * @param filename the filename of a binary
 	 * @param path     the {@code PATH} environment variable
-	 * @return the fully-qualified path of the executable
+	 * @return the fully qualified path of the executable
 	 * @throws NullPointerException  if any of the arguments are null
 	 * @throws FileNotFoundException if the binary could not be found
 	 */
@@ -98,7 +116,7 @@ public final class OperatingSystem
 			throw new NullPointerException("filename may not be null");
 		if (path == null)
 			throw new NullPointerException("path may not be null");
-		// Per https://stackoverflow.com/a/34061154/14731 it's easier to invoke a fully-qualified path
+		// Per https://stackoverflow.com/a/34061154/14731 it's easier to invoke a fully qualified path
 		// than trying to quote command-line arguments properly.
 		// https://stackoverflow.com/a/32827512/14731 shows how this can be done.
 		String suffix = getExecutableSuffix();
@@ -123,11 +141,12 @@ public final class OperatingSystem
 	 * Returns the suffix to append to the cmake executables.
 	 *
 	 * @return the suffix to append to the cmake executables
-	 * @throws UnsupportedOperationException if the operating system was unsupported
+	 * @throws UnsupportedOperationException if <a href="https://cmake.org/download/">CMake's website</a>
+	 * does not provide binaries for this platform
 	 */
 	public String getExecutableSuffix()
 	{
-		switch (type)
+		switch (operatingSystem)
 		{
 			case LINUX:
 			case MAC:
@@ -135,7 +154,7 @@ public final class OperatingSystem
 			case WINDOWS:
 				return ".exe";
 			default:
-				throw new UnsupportedOperationException("Unsupported operating system: " + type);
+				throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 		}
 	}
 
@@ -143,11 +162,12 @@ public final class OperatingSystem
 	 * Returns the suffix to append to the cmake download filename.
 	 *
 	 * @return the suffix to append to the cmake download filename
-	 * @throws UnsupportedOperationException if the operating system was unsupported
+	 * @throws UnsupportedOperationException if <a href="https://cmake.org/download/">CMake's website</a>
+	 * does not provide binaries for this platform
 	 */
 	public String getDownloadSuffix()
 	{
-		switch (type)
+		switch (operatingSystem)
 		{
 			case LINUX:
 				switch (architecture)
@@ -159,7 +179,7 @@ public final class OperatingSystem
 					case ARM_32:
 						// cmake is assumed to ship with the operating system
 					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 				}
 			case MAC:
 				switch (architecture)
@@ -169,7 +189,7 @@ public final class OperatingSystem
 					case ARM_64:
 						return "macos-universal.tar.gz";
 					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 				}
 			case WINDOWS:
 				switch (architecture)
@@ -179,10 +199,10 @@ public final class OperatingSystem
 					case ARM_64:
 						return "windows-arm64.zip";
 					default:
-						throw new UnsupportedOperationException("Unsupported architecture: " + architecture);
+						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 				}
 			default:
-				throw new UnsupportedOperationException("Unsupported operating system: " + type);
+				throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 		}
 	}
 
@@ -191,11 +211,12 @@ public final class OperatingSystem
 	 *
 	 * @param in the InputStream associated with the archive
 	 * @return true if the operating system supports POSIX attributes
-	 * @throws UnsupportedOperationException if the operating system was unsupported
+	 * @throws UnsupportedOperationException if <a href="https://cmake.org/download/">CMake's website</a>
+	 * does not provide binaries for this platform
 	 */
 	public boolean supportsPosix(InputStream in)
 	{
-		switch (type)
+		switch (operatingSystem)
 		{
 			case LINUX:
 			case MAC:
@@ -203,7 +224,7 @@ public final class OperatingSystem
 			case WINDOWS:
 				return false;
 			default:
-				throw new UnsupportedOperationException("Unsupported operating system: " + type);
+				throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 		}
 	}
 
@@ -217,7 +238,7 @@ public final class OperatingSystem
 	public String getEnvironment(ProcessBuilder processBuilder, String name)
 	{
 		Map<String, String> environment = processBuilder.environment();
-		return environment.get(type.getEnvironmentCanonicalName(environment, name));
+		return environment.get(operatingSystem.getEnvironmentCanonicalName(environment, name));
 	}
 
 	/**
@@ -246,28 +267,28 @@ public final class OperatingSystem
 				value = "";
 			}
 			String name = entry.getKey();
-			name = type.getEnvironmentCanonicalName(environment, name);
+			name = operatingSystem.getEnvironmentCanonicalName(environment, name);
 			environment.put(name, value);
 		}
 	}
 
 	/**
-	 * @param type         the type of the operating system
-	 * @param architecture the architecture of the operating system
+	 * @param operatingSystem the operating system of the platform
+	 * @param architecture    the architecture of the platform
 	 * @throws AssertionError if any of the arguments are null
 	 */
-	OperatingSystem(Type type, Architecture architecture)
+	Platform(OperatingSystem operatingSystem, Architecture architecture)
 	{
-		assert (type != null) : "type may not be null";
+		assert (operatingSystem != null) : "operatingSystem may not be null";
 		assert (architecture != null) : "architecture may not be null";
-		this.type = type;
+		this.operatingSystem = operatingSystem;
 		this.architecture = architecture;
 	}
 
 	@Override
 	public String toString()
 	{
-		return type + " " + architecture;
+		return operatingSystem + " " + architecture;
 	}
 
 	/**
@@ -292,12 +313,25 @@ public final class OperatingSystem
 		/**
 		 * ARM, 64-bit.
 		 */
-		ARM_64;
+		ARM_64,
+		/**
+		 * <a href="https://cmake.org/download/">CMake's website</a> does not provide binaries for this
+		 * architecture.
+		 */
+		UNSUPPORTED;
+
+		/**
+		 * @return the system property used to detect the system architecture
+		 */
+		public static String getDetectionProperty()
+		{
+			return System.getProperty("os.arch");
+		}
 
 		private static final Reference<Architecture> DETECTED = ConcurrentLazyReference.create(() ->
 		{
-			String osArch = System.getProperty("os.arch");
-			osArch = osArch.toLowerCase(Locale.US).replaceAll("[^a-z0-9]+", "");
+			String osArch = getDetectionProperty();
+			osArch = osArch.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9]+", "");
 			switch (osArch)
 			{
 				case "x8632":
@@ -321,8 +355,7 @@ public final class OperatingSystem
 				case "aarch64":
 					return ARM_64;
 				default:
-					throw new AssertionError("Unsupported architecture: " + osArch + "\n" +
-						"properties: " + System.getProperties());
+					return UNSUPPORTED;
 			}
 		});
 
@@ -338,9 +371,9 @@ public final class OperatingSystem
 	}
 
 	/**
-	 * Operating system types.
+	 * Operating systems.
 	 */
-	public enum Type
+	public enum OperatingSystem
 	{
 		/**
 		 * Windows.
@@ -360,45 +393,43 @@ public final class OperatingSystem
 		/**
 		 * Linux.
 		 */
-		LINUX
-			{
-				@Override
-				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
-				{
-					return name;
-				}
-			},
+		LINUX,
 		/**
 		 * macOS.
 		 */
-		MAC
-			{
-				@Override
-				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
-				{
-					return name;
-				}
-			};
+		MAC,
+		/**
+		 * <a href="https://cmake.org/download/">CMake's website</a> does not provide binaries for this operating
+		 * system.
+		 */
+		UNSUPPORTED;
 
-		private static final Reference<Type> DETECTED = ConcurrentLazyReference.create(() ->
+		/**
+		 * @return the system property used to detect the operating system
+		 */
+		public static String getDetectionProperty()
 		{
-			String osName = System.getProperty("os.name");
+			return System.getProperty("os.name");
+		}
+
+		private static final Reference<OperatingSystem> DETECTED = ConcurrentLazyReference.create(() ->
+		{
+			String osName = getDetectionProperty();
 			if (startsWithIgnoreCase(osName, "windows"))
 				return WINDOWS;
 			if (startsWithIgnoreCase(osName, "linux"))
 				return LINUX;
 			if (startsWithIgnoreCase(osName, "mac"))
 				return MAC;
-			throw new AssertionError("Unsupported operating system: " + osName + "\n" +
-				"properties: " + System.getProperties());
+			return UNSUPPORTED;
 		});
 
 		/**
-		 * Returns the type of the detected operating system.
+		 * Returns the detected operating system.
 		 *
-		 * @return the type of the detected operating system
+		 * @return the detected operating system
 		 */
-		public static Type detected()
+		public static OperatingSystem detected()
 		{
 			return DETECTED.getValue();
 		}
@@ -419,6 +450,9 @@ public final class OperatingSystem
 		 * @param name        an environment variable
 		 * @return the case-sensitive form of the variable
 		 */
-		abstract String getEnvironmentCanonicalName(Map<String, String> environment, String name);
+		String getEnvironmentCanonicalName(Map<String, String> environment, String name)
+		{
+			return name;
+		}
 	}
 }

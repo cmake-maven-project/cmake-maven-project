@@ -53,9 +53,17 @@ public class TestMojo extends CmakeMojo
 	private File buildDirectory;
 	/**
 	 * Value that lets Maven tests fail without causing the build to fail.
+	 *
+	 * @deprecated replaced by {@code ignoreTestFailure}
 	 */
+	@Deprecated
 	@Parameter(property = "maven.test.failure.ignore", defaultValue = "false")
 	private boolean testFailureIgnore;
+	/**
+	 * Value that lets Maven tests fail without causing the build to fail.
+	 */
+	@Parameter(property = "maven.ignore.test.failure", defaultValue = "false")
+	private boolean ignoreTestFailure;
 	/**
 	 * Maven tests value that indicates just the ctest tests are to be skipped.
 	 */
@@ -115,7 +123,7 @@ public class TestMojo extends CmakeMojo
 			String ctestPath = getBinaryPath("ctest", processBuilder).toString();
 			processBuilder.command().add(ctestPath);
 
-			Collections.addAll(processBuilder.command(), "--test-action", "Test");
+			Collections.addAll(processBuilder.command(), "--test-action", "Test", "--output-on-failure");
 
 			String threadCountString = Integer.toString(threadCount);
 			Collections.addAll(processBuilder.command(), "--parallel", threadCountString);
@@ -161,7 +169,7 @@ public class TestMojo extends CmakeMojo
 				tagReader.close();
 			}
 
-			if (tag == null || tag.trim().length() == 0)
+			if (tag == null || tag.trim().isEmpty())
 				throw new IOException("Couldn't read ctest TAG file");
 
 			// Get the current run's test data for reformatting
@@ -181,7 +189,12 @@ public class TestMojo extends CmakeMojo
 			// Transform CTest output into Surefire style test output
 			transformer.transform(source, result);
 
-			if (returnCode != 0 && !testFailureIgnore)
+			if (!ignoreTestFailure && testFailureIgnore)
+			{
+				ignoreTestFailure = testFailureIgnore;
+				log.warn("<testFailureIgnore> is deprecated. Please use <ignoreTestFailure> instead.");
+			}
+			if (returnCode != 0 && !ignoreTestFailure)
 				throw new MojoExecutionException("Return code: " + returnCode);
 		}
 		catch (InterruptedException | IOException | TransformerException e)

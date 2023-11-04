@@ -1,8 +1,8 @@
 Dashboard-Test
 ==============
 
-This test tests the 'testFailureIgnore' and the CTest dashboard parameters.  It is
-configured so that a failed test will not cause the build to fail (testFailureIgnore
+This test tests the 'ignoreTestFailure' property and the CTest dashboard parameters.  It is
+configured so that a failed test will not cause the build to fail (ignoreTestFailure
 is set to 'true').  The failed test is then reported to the dashboard set up for the
 project at my.dash.org:
 

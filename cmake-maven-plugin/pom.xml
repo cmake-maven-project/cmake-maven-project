@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
 		<artifactId>cmake</artifactId>
-		<version>3.27.1-b1-SNAPSHOT</version>
+		<version>3.27.7-b2-SNAPSHOT</version>
 	</parent>
 	<prerequisites>
 		<maven>${maven.version}</maven>
@@ -15,20 +15,20 @@
 	<description>Builds native code using CMake makefile generator</description>
 
 	<properties>
-		<skipUnpackBinaries>false</skipUnpackBinaries>
+		<shipsWithCmake>false</shipsWithCmake>
 	</properties>
 
 	<profiles>
 		<profile>
-			<id>linux-arm_32</id>
+			<id>skip-integration-tests</id>
 			<activation>
-				<os>
-					<family>unix</family>
-					<arch>arm</arch>
-				</os>
+				<property>
+					<name>invoker.skip</name>
+					<value>true</value>
+				</property>
 			</activation>
 			<properties>
-				<skipUnpackBinaries>true</skipUnpackBinaries>
+				<skipTests>true</skipTests>
 			</properties>
 		</profile>
 	</profiles>
@@ -45,7 +45,14 @@
 							<goal>install</goal>
 							<goal>run</goal>
 						</goals>
+						<!--
+						Make sure that this artifact is installed before running integration tests; otherwise,
+						maven-invoker-plugin:install will fail.
+						-->
+						<phase>install</phase>
 						<configuration>
+							<skipInstallation>${skipTests}</skipInstallation>
+							<skipInvocation>${skipTests}</skipInvocation>
 							<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
 							<localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
 							<failIfNoProjects>true</failIfNoProjects>
@@ -59,7 +66,7 @@
 								<cmake.plugin.groupid>${project.groupId}</cmake.plugin.groupid>
 								<cmake.plugin.version>${project.version}</cmake.plugin.version>
 								<platform>${platform}</platform>
-								<skipUnpackBinaries>${skipUnpackBinaries}</skipUnpackBinaries>
+								<shipsWithCmake>${shipsWithCmake}</shipsWithCmake>
 							</properties>
 						</configuration>
 					</execution>
