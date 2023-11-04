@@ -25,6 +25,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -63,7 +65,7 @@ public class GetBinariesMojo
 	 * The maximum number of times to retry deleting files.
 	 */
 	private static final int MAX_RETRIES = 30;
-	private final OperatingSystem os = OperatingSystem.detected();
+	private final Platform platform = Platform.detected();
 
 	/**
 	 * The project version.
@@ -77,7 +79,14 @@ public class GetBinariesMojo
 	public void execute()
 		throws MojoExecutionException
 	{
-		String suffix = os.getDownloadSuffix();
+		Log log = getLog();
+		if (!platform.isDownloadAvailable())
+		{
+			log.info("https://cmake.org/download/ does not provide any binaries for this platform");
+			return;
+		}
+
+		String suffix = platform.getDownloadSuffix();
 
 		String cmakeVersion = getCMakeVersion(projectVersion);
 		final Path target = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
@@ -88,15 +97,14 @@ public class GetBinariesMojo
 			deleteRecursively(target);
 
 			// Directories are not normalized, begin by unpacking the binaries.
-			Path archive = download(new URL("https://github.com/Kitware/CMake/releases/download/v" +
-				cmakeVersion + "/cmake-" + cmakeVersion + "-" + suffix));
-			Log log = getLog();
+			Path archive = download(new URI("https://github.com/Kitware/CMake/releases/download/v" +
+				cmakeVersion + "/cmake-" + cmakeVersion + "-" + suffix).toURL());
 			if (log.isInfoEnabled())
 				log.info("Extracting " + archive + " to " + target);
 			extract(archive, target);
 			normalizeDirectories(target);
 		}
-		catch (IOException e)
+		catch (IOException | URISyntaxException e)
 		{
 			throw new MojoExecutionException("", e);
 		}
@@ -209,7 +217,7 @@ public class GetBinariesMojo
 		try (ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(
 			new BufferedInputStream(Files.newInputStream(source))))
 		{
-			if (os.supportsPosix(in))
+			if (platform.supportsPosix(in))
 				attributes = new FileAttribute<?>[1];
 			else
 				attributes = new FileAttribute<?>[0];
