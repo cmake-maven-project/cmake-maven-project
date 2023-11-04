@@ -84,11 +84,11 @@ public final class OperatingSystem
 	}
 
 	/**
-	 * Returns the fully-qualified path of the executable.
+	 * Returns the fully qualified path of the executable.
 	 *
 	 * @param filename the filename of a binary
 	 * @param path     the {@code PATH} environment variable
-	 * @return the fully-qualified path of the executable
+	 * @return the fully qualified path of the executable
 	 * @throws NullPointerException  if any of the arguments are null
 	 * @throws FileNotFoundException if the binary could not be found
 	 */
@@ -98,7 +98,7 @@ public final class OperatingSystem
 			throw new NullPointerException("filename may not be null");
 		if (path == null)
 			throw new NullPointerException("path may not be null");
-		// Per https://stackoverflow.com/a/34061154/14731 it's easier to invoke a fully-qualified path
+		// Per https://stackoverflow.com/a/34061154/14731 it's easier to invoke a fully qualified path
 		// than trying to quote command-line arguments properly.
 		// https://stackoverflow.com/a/32827512/14731 shows how this can be done.
 		String suffix = getExecutableSuffix();
@@ -292,7 +292,11 @@ public final class OperatingSystem
 		/**
 		 * ARM, 64-bit.
 		 */
-		ARM_64;
+		ARM_64,
+		/**
+		 * Unsupported architecture.
+		 */
+		UNSUPPORTED;
 
 		private static final Reference<Architecture> DETECTED = ConcurrentLazyReference.create(() ->
 		{
@@ -318,12 +322,10 @@ public final class OperatingSystem
 				case "arm":
 				case "arm32":
 					return ARM_32;
-				case "arm64":
 				case "aarch64":
 					return ARM_64;
 				default:
-					throw new AssertionError("Unsupported architecture: " + osArch + "\n" +
-						"properties: " + System.getProperties());
+					return UNSUPPORTED;
 			}
 		});
 
@@ -361,25 +363,15 @@ public final class OperatingSystem
 		/**
 		 * Linux.
 		 */
-		LINUX
-			{
-				@Override
-				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
-				{
-					return name;
-				}
-			},
+		LINUX,
 		/**
 		 * macOS.
 		 */
-		MAC
-			{
-				@Override
-				String getEnvironmentCanonicalName(Map<String, String> environment, String name)
-				{
-					return name;
-				}
-			};
+		MAC,
+		/**
+		 * Unsupported operating system.
+		 */
+		UNSUPPORTED;
 
 		private static final Reference<Type> DETECTED = ConcurrentLazyReference.create(() ->
 		{
@@ -390,8 +382,7 @@ public final class OperatingSystem
 				return LINUX;
 			if (startsWithIgnoreCase(osName, "mac"))
 				return MAC;
-			throw new AssertionError("Unsupported operating system: " + osName + "\n" +
-				"properties: " + System.getProperties());
+			return UNSUPPORTED;
 		});
 
 		/**
@@ -420,6 +411,9 @@ public final class OperatingSystem
 		 * @param name        an environment variable
 		 * @return the case-sensitive form of the variable
 		 */
-		abstract String getEnvironmentCanonicalName(Map<String, String> environment, String name);
+		String getEnvironmentCanonicalName(Map<String, String> environment, String name)
+		{
+			return name;
+		}
 	}
 }
