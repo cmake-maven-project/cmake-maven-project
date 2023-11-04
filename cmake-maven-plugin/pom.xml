@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
@@ -18,6 +19,21 @@
 		<shipsWithCmake>false</shipsWithCmake>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>skip-integration-tests</id>
+			<activation>
+				<property>
+					<name>invoker.skip</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<properties>
+				<skipTests>true</skipTests>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -30,6 +46,11 @@
 							<goal>install</goal>
 							<goal>run</goal>
 						</goals>
+						<!--
+						Make sure that this artifact is installed before running integration tests; otherwise,
+						maven-invoker-plugin:install will fail.
+						-->
+						<phase>install</phase>
 						<configuration>
 							<skipInstallation>${skipTests}</skipInstallation>
 							<skipInvocation>${skipTests}</skipInvocation>
