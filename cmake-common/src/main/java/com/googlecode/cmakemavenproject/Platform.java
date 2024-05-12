@@ -92,7 +92,7 @@ public final class Platform
 					case X86_64:
 						return "windows-x86_64";
 					case ARM_64:
-						return "windows-arm64";
+						return "windows-arm_64";
 					default:
 						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
 				}
