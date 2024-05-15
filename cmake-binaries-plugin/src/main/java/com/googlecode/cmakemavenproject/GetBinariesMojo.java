@@ -397,7 +397,7 @@ public class GetBinariesMojo
 	 *
 	 * @param entry the archive entry
 	 * @return the PosixFilePermissions, or null if the default permissions should be used
-	 * @see <a href="http://stackoverflow.com/a/9445853/14731">http://stackoverflow.com/a/9445853/14731</a>
+	 * @see <a href="https://stackoverflow.com/a/9445853/14731">https://stackoverflow.com/a/9445853/14731</a>
 	 */
 	private Set<PosixFilePermission> getPosixPermissions(ArchiveEntry entry)
 	{
@@ -426,11 +426,11 @@ public class GetBinariesMojo
 
 		// Extract digits from left to right
 		//
-		// REFERENCE: http://stackoverflow.com/questions/203854/how-to-get-the-nth-digit-of-an-integer-with-bit-wise-operations
+		// REFERENCE: https://stackoverflow.com/questions/203854/how-to-get-the-nth-digit-of-an-integer-with-bit-wise-operations
 		for (int i = 3; i >= 1; --i)
 		{
 			// Octal is base-8
-			mode %= Math.pow(8, i);
+			mode %= (int) Math.pow(8, i);
 			int digit = (int) (mode / Math.pow(8, i - 1));
 			if ((digit & 0x04) != 0)
 				result.append("r");

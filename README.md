@@ -166,4 +166,4 @@ That's it! To learn more about CMake itself, consult the [CMake.org](https://cma
 
 ### License
 
-CMake-Maven-Project is released under an [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+CMake-Maven-Project is released under an [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
