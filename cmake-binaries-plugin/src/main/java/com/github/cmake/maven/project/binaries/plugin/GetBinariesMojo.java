@@ -1,5 +1,6 @@
-package com.googlecode.cmakemavenproject;
+package com.github.cmake.maven.project.binaries.plugin;
 
+import com.github.cmake.maven.project.common.Platform;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -17,9 +18,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import javax.inject.Inject;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -58,22 +59,25 @@ import java.util.regex.Pattern;
  * @author Gili Tzabari
  */
 @Mojo(name = "get-binaries", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
-public class GetBinariesMojo
-	extends AbstractMojo
+public class GetBinariesMojo extends AbstractMojo
 {
 	/**
 	 * The maximum number of times to retry deleting files.
 	 */
 	private static final int MAX_RETRIES = 30;
+	private final MavenProject project;
 	private final Platform platform = Platform.detected();
 
 	/**
-	 * The project version.
+	 * Creates a new instance.
+	 *
+	 * @param project an instance of {@code MavenProject}
 	 */
-	@Parameter(property = "project.version")
-	private String projectVersion;
-	@Parameter(property = "project", required = true, readonly = true)
-	private MavenProject project;
+	@Inject
+	public GetBinariesMojo(MavenProject project)
+	{
+		this.project = project;
+	}
 
 	@Override
 	public void execute()
@@ -88,7 +92,7 @@ public class GetBinariesMojo
 
 		String suffix = platform.getDownloadSuffix();
 
-		String cmakeVersion = getCMakeVersion(projectVersion);
+		String cmakeVersion = getCMakeVersion(project.getVersion());
 		final Path target = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
 		try
 		{
@@ -140,7 +144,8 @@ public class GetBinariesMojo
 	private Path download(URL url) throws MojoExecutionException
 	{
 		String filename = new File(url.getPath()).getName();
-		Path result = Paths.get(project.getBuild().getDirectory(), filename);
+		String buildDirectory = project.getBuild().getDirectory();
+		Path result = Paths.get(buildDirectory, filename);
 		try
 		{
 			if (Files.notExists(result))
@@ -152,7 +157,7 @@ public class GetBinariesMojo
 
 				try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream()))
 				{
-					Files.createDirectories(Paths.get(project.getBuild().getDirectory()));
+					Files.createDirectories(Paths.get(buildDirectory));
 					try (BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(result)))
 					{
 						byte[] buffer = new byte[10 * 1024];
@@ -214,7 +219,7 @@ public class GetBinariesMojo
 	{
 		Path tempDir = Files.createTempDirectory("cmake");
 		FileAttribute<?>[] attributes;
-		try (ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(
+		try (ArchiveInputStream<ArchiveEntry> in = new ArchiveStreamFactory().createArchiveInputStream(
 			new BufferedInputStream(Files.newInputStream(source))))
 		{
 			if (platform.supportsPosix(in))

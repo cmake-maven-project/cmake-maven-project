@@ -1,4 +1,4 @@
-package com.googlecode.cmakemavenproject;
+package com.github.cmake.maven.project.common;
 
 import com.github.cowwoc.pouch.core.ConcurrentLazyReference;
 import com.github.cowwoc.pouch.core.Reference;
@@ -27,6 +27,15 @@ public final class Platform
 	});
 
 	/**
+	 * The operating system of the platform.
+	 */
+	public final OperatingSystem operatingSystem;
+	/**
+	 * The architecture of the platform.
+	 */
+	public final Architecture architecture;
+
+	/**
 	 * Returns the detected platform.
 	 *
 	 * @return the detected platform
@@ -37,38 +46,36 @@ public final class Platform
 	}
 
 	/**
-	 * @return the system properties used to detect the platform
+	 * @return {@code true} if cmake binaries ship with the platform
 	 */
-	public static String getDetectionProperties()
+	public boolean shipsWithPlatform()
 	{
-		return OperatingSystem.getDetectionProperty() + "/" + Architecture.getDetectionProperty();
+		return architecture == Architecture.ARM_32;
 	}
 
 	/**
-	 * @return true if the platform binaries are available on
+	 * @return {@code true} if the platform binaries are available on
 	 * <a href="https://cmake.org/download/">CMake's website</a>
 	 */
 	public boolean isDownloadAvailable()
 	{
-		return operatingSystem != OperatingSystem.UNSUPPORTED && architecture != Architecture.UNSUPPORTED &&
-			!(operatingSystem == OperatingSystem.LINUX && architecture == Architecture.ARM_32);
+		return !(operatingSystem == OperatingSystem.LINUX && architecture == Architecture.ARM_32);
 	}
 
 	/**
-	 * The operating system of the platform.
+	 * @return {@code true} if automated tests can run on this platform
 	 */
-	public final OperatingSystem operatingSystem;
-	/**
-	 * The architecture of the platform.
-	 */
-	public final Architecture architecture;
+	public boolean canRunTests()
+	{
+		return architecture != Architecture.ARM_64;
+	}
 
 	/**
 	 * Returns the classifier associated with this platform.
 	 *
 	 * @return the classifier associated with this platform
 	 * @throws UnsupportedOperationException if <a href="https://cmake.org/download/">CMake's website</a>
-	 * does not provide binaries for this platform
+	 *                                       does not provide binaries for this platform
 	 */
 	public String getClassifier()
 	{
@@ -84,7 +91,7 @@ public final class Platform
 					case ARM_64:
 						return "mac-universal";
 					default:
-						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+						throw new UnsupportedOperationException("Unsupported platform: " + getName());
 				}
 			case WINDOWS:
 				switch (architecture)
@@ -94,11 +101,19 @@ public final class Platform
 					case ARM_64:
 						return "windows-arm_64";
 					default:
-						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+						throw new UnsupportedOperationException("Unsupported platform: " + getName());
 				}
 			default:
-				throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+				throw new UnsupportedOperationException("Unsupported platform: " + getName());
 		}
+	}
+
+	/**
+	 * @return the name of the platform
+	 */
+	private static String getName()
+	{
+		return System.getProperty("os.name") + "/" + System.getProperty("os.arch");
 	}
 
 	/**
@@ -142,7 +157,7 @@ public final class Platform
 	 *
 	 * @return the suffix to append to the cmake executables
 	 * @throws UnsupportedOperationException if <a href="https://cmake.org/download/">CMake's website</a>
-	 * does not provide binaries for this platform
+	 *                                       does not provide binaries for this platform
 	 */
 	public String getExecutableSuffix()
 	{
@@ -154,7 +169,7 @@ public final class Platform
 			case WINDOWS:
 				return ".exe";
 			default:
-				throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+				throw new UnsupportedOperationException("Unsupported platform: " + getName());
 		}
 	}
 
@@ -163,7 +178,7 @@ public final class Platform
 	 *
 	 * @return the suffix to append to the cmake download filename
 	 * @throws UnsupportedOperationException if <a href="https://cmake.org/download/">CMake's website</a>
-	 * does not provide binaries for this platform
+	 *                                       does not provide binaries for this platform
 	 */
 	public String getDownloadSuffix()
 	{
@@ -179,7 +194,7 @@ public final class Platform
 					case ARM_32:
 						// cmake is assumed to ship with the operating system
 					default:
-						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+						throw new UnsupportedOperationException("Unsupported platform: " + getName());
 				}
 			case MAC:
 				switch (architecture)
@@ -189,7 +204,7 @@ public final class Platform
 					case ARM_64:
 						return "macos-universal.tar.gz";
 					default:
-						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+						throw new UnsupportedOperationException("Unsupported platform: " + getName());
 				}
 			case WINDOWS:
 				switch (architecture)
@@ -199,10 +214,10 @@ public final class Platform
 					case ARM_64:
 						return "windows-arm64.zip";
 					default:
-						throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+						throw new UnsupportedOperationException("Unsupported platform: " + getName());
 				}
 			default:
-				throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+				throw new UnsupportedOperationException("Unsupported platform: " + getName());
 		}
 	}
 
@@ -212,7 +227,7 @@ public final class Platform
 	 * @param in the InputStream associated with the archive
 	 * @return true if the operating system supports POSIX attributes
 	 * @throws UnsupportedOperationException if <a href="https://cmake.org/download/">CMake's website</a>
-	 * does not provide binaries for this platform
+	 *                                       does not provide binaries for this platform
 	 */
 	public boolean supportsPosix(InputStream in)
 	{
@@ -224,7 +239,7 @@ public final class Platform
 			case WINDOWS:
 				return false;
 			default:
-				throw new UnsupportedOperationException("Unsupported platform: " + getDetectionProperties());
+				throw new UnsupportedOperationException("Unsupported platform: " + getName());
 		}
 	}
 
@@ -313,25 +328,17 @@ public final class Platform
 		/**
 		 * ARM, 64-bit.
 		 */
-		ARM_64,
-		/**
-		 * <a href="https://cmake.org/download/">CMake's website</a> does not provide binaries for this
-		 * architecture.
-		 */
-		UNSUPPORTED;
+		ARM_64;
 
 		/**
-		 * @return the system property used to detect the system architecture
+		 * Detects the platform's architecture.
+		 *
+		 * @return the detected architecture
+		 * @throws IllegalArgumentException if no match was found
 		 */
-		public static String getDetectionProperty()
-		{
-			return System.getProperty("os.arch");
-		}
-
 		private static final Reference<Architecture> DETECTED = ConcurrentLazyReference.create(() ->
 		{
-			String osArch = getDetectionProperty();
-			osArch = osArch.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9]+", "");
+			String osArch = System.getProperty("os.arch").toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9]+", "");
 			switch (osArch)
 			{
 				case "x8632":
@@ -355,7 +362,7 @@ public final class Platform
 				case "aarch64":
 					return ARM_64;
 				default:
-					return UNSUPPORTED;
+					throw new IllegalArgumentException("Unsupported architecture: " + osArch);
 			}
 		});
 
@@ -397,31 +404,24 @@ public final class Platform
 		/**
 		 * macOS.
 		 */
-		MAC,
-		/**
-		 * <a href="https://cmake.org/download/">CMake's website</a> does not provide binaries for this operating
-		 * system.
-		 */
-		UNSUPPORTED;
+		MAC;
 
 		/**
-		 * @return the system property used to detect the operating system
+		 * Detects the platform's operating system.
+		 *
+		 * @return the operating system
+		 * @throws IllegalArgumentException if no match was found
 		 */
-		public static String getDetectionProperty()
-		{
-			return System.getProperty("os.name");
-		}
-
 		private static final Reference<OperatingSystem> DETECTED = ConcurrentLazyReference.create(() ->
 		{
-			String osName = getDetectionProperty();
-			if (startsWithIgnoreCase(osName, "windows"))
+			String name = System.getProperty("os.name");
+			if (startsWithIgnoreCase(name, "windows"))
 				return WINDOWS;
-			if (startsWithIgnoreCase(osName, "linux"))
+			if (startsWithIgnoreCase(name, "linux"))
 				return LINUX;
-			if (startsWithIgnoreCase(osName, "mac"))
+			if (startsWithIgnoreCase(name, "mac"))
 				return MAC;
-			return UNSUPPORTED;
+			throw new IllegalArgumentException("Unsupported operating system: " + name);
 		});
 
 		/**

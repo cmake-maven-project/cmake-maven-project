@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.googlecode.cmake-maven-project</groupId>
@@ -10,6 +11,7 @@
 	<name>CMake Binaries</name>
 	<description>CMake Binaries</description>
 	<packaging>pom</packaging>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -41,7 +43,7 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<classifier>${platform}</classifier>
+							<classifier>${cmake.platform}</classifier>
 							<classesDirectory>${project.build.directory}/dependency/cmake</classesDirectory>
 						</configuration>
 					</execution>
@@ -49,31 +51,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<!-- Deploy an empty main jar to satisfy Sonatype's staging rules. -->
-			<id>portable</id>
-			<activation>
-				<property>
-					<name>portable</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-jar-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>default-jar</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-								<phase>package</phase>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
@@ -7,6 +8,7 @@
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
+
 	<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
 	<licenses>
 		<license>
@@ -53,7 +55,7 @@
 			 * Example: BSD variants
 			 * Don't download binaries or run tests
 		-->
-		<shipsWithCmake>true</shipsWithCmake>
+		<cmake.shipsWithPlatform>true</cmake.shipsWithPlatform>
 		<skipTests>false</skipTests>
 	</properties>
 
@@ -139,8 +141,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<!-- WORKAROUND: https://issues.apache.org/jira/browse/MNG-8121 -->
-					<version>3.12.0</version>
+					<version>3.13.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -151,11 +152,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>3.6.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -192,6 +188,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-invoker-plugin</artifactId>
 					<version>3.6.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.2.5</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -237,20 +238,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!--
-				Cannot be hidden behind the "deploy" profile because we invoke "rc-open" and "rc-close" before and
-				after the deploy.
-				-->
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.13</version>
-				<extensions>true</extensions>
-				<configuration>
-					<serverId>maven-central-releases</serverId>
-					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>3.0.1</version>
@@ -271,45 +258,6 @@
 
 	<profiles>
 		<profile>
-			<id>list-profiles</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>validate</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<echo>Please activate one of the following profiles:</echo>
-										<echo>* windows-x86_64</echo>
-										<echo>* windows-arm_64</echo>
-										<echo>* linux-x86_64</echo>
-										<echo>* linux-arm_32</echo>
-										<echo>* linux-arm_64</echo>
-										<echo>* mac-x86_64</echo>
-										<echo>* mac-arm_64</echo>
-										<echo />
-										<echo>For instance: mvn -Pwindows-x86_64 install</echo>
-										<echo />
-										<echo>Use mvn help:active-profiles for troubleshooting and</echo>
-										<echo>https://maven.apache.org/settings.html#Activation for reference.</echo>
-										<fail />
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
 			<id>windows-x86_64</id>
 			<activation>
 				<os>
@@ -318,7 +266,7 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>windows-x86_64</platform>
+				<cmake.platform>windows-x86_64</cmake.platform>
 			</properties>
 		</profile>
 		<profile>
@@ -330,7 +278,7 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>windows-arm_64</platform>
+				<cmake.platform>windows-arm_64</cmake.platform>
 				<skipTests>true</skipTests>
 			</properties>
 		</profile>
@@ -344,7 +292,7 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>linux-x86_64</platform>
+				<cmake.platform>linux-x86_64</cmake.platform>
 			</properties>
 		</profile>
 		<profile>
@@ -356,8 +304,8 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>linux-arm_32</platform>
-				<shipsWithCmake>true</shipsWithCmake>
+				<cmake.platform>linux-arm_32</cmake.platform>
+				<cmake.shipsWithPlatform>true</cmake.shipsWithPlatform>
 			</properties>
 		</profile>
 		<profile>
@@ -369,7 +317,7 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>linux-arm_64</platform>
+				<cmake.platform>linux-arm_64</cmake.platform>
 			</properties>
 		</profile>
 		<profile>
@@ -381,7 +329,7 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>mac-universal</platform>
+				<cmake.platform>mac-universal</cmake.platform>
 			</properties>
 		</profile>
 		<profile>
@@ -393,7 +341,7 @@
 				</os>
 			</activation>
 			<properties>
-				<platform>mac-universal</platform>
+				<cmake.platform>mac-universal</cmake.platform>
 			</properties>
 		</profile>
 		<profile>
@@ -443,6 +391,18 @@
 								</configuration>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-deploy-plugin</artifactId>
+						<version>3.1.2</version>
+						<configuration>
+							<deployAtEnd>true</deployAtEnd>
+							<altReleaseDeploymentRepository>
+								<!-- Based on https://gist.github.com/cstamas/69e6365bbb70521923020d68369bf8e5 -->
+								maven-central-releases::https://${staging_host}/service/local/staging/deployByRepositoryId/${staging_repository_id}
+							</altReleaseDeploymentRepository>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

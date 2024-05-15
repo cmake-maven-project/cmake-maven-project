@@ -1,5 +1,6 @@
-package com.googlecode.cmakemavenproject;
+package com.github.cmake.maven.project.maven.plugin;
 
+import com.github.cmake.maven.project.common.Platform;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.AbstractMojo;
@@ -7,7 +8,6 @@ import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -15,6 +15,7 @@ import org.twdata.maven.mojoexecutor.MojoExecutor;
 import org.twdata.maven.mojoexecutor.MojoExecutor.Element;
 import org.twdata.maven.mojoexecutor.MojoExecutor.ExecutionEnvironment;
 
+import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,19 +25,17 @@ import java.util.stream.Collectors;
 
 public abstract class CmakeMojo extends AbstractMojo
 {
-	@Component
-	private BuildPluginManager pluginManager;
-	@Parameter(property = "project", required = true, readonly = true)
-	protected MavenProject project;
-	@Parameter(property = "session", required = true, readonly = true)
-	private MavenSession session;
-	@Parameter(property = "cmake.download", defaultValue = "true")
+	/**
+	 * {@code true} if this plugin should download and unpack cmake binaries. {@code false} if this plugin
+	 * should assume that cmake is already installed and is on the {@code PATH}.
+	 */
+	@Parameter(property = "cmake.download", alias = "cmake.download", defaultValue = "true")
 	private boolean downloadBinaries;
 	/**
 	 * The directory containing the cmake executable. By default, it is assumed that the executable is on
 	 * the PATH. This parameter is ignored if {@link #downloadBinaries} is set.
 	 */
-	@Parameter(property = "cmake.dir")
+	@Parameter(property = "cmake.dir", alias = "cmake.dir")
 	private String cmakeDir;
 	/**
 	 * The environment variables.
@@ -48,7 +47,26 @@ public abstract class CmakeMojo extends AbstractMojo
 	 */
 	@Parameter
 	private List<String> options;
+
+	private final MavenProject project;
+	private final BuildPluginManager pluginManager;
+	private final MavenSession session;
 	private final Platform platform = Platform.detected();
+
+	/**
+	 * Creates a new instance.
+	 *
+	 * @param project       an instance of {@code MavenProject}
+	 * @param session       an instance of {@code MavenSession}
+	 * @param pluginManager an instance of {@code PluginManager}
+	 */
+	@Inject
+	public CmakeMojo(MavenProject project, MavenSession session, BuildPluginManager pluginManager)
+	{
+		this.project = project;
+		this.pluginManager = pluginManager;
+		this.session = session;
+	}
 
 	/**
 	 * Downloads cmake if necessary.
@@ -63,6 +81,16 @@ public abstract class CmakeMojo extends AbstractMojo
 			return;
 		Path outputDirectory = Paths.get(project.getBuild().getDirectory(), "dependency/cmake");
 		downloadBinaries(outputDirectory);
+	}
+
+	/**
+	 * Returns this plugin's build directory.
+	 *
+	 * @return this plugin's build directory
+	 */
+	protected String getBuildDirectory()
+	{
+		return project.getBuild().getDirectory();
 	}
 
 	/**

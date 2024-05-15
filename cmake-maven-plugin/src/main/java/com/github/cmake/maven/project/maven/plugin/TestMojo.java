@@ -11,14 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.googlecode.cmakemavenproject;
+package com.github.cmake.maven.project.maven.plugin;
 
+import com.github.cmake.maven.project.common.Mojos;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
+import javax.inject.Inject;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -53,21 +58,13 @@ public class TestMojo extends CmakeMojo
 	private File buildDirectory;
 	/**
 	 * Value that lets Maven tests fail without causing the build to fail.
-	 *
-	 * @deprecated replaced by {@code ignoreTestFailure}
 	 */
-	@Deprecated
-	@Parameter(property = "maven.test.failure.ignore", defaultValue = "false")
-	private boolean testFailureIgnore;
-	/**
-	 * Value that lets Maven tests fail without causing the build to fail.
-	 */
-	@Parameter(property = "maven.ignore.test.failure", defaultValue = "false")
+	@Parameter(defaultValue = "false")
 	private boolean ignoreTestFailure;
 	/**
 	 * Maven tests value that indicates just the ctest tests are to be skipped.
 	 */
-	@Parameter(property = "ctest.skip.tests", defaultValue = "false")
+	@Parameter(property = "ctest.skip.tests", alias = "ctest.skip.tests", defaultValue = "false")
 	private boolean ctestSkip;
 	/**
 	 * Standard Maven tests value that indicates all tests are to be skipped.
@@ -86,6 +83,19 @@ public class TestMojo extends CmakeMojo
 	 */
 	@Parameter(property = "dashboard")
 	private String dashboard;
+
+	/**
+	 * Creates a new instance.
+	 *
+	 * @param project       an instance of {@code MavenProject}
+	 * @param session       an instance of {@code MavenSession}
+	 * @param pluginManager an instance of {@code PluginManager}
+	 */
+	@Inject
+	public TestMojo(MavenProject project, MavenSession session, BuildPluginManager pluginManager)
+	{
+		super(project, session, pluginManager);
+	}
 
 	/**
 	 * Executes the CTest run.
@@ -156,28 +166,8 @@ public class TestMojo extends CmakeMojo
 			// Read the ctest TAG file to find out what current run was called
 			File tagFile = new File(buildDirectory, "/Testing/TAG");
 			Charset charset = Charset.defaultCharset();
-			FileInputStream fis = new FileInputStream(tagFile);
-			InputStreamReader isr = new InputStreamReader(fis, charset);
-			BufferedReader tagReader = new BufferedReader(isr);
-			String tag;
-			try
-			{
-				tag = tagReader.readLine();
-			}
-			finally
-			{
-				tagReader.close();
-			}
-
-			if (tag == null || tag.trim().isEmpty())
-				throw new IOException("Couldn't read ctest TAG file");
-
-			// Get the current run's test data for reformatting
-			String xmlTestFilePath = "/Testing/" + tag + "/Test.xml";
-			File xmlSource = new File(buildDirectory, xmlTestFilePath);
-			StreamSource source = new StreamSource(xmlSource);
-			String projBuildDir = project.getBuild().getDirectory();
-			File reportsDir = new File(projBuildDir, "surefire-reports");
+			StreamSource source = getStreamSource(tagFile, charset);
+			File reportsDir = new File(getBuildDirectory(), "surefire-reports");
 			File xmlReport = new File(reportsDir, "CTestResults.xml");
 			StreamResult result = new StreamResult(xmlReport);
 
@@ -189,11 +179,6 @@ public class TestMojo extends CmakeMojo
 			// Transform CTest output into Surefire style test output
 			transformer.transform(source, result);
 
-			if (!ignoreTestFailure && testFailureIgnore)
-			{
-				ignoreTestFailure = testFailureIgnore;
-				log.warn("<testFailureIgnore> is deprecated. Please use <ignoreTestFailure> instead.");
-			}
 			if (returnCode != 0 && !ignoreTestFailure)
 				throw new MojoExecutionException("Return code: " + returnCode);
 		}
@@ -201,5 +186,29 @@ public class TestMojo extends CmakeMojo
 		{
 			throw new MojoExecutionException(e.getMessage(), e);
 		}
+	}
+
+	private StreamSource getStreamSource(File tagFile, Charset charset) throws IOException
+	{
+		FileInputStream fis = new FileInputStream(tagFile);
+		InputStreamReader isr = new InputStreamReader(fis, charset);
+		BufferedReader tagReader = new BufferedReader(isr);
+		String tag;
+		try
+		{
+			tag = tagReader.readLine();
+		}
+		finally
+		{
+			tagReader.close();
+		}
+
+		if (tag == null || tag.trim().isEmpty())
+			throw new IOException("Couldn't read ctest TAG file");
+
+		// Get the current run's test data for reformatting
+		String xmlTestFilePath = "/Testing/" + tag + "/Test.xml";
+		File xmlSource = new File(buildDirectory, xmlTestFilePath);
+		return new StreamSource(xmlSource);
 	}
 }

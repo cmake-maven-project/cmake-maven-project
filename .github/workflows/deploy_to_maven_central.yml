@@ -1,25 +1,63 @@
-# Source: https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-maven
+# Based on https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-maven
+# and https://gist.github.com/cstamas/69e6365bbb70521923020d68369bf8e5
 name: Deploy to Maven Central
 on:
   workflow_dispatch:
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 env:
-  # One can look up a project's profileId by running:
-  # mvn nexus-staging:rc-list-profiles -DserverId=maven-central-releases -DnexusUrl=https://oss.sonatype.org/
-  STAGING_PROFILE_ID: "1a35794454094c"
+  STAGING_HOST: "oss.sonatype.org"
   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
   OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
   MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+  GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
 jobs:
   open-release:
     runs-on: ubuntu-latest
     outputs:
-      INITIAL_REF_POSITION: ${{ steps.open-staging.outputs.INITIAL_REF_POSITION }}
-      TAG: ${{ steps.open-staging.outputs.TAG }}
-      STAGING_REPOSITORY_ID: ${{ steps.open-staging.outputs.STAGING_REPOSITORY_ID }}
+      INITIAL_REF_POSITION: ${{ steps.create-tag.outputs.INITIAL_REF_POSITION }}
+      TAG: ${{ steps.create-tag.outputs.TAG }}
+      STAGING_PROFILE_ID: ${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}
+      STAGING_REPOSITORY_ID: ${{ steps.parse-repository-id.outputs.STAGING_REPOSITORY_ID }}
     steps:
+      - name: Look up staging profile id
+        id: request-profile-id
+        run: >
+          echo "STAGING_PROFILE_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
+          -H 'Accept:application/json'
+          'https://${{ env.STAGING_HOST }}/service/local/staging/profile_evaluate?t=maven2&g=com.googlecode.cmake-maven-project&a=anything&v=anything')"
+          >> "$GITHUB_OUTPUT"
+
+      - name: Parse the staging profile id
+        id: parse-profile-id
+        run: >
+          echo "STAGING_PROFILE_ID=$(echo '${{ steps.request-profile-id.outputs.STAGING_PROFILE_ID }}' | jq -r '.data[0].id')" >> "$GITHUB_OUTPUT"
+
+      - name: Open staging foo
+        id: open-staging-foo
+        run: >
+          echo "STAGING_REPOSITORY_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
+          -H 'Accept: application/json'
+          -H 'Content-type: application/json'
+          -X POST -d '{"data": {"description": "Create new staging repository"}}'
+          'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}/start')"
+
+      - name: Open staging repository
+        id: open-repository
+        run: >
+          echo "STAGING_REPOSITORY_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
+          -H 'Accept: application/json'
+          -H 'Content-type: application/json'
+          -X POST -d '{"data": {"description": "Create new staging repository"}}'
+          'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}/start')"
+          >> "$GITHUB_OUTPUT"
+
+      - name: Parse the staging repository id
+        id: parse-repository-id
+        run: >
+          echo "STAGING_REPOSITORY_ID=$(echo '${{ steps.open-repository.outputs.STAGING_REPOSITORY_ID }}' | jq -r '.data.stagedRepositoryId')" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
@@ -42,7 +80,7 @@ jobs:
           path: |
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
-          key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
           restore-keys: |
             ${{ runner.OS }}-maven-
 
@@ -64,17 +102,12 @@ jobs:
       #
       # "release:prepare" must skip integration tests because "binaries-on-path-test" requires artifacts
       # to be deployed to local repository.
-      - name: Open staging repository
-        id: open-staging
+      - name: Create tag
+        id: create-tag
         run: |
-          echo "INITIAL_REF_POSITION=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "INITIAL_REF_POSITION=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           ./mvnw release:prepare --batch-mode -V -e -Darguments="-Ddeploy -Dinvoker.skip=true"
-          echo "TAG=$(git describe --tag --abbrev=0)" >> $GITHUB_OUTPUT
-          
-          output=$(./mvnw --batch-mode -e -DstagingProfileId=${{ env.STAGING_PROFILE_ID }} nexus-staging:rc-open)
-          [[ "$output" =~ Opened\ (comgooglecodecmake-maven-project-[[:digit:]]+) ]]
-          stagingRepositoryId="${BASH_REMATCH[1]}"
-          echo "STAGING_REPOSITORY_ID=$stagingRepositoryId" >> $GITHUB_OUTPUT
+          echo "TAG=$(git describe --tag --abbrev=0)" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy (${{ matrix.runtime }})
@@ -98,41 +131,45 @@ jobs:
           - runtime: win-arm64
             os: windows-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ needs.open-release.outputs.TAG }}
-    - uses: actions/setup-java@v4
-      with:
-        distribution: zulu
-        java-version: 8
-        server-id: maven-central-releases
-        # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
-        server-username: OSSRH_USERNAME
-        server-password: OSSRH_TOKEN
-        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.open-release.outputs.TAG }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 8
+          server-id: maven-central-releases
+          # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-    - name: Cache Dependencies
-      uses: actions/cache@v4
-      with:
-        # Avoid caching generated artifacts
-        path: |
-          ~/.m2/repository/*
-          !~/.m2/repository/com/googlecode/cmake-maven-project
-        key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.OS }}-maven-
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          # Avoid caching generated artifacts
+          path: |
+            ~/.m2/repository/*
+            !~/.m2/repository/com/googlecode/cmake-maven-project
+          key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
+          restore-keys: |
+            ${{ runner.OS }}-maven-
 
-    - name: Add platform-specific options
-      if: ${{ matrix.runtime == 'win-arm64' }}
-      run: >
-        "MAVEN_ARGS=-Pwindows-arm_64 -Dinvoker.skip=true" >> $env:GITHUB_ENV
+      - name: Add platform-specific options
+        if: ${{ matrix.runtime == 'win-arm64' }}
+        # We need to quote -D arguments if the argument name contains a dot, due to this Powershell bug:
+        # https://github.com/PowerShell/PowerShell/issues/6291
+        run: >
+          echo "MAVEN_OPTS=`-Dos.family=windows` `-Dos.arch=aarch64` -Dinvoker.skip=true" | Out-File 
+          -FilePath $env:GITHUB_ENV -Append
 
-    - name: Deploy to Maven Central
-      run: >
-        ./mvnw --batch-mode -V -e -Ddeploy -Dportable -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
-        -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
-        deploy
+      - name: Deploy to Maven Central
+        run: >
+          ./mvnw --batch-mode -V -e -Ddeploy
+          -Dstaging_repository_id=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
+          -Dstaging_host="${{ env.STAGING_HOST }}"
+          deploy
 
   close-release:
     needs: [ open-release, deploy ]
@@ -159,15 +196,16 @@ jobs:
           path: |
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
-          key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
           restore-keys: |
             ${{ runner.OS }}-maven-
 
       - name: Close staging repository
         run: >
-          ./mvnw --batch-mode -V -e -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
-          -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
-          nexus-staging:rc-close
+          curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
+          -H "Content-Type:application/json"
+          -d '{"data": {"stagedRepositoryId": "${{ env.STAGING_PROFILE_ID }}", 
+          "description": "Closing repository"}}' https://${{ env.STAGING_HOST }}.org/service/local/staging/bulk/close
 
   # Cleanup on failure: https://stackoverflow.com/a/74562058/14731
   on-failure:
@@ -197,7 +235,7 @@ jobs:
           path: |
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
-          key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
           restore-keys: |
             ${{ runner.OS }}-maven-
 
@@ -205,6 +243,11 @@ jobs:
         run: |
           git config user.email "cowwoc2020@gmail.com"
           git config user.name "Gili Tzabari"
+
+      - name: Delete tag
+        if: needs.open-release.outputs.TAG != ''
+        run: |
+          git push --delete origin ${{ needs.open-release.outputs.TAG }}
 
       - name: Restore the workflow ref to its original position
         if: needs.open-release.outputs.INITIAL_REF_POSITION != ''
@@ -218,14 +261,10 @@ jobs:
             git push -f origin ${{ github.ref_name }}
           fi
 
-      - name: Delete tag
-        if: needs.open-release.outputs.TAG != ''
-        run: |
-          git push --delete origin ${{ needs.open-release.outputs.TAG }}
-
       - name: Drop staging repository
         if: needs.open-release.outputs.STAGING_REPOSITORY_ID != ''
         run: >
-          ./mvnw --batch-mode -V -e -DstagingProfileId=${{ env.STAGING_PROFILE_ID }}
-          -DstagingRepositoryId=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
-          nexus-staging:rc-drop
+          curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
+          -H "Content-Type:application/json"
+          -d '{"data": {"stagedRepositoryIds": ["${{ env.STAGING_PROFILE_ID }}"],
+          "description": "Dropping repository"}}' https://${{ env.STAGING_HOST }}/service/local/staging/bulk/drop

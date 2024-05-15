@@ -36,7 +36,7 @@
 									<groupId>${cmake.plugin.groupid}</groupId>
 									<artifactId>cmake-binaries</artifactId>
 									<version>${cmake.plugin.version}</version>
-									<classifier>${platform}</classifier>
+									<classifier>${cmake.platform}</classifier>
 									<type>jar</type>
 								</artifactItem>
 							</artifactItems>

@@ -146,11 +146,11 @@ By default, Maven will activate the right profile based on your JVM:
 * mac-x86_64
 * mac-arm_64
 
-If detection does not work, or you wish to override it then set `-P<profile>`.
+If detection does not work, or you wish to override it then set `-Dos.name=<value>` and `-Dos.arch=<value>`.
 
 For instance, when building for 64-bit Linux machines, use:
 
-    mvn -Plinux-x86_64 install
+    mvn -Dos.name="linux" -Dos.arch="x86_64" install
 
 ### Using a local CMake installation
 
