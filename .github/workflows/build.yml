@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        runtime: [ linux-x64, osx-x64, win-x64, osx-arm64, win-arm64 ]
+        runtime: [ linux-x64, osx-x64, win-x64 ]
         include:
           - runtime: linux-x64
             os: ubuntu-latest
@@ -18,13 +18,7 @@ jobs:
           - runtime: osx-x64
             os: macOS-latest
 
-          - runtime: osx-arm64
-            os: macOS-latest
-
           - runtime: win-x64
-            os: windows-latest
-
-          - runtime: win-arm64
             os: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,10 +45,6 @@ jobs:
       # -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
       #                            having to crawl the workspace files to see the cause).
       # -e : Display stack-traces on failure
-      - name: Add maven options for arm64 platform
-        if: ${{ endsWith(matrix.runtime, '-arm64') }}
-        run: echo "MAVEN_OPTS=-Dinvoker.skip=true" >> "$GITHUB_ENV"
-
       - name: Build
         run: ./mvnw install -batch-mode -V "-Dsurefire.useFile=false" -e
 
