@@ -18,6 +18,7 @@ jobs:
     outputs:
       INITIAL_REF_POSITION: ${{ steps.create-tag.outputs.INITIAL_REF_POSITION }}
       TAG: ${{ steps.create-tag.outputs.TAG }}
+      VERSION: ${{ steps.create-tag.outputs.VERSION }}
       STAGING_PROFILE_ID: ${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}
       STAGING_REPOSITORY_ID: ${{ steps.parse-repository-id.outputs.STAGING_REPOSITORY_ID }}
     steps:
@@ -40,7 +41,7 @@ jobs:
           echo "STAGING_REPOSITORY_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
           -H 'Accept: application/json'
           -H 'Content-type: application/json'
-          -X POST -d '{"data": {"description": "com.googlecode.cmake-maven-project:${{ steps.create-tag.outputs.TAG }}"}}'
+          -X POST -d '{"data": {"description": "com.googlecode.cmake-maven-project:${{ steps.create-tag.outputs.VERSION }}"}}'
           'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}/start')"
           >> "$GITHUB_OUTPUT"
 
@@ -99,7 +100,9 @@ jobs:
         run: |
           echo "INITIAL_REF_POSITION=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           ./mvnw release:prepare --batch-mode -V -e -Darguments="-Ddeploy -Dinvoker.skip=true"
-          echo "TAG=$(git describe --tag --abbrev=0)" >> "$GITHUB_OUTPUT"
+          TAG=$(git describe --tag --abbrev=0)
+          echo "TAG=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${TAG#"release-"}" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy (${{ matrix.runtime }})
