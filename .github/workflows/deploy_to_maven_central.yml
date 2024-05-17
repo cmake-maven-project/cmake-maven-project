@@ -11,7 +11,6 @@ env:
   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
   OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
   MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-  GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
 jobs:
   open-release:
     runs-on: ubuntu-latest
@@ -34,22 +33,13 @@ jobs:
         run: >
           echo "STAGING_PROFILE_ID=$(echo '${{ steps.request-profile-id.outputs.STAGING_PROFILE_ID }}' | jq -r '.data[0].id')" >> "$GITHUB_OUTPUT"
 
-      - name: Open staging foo
-        id: open-staging-foo
-        run: >
-          echo "STAGING_REPOSITORY_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
-          -H 'Accept: application/json'
-          -H 'Content-type: application/json'
-          -X POST -d '{"data": {"description": "Create new staging repository"}}'
-          'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}/start')"
-
       - name: Open staging repository
         id: open-repository
         run: >
           echo "STAGING_REPOSITORY_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
           -H 'Accept: application/json'
           -H 'Content-type: application/json'
-          -X POST -d '{"data": {"description": "Create new staging repository"}}'
+          -X POST -d '{"data": {"description": "com.googlecode.cmake-maven-project:${{ steps.create-tag.outputs.TAG }}"}}'
           'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}/start')"
           >> "$GITHUB_OUTPUT"
 
@@ -62,6 +52,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
+          token: ${{ secrets.WORKFLOW_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -134,6 +125,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.open-release.outputs.TAG }}
+          token: ${{ secrets.WORKFLOW_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -178,6 +170,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.open-release.outputs.TAG }}
+          token: ${{ secrets.WORKFLOW_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -204,8 +197,8 @@ jobs:
         run: >
           curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
           -H "Content-Type:application/json"
-          -d '{"data": {"stagedRepositoryId": "${{ env.STAGING_PROFILE_ID }}", 
-          "description": "Closing repository"}}' https://${{ env.STAGING_HOST }}/service/local/staging/bulk/close
+          -d '{"data": {"stagedRepositoryId": "${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}", "description": "Closing repository"}}'
+          https://${{ env.STAGING_HOST }}/service/local/staging/profiles/$PROFILE_ID/finish 
 
   # Cleanup on failure: https://stackoverflow.com/a/74562058/14731
   on-failure:
@@ -217,6 +210,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
+          token: ${{ secrets.WORKFLOW_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -239,6 +233,14 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-maven-
 
+      - name: Drop staging repository
+        if: needs.open-release.outputs.STAGING_REPOSITORY_ID != ''
+        run: >
+          curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
+          -H "Content-Type:application/json"
+          -d '{"data": {"stagedRepositoryIds": ["${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}"],
+          "description": "Dropping repository"}}' https://${{ env.STAGING_HOST }}/service/local/staging/bulk/drop
+
       - name: Configure Git User
         run: |
           git config user.email "cowwoc2020@gmail.com"
@@ -260,11 +262,3 @@ jobs:
             fi
             git push -f origin ${{ github.ref_name }}
           fi
-
-      - name: Drop staging repository
-        if: needs.open-release.outputs.STAGING_REPOSITORY_ID != ''
-        run: >
-          curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
-          -H "Content-Type:application/json"
-          -d '{"data": {"stagedRepositoryIds": ["${{ env.STAGING_PROFILE_ID }}"],
-          "description": "Dropping repository"}}' https://${{ env.STAGING_HOST }}/service/local/staging/bulk/drop
