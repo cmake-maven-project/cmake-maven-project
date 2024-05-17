@@ -95,6 +95,8 @@ jobs:
       #
       # "release:prepare" must skip integration tests because "binaries-on-path-test" requires artifacts
       # to be deployed to local repository.
+      #
+      # Extracting the release version number: https://stackoverflow.com/a/16623897/14731
       - name: Create tag
         id: create-tag
         run: |
