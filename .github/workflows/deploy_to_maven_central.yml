@@ -204,7 +204,7 @@ jobs:
           curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
           -H "Content-Type:application/json"
           -d '{"data": {"stagedRepositoryId": "${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}", "description": "Closing repository"}}'
-          https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ needs.open-release.outputs.STAGING_PROFILE_ID }}/finish 
+          'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ needs.open-release.outputs.STAGING_PROFILE_ID }}/finish' 
 
   # Cleanup on failure: https://stackoverflow.com/a/74562058/14731
   on-failure:
@@ -244,8 +244,8 @@ jobs:
         run: >
           curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
           -H "Content-Type:application/json"
-          -d '{"data": {"stagedRepositoryIds": ["${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}"],
-          "description": "Dropping repository"}}' https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ needs.open-release.outputs.STAGING_PROFILE_ID }}/drop
+          -d '{"data": {"stagedRepositoryId": "${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}", "description": "Dropping repository"}}'
+          'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ needs.open-release.outputs.STAGING_PROFILE_ID }}/drop'
 
       - name: Configure Git User
         run: |
