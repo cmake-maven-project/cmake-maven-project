@@ -22,34 +22,6 @@ jobs:
       STAGING_PROFILE_ID: ${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}
       STAGING_REPOSITORY_ID: ${{ steps.parse-repository-id.outputs.STAGING_REPOSITORY_ID }}
     steps:
-      - name: Look up staging profile id
-        id: request-profile-id
-        run: >
-          echo "STAGING_PROFILE_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
-          -H 'Accept:application/json'
-          'https://${{ env.STAGING_HOST }}/service/local/staging/profile_evaluate?t=maven2&g=com.googlecode.cmake-maven-project&a=anything&v=anything')"
-          >> "$GITHUB_OUTPUT"
-
-      - name: Parse the staging profile id
-        id: parse-profile-id
-        run: >
-          echo "STAGING_PROFILE_ID=$(echo '${{ steps.request-profile-id.outputs.STAGING_PROFILE_ID }}' | jq -r '.data[0].id')" >> "$GITHUB_OUTPUT"
-
-      - name: Open staging repository
-        id: open-repository
-        run: >
-          echo "STAGING_REPOSITORY_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
-          -H 'Accept: application/json'
-          -H 'Content-type: application/json'
-          -X POST -d '{"data": {"description": "com.googlecode.cmake-maven-project:${{ steps.create-tag.outputs.VERSION }}"}}'
-          'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}/start')"
-          >> "$GITHUB_OUTPUT"
-
-      - name: Parse the staging repository id
-        id: parse-repository-id
-        run: >
-          echo "STAGING_REPOSITORY_ID=$(echo '${{ steps.open-repository.outputs.STAGING_REPOSITORY_ID }}' | jq -r '.data.stagedRepositoryId')" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
@@ -105,6 +77,34 @@ jobs:
           TAG=$(git describe --tag --abbrev=0)
           echo "TAG=${TAG}" >> "$GITHUB_OUTPUT"
           echo "VERSION=${TAG#"release-"}" >> "$GITHUB_OUTPUT"
+
+      - name: Look up staging profile id
+        id: request-profile-id
+        run: >
+          echo "STAGING_PROFILE_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
+          -H 'Accept:application/json'
+          'https://${{ env.STAGING_HOST }}/service/local/staging/profile_evaluate?t=maven2&g=com.googlecode.cmake-maven-project&a=anything&v=anything')"
+          >> "$GITHUB_OUTPUT"
+
+      - name: Parse the staging profile id
+        id: parse-profile-id
+        run: >
+          echo "STAGING_PROFILE_ID=$(echo '${{ steps.request-profile-id.outputs.STAGING_PROFILE_ID }}' | jq -r '.data[0].id')" >> "$GITHUB_OUTPUT"
+
+      - name: Open staging repository
+        id: open-repository
+        run: >
+          echo "STAGING_REPOSITORY_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
+          -H 'Accept: application/json'
+          -H 'Content-type: application/json'
+          -X POST -d '{"data": {"description": "com.googlecode.cmake-maven-project:${{ steps.create-tag.outputs.VERSION }}"}}'
+          'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}/start')"
+          >> "$GITHUB_OUTPUT"
+
+      - name: Parse the staging repository id
+        id: parse-repository-id
+        run: >
+          echo "STAGING_REPOSITORY_ID=$(echo '${{ steps.open-repository.outputs.STAGING_REPOSITORY_ID }}' | jq -r '.data.stagedRepositoryId')" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy (${{ matrix.runtime }})
