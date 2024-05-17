@@ -179,8 +179,13 @@ public class TestMojo extends CmakeMojo
 			// Transform CTest output into Surefire style test output
 			transformer.transform(source, result);
 
-			if (returnCode != 0 && !ignoreTestFailure)
-				throw new MojoExecutionException("Return code: " + returnCode);
+			if (returnCode != 0)
+			{
+				if (ignoreTestFailure)
+					log.warn("ignoreTestFailure is true. Ignoring failure");
+				else
+					throw new MojoExecutionException("Return code: " + returnCode);
+			}
 		}
 		catch (InterruptedException | IOException | TransformerException e)
 		{
