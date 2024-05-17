@@ -205,7 +205,7 @@ jobs:
           curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
           -H "Content-Type:application/json"
           -d '{"data": {"stagedRepositoryId": "${{ env.STAGING_PROFILE_ID }}", 
-          "description": "Closing repository"}}' https://${{ env.STAGING_HOST }}.org/service/local/staging/bulk/close
+          "description": "Closing repository"}}' https://${{ env.STAGING_HOST }}/service/local/staging/bulk/close
 
   # Cleanup on failure: https://stackoverflow.com/a/74562058/14731
   on-failure:
