@@ -1,5 +1,6 @@
 # Based on https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-maven
-# and https://gist.github.com/cstamas/69e6365bbb70521923020d68369bf8e5
+# https://gist.github.com/cstamas/69e6365bbb70521923020d68369bf8e5 and
+# https://oss.sonatype.org/nexus-staging-plugin/default/docs/rest.html
 name: Deploy to Maven Central
 on:
   workflow_dispatch:
@@ -239,7 +240,7 @@ jobs:
           curl -u ${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }} -X POST
           -H "Content-Type:application/json"
           -d '{"data": {"stagedRepositoryIds": ["${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}"],
-          "description": "Dropping repository"}}' https://${{ env.STAGING_HOST }}/service/local/staging/bulk/drop
+          "description": "Dropping repository"}}' https://${{ env.STAGING_HOST }}/service/local/staging/profiles/$PROFILE_ID/drop
 
       - name: Configure Git User
         run: |
