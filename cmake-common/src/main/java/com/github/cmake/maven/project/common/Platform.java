@@ -59,7 +59,8 @@ public final class Platform
 	 */
 	public boolean isDownloadAvailable()
 	{
-		return !(operatingSystem == OperatingSystem.LINUX && architecture == Architecture.ARM_32);
+		return !((operatingSystem == OperatingSystem.LINUX && architecture == Architecture.ARM_32) ||
+			operatingSystem == OperatingSystem.FREEBSD);
 	}
 
 	/**
@@ -103,6 +104,12 @@ public final class Platform
 					default:
 						throw new UnsupportedOperationException("Unsupported platform: " + getName());
 				}
+			case FREEBSD:
+			{
+				throw new UnsupportedOperationException("Platform requires CMake to be on the PATH.\n" +
+					"Platform: " + getName() + "\n" +
+					"PATH    : " + System.getenv("PATH"));
+			}
 			default:
 				throw new UnsupportedOperationException("Unsupported platform: " + getName());
 		}
@@ -165,6 +172,7 @@ public final class Platform
 		{
 			case LINUX:
 			case MAC:
+			case FREEBSD:
 				return "";
 			case WINDOWS:
 				return ".exe";
@@ -206,6 +214,12 @@ public final class Platform
 					default:
 						throw new UnsupportedOperationException("Unsupported platform: " + getName());
 				}
+			case FREEBSD:
+			{
+				throw new UnsupportedOperationException("Platform requires CMake to be on the PATH.\n" +
+					"Platform: " + getName() + "\n" +
+					"PATH    : " + System.getenv("PATH"));
+			}
 			case WINDOWS:
 				switch (architecture)
 				{
@@ -235,6 +249,7 @@ public final class Platform
 		{
 			case LINUX:
 			case MAC:
+			case FREEBSD:
 				return in instanceof ArchiveInputStream;
 			case WINDOWS:
 				return false;
@@ -404,23 +419,23 @@ public final class Platform
 		/**
 		 * macOS.
 		 */
-		MAC;
-
+		MAC,
 		/**
-		 * Detects the platform's operating system.
-		 *
-		 * @return the operating system
-		 * @throws IllegalArgumentException if no match was found
+		 * FreeBSD.
 		 */
+		FREEBSD;
+
 		private static final Reference<OperatingSystem> DETECTED = ConcurrentLazyReference.create(() ->
 		{
 			String name = System.getProperty("os.name");
-			if (startsWithIgnoreCase(name, "windows"))
+			if (startsWithIgnoreCase(name, "Windows"))
 				return WINDOWS;
-			if (startsWithIgnoreCase(name, "linux"))
+			if (startsWithIgnoreCase(name, "Linux"))
 				return LINUX;
-			if (startsWithIgnoreCase(name, "mac"))
+			if (startsWithIgnoreCase(name, "Mac"))
 				return MAC;
+			if (startsWithIgnoreCase(name, "FreeBSD"))
+				return FREEBSD;
 			throw new IllegalArgumentException("Unsupported operating system: " + name);
 		});
 
@@ -428,6 +443,7 @@ public final class Platform
 		 * Returns the detected operating system.
 		 *
 		 * @return the detected operating system
+		 * @throws IllegalArgumentException if no match was found
 		 */
 		public static OperatingSystem detected()
 		{
