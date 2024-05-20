@@ -114,9 +114,12 @@ jobs:
       # Concurrent deploys of the files that are common across platforms may lead to data corruption
       max-parallel: 1
       matrix:
-        runtime: [ win-arm64, linux-x64, osx-x64, win-x64 ]
+        runtime: [ linux-arm64, win-arm64, linux-x64, osx-x64, win-x64 ]
         include:
           - runtime: linux-x64
+            os: ubuntu-latest
+
+          - runtime: linux-arm64
             os: ubuntu-latest
 
           - runtime: osx-x64
@@ -160,7 +163,12 @@ jobs:
         # https://github.com/PowerShell/PowerShell/issues/6291
         run: >
           echo "MAVEN_OPTS=`-Dos.family=windows` `-Dos.arch=aarch64` -Dinvoker.skip=true" | Out-File 
-          -FilePath $env:GITHUB_ENV -Append
+          -FilePath "$env:GITHUB_ENV" -Append
+
+      - name: Add platform-specific options
+        if: ${{ matrix.runtime == 'linux-arm64' }}
+        run: >
+          echo "MAVEN_OPTS=-Dos.family=unix -Dos.arch=aarch64 -Dinvoker.skip=true" >> "${GITHUB_ENV}"
 
       - name: Deploy to Maven Central
         run: >
