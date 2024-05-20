@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
-	<version>3.29.3-b2</version>
+	<version>3.29.3-b3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>CMake</name>
 	<description>Builds native code using CMake makefile generator</description>
@@ -21,7 +21,7 @@
 		<connection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git</connection>
 		<developerConnection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git
 		</developerConnection>
-		<tag>release-3.29.3-b2</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<developers>
 		<developer>
