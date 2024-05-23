@@ -46,8 +46,6 @@ jobs:
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
-          restore-keys: |
-            ${{ runner.OS }}-maven-
 
       - name: Configure Git User
         run: |
@@ -154,8 +152,6 @@ jobs:
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
-          restore-keys: |
-            ${{ runner.OS }}-maven-
 
       - name: Add platform-specific options
         if: ${{ matrix.runtime == 'win-arm64' }}
@@ -204,8 +200,6 @@ jobs:
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
-          restore-keys: |
-            ${{ runner.OS }}-maven-
 
       - name: Close staging repository
         run: >
@@ -244,8 +238,6 @@ jobs:
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
-          restore-keys: |
-            ${{ runner.OS }}-maven-
 
       - name: Drop staging repository
         if: needs.open-release.outputs.STAGING_REPOSITORY_ID != ''

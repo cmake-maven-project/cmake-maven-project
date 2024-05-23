@@ -34,19 +34,16 @@ jobs:
           path: |
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
-          key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.OS }}-maven-
+          key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
 
       # Maven command-line options:
       # --batch-mode: recommended in CI to inform maven to not run in interactive mode (less logs)
       # -V: strongly recommended in CI, will display the JDK and Maven versions in use.
-      #      Very useful to be quickly sure the selected versions were the ones you think.
-      # -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
-      #                            having to crawl the workspace files to see the cause).
-      # -e : Display stack-traces on failure
+      # -Dsurefire.useFile=false: useful in CI. Displays test errors in the logs directly (instead of
+      #                           having to crawl the workspace files to see the cause).
+      # -e: Display stack-traces on failure
       - name: Build
-        run: ./mvnw install -batch-mode -V "-Dsurefire.useFile=false" -e
+        run: ./mvnw install --batch-mode -V "-Dsurefire.useFile=false" -e
 
   build-arm:
     runs-on: ubuntu-latest
@@ -74,9 +71,7 @@ jobs:
           path: |
             ~/.m2/repository/*
             !~/.m2/repository/com/googlecode/cmake-maven-project
-          key: ${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.OS }}-maven-
+          key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
 
       - name: Build
         uses: uraimo/run-on-arch-action@v2
