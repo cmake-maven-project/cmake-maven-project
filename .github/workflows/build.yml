@@ -1,7 +1,7 @@
 name: Build
 on: [ push ]
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -130,6 +130,6 @@ jobs:
               </toolchain>
             </toolchains>
             EOF
-              
+            
             cd "${GITHUB_WORKSPACE}"
             ./mvnw install --batch-mode -V -e

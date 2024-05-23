@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
@@ -16,6 +18,7 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
 	<scm>
 		<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
 		<connection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git</connection>
@@ -23,6 +26,7 @@
 		</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
+
 	<developers>
 		<developer>
 			<id>cowwoc</id>
@@ -34,12 +38,29 @@
 		</developer>
 	</developers>
 
+	<distributionManagement>
+		<snapshotRepository>
+			<id>maven-central-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>maven-central-releases</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+		</repository>
+	</distributionManagement>
+
+	<modules>
+		<module>cmake-common</module>
+		<module>cmake-binaries</module>
+		<module>cmake-binaries-plugin</module>
+		<module>cmake-maven-plugin</module>
+	</modules>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.version>3.9.6</maven.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.core.version>3.9.6</maven.core.version>
 
 		<!--
 		We have three kinds of platforms:
@@ -58,23 +79,17 @@
 		<skipTests>false</skipTests>
 	</properties>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>maven-central-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>maven-central-releases</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-	</distributionManagement>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-core</artifactId>
-				<version>${maven.core.version}</version>
+				<version>3.9.6</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>33.2.0-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
@@ -101,22 +116,12 @@
 				<artifactId>junit-jupiter-engine</artifactId>
 				<version>5.10.0</version>
 			</dependency>
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>33.2.0-jre</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.4.1</version>
-				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
@@ -126,11 +131,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.13.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.6.3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -144,11 +144,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>3.2.4</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>3.6.1</version>
 				</plugin>
@@ -156,11 +151,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
 					<version>3.3.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.1.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -193,6 +183,39 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>3.2.5</version>
 				</plugin>
+				<plugin>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.6.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>3.2.4</version>
+					<executions>
+						<execution>
+							<id>sign-artifacts</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>sign</goal>
+							</goals>
+							<configuration>
+								<bestPractices>true</bestPractices>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.1.2</version>
+					<configuration>
+						<deployAtEnd>true</deployAtEnd>
+						<altReleaseDeploymentRepository>
+							<!-- Based on https://gist.github.com/cstamas/69e6365bbb70521923020d68369bf8e5 -->
+							maven-central-releases::https://${staging_host}/service/local/staging/deployByRepositoryId/${staging_repository_id}
+						</altReleaseDeploymentRepository>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -219,6 +242,15 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.1</version>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<tagNameFormat>release-@{project.version}</tagNameFormat>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-toolchains-plugin</artifactId>
 				<version>3.2.0</version>
 				<executions>
@@ -236,24 +268,8 @@
 					</toolchains>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>3.0.1</version>
-				<configuration>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<tagNameFormat>release-@{project.version}</tagNameFormat>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
-
-	<modules>
-		<module>cmake-common</module>
-		<module>cmake-binaries</module>
-		<module>cmake-binaries-plugin</module>
-		<module>cmake-maven-plugin</module>
-	</modules>
 
 	<profiles>
 		<profile>
@@ -345,18 +361,12 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>deploy</id>
-			<activation>
-				<property>
-					<name>deploy</name>
-				</property>
-			</activation>
+			<id>release</id>
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>3.3.0</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -367,13 +377,20 @@
 						</executions>
 					</plugin>
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.6.3</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>3.1.0</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -381,24 +398,8 @@
 								<goals>
 									<goal>sign</goal>
 								</goals>
-								<configuration>
-									<!-- See https://maven.apache.org/guides/mini/guide-encryption.html -->
-									<passphraseServerId>gpg.passphrase</passphraseServerId>
-								</configuration>
 							</execution>
 						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-deploy-plugin</artifactId>
-						<version>3.1.2</version>
-						<configuration>
-							<deployAtEnd>true</deployAtEnd>
-							<altReleaseDeploymentRepository>
-								<!-- Based on https://gist.github.com/cstamas/69e6365bbb70521923020d68369bf8e5 -->
-								maven-central-releases::https://${staging_host}/service/local/staging/deployByRepositoryId/${staging_repository_id}
-							</altReleaseDeploymentRepository>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
