@@ -114,22 +114,5 @@ jobs:
           run: |
             export JAVA_HOME=`which java | xargs readlink -f | xargs dirname | xargs dirname`
             
-            mkdir -p ~/.m2/
-            cat <<EOF > ~/.m2/toolchains.xml
-            <?xml version="1.0" encoding="UTF8"?>
-            <toolchains>
-              <toolchain>
-                <type>jdk</type>
-                <provides>
-                  <version>8</version>
-                  <vendor>zulu</vendor>
-                </provides>
-                <configuration>
-                  <jdkHome>${JAVA_HOME}</jdkHome>
-                </configuration>
-              </toolchain>
-            </toolchains>
-            EOF
-            
             cd "${GITHUB_WORKSPACE}"
             ./mvnw install --batch-mode -V -e
