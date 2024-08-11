@@ -78,7 +78,7 @@ public final class Mojos
 				String line = in.readLine();
 				if (line == null)
 					break;
-				System.out.println(line);
+				log.info(line);
 			}
 		}
 		int result = process.waitFor();
