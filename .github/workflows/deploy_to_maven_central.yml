@@ -170,7 +170,7 @@ jobs:
         run: ./mvnw --batch-mode -V -e verify
 
       - name: Debug environment variables
-        run: ./mvn eu.maveniverse.maven.plugins:toolbox:0.1.33:dump -Dverbose
+        run: ./mvnw eu.maveniverse.maven.plugins:toolbox:0.1.33:dump -Dverbose
 
       - name: Deploy to Maven Central
         run: >
