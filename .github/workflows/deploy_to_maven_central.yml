@@ -30,9 +30,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
-          java-version: |
-            8
-            21
+          java-version: 8
           server-id: maven-central-releases
           # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
           server-username: OSSRH_USERNAME
@@ -138,7 +136,9 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
-          java-version: 8
+          java-version: |
+            8
+            21
           server-id: maven-central-releases
           # Server authentication corresponds to "user token" returned by https://oss.sonatype.org/
           server-username: OSSRH_USERNAME
