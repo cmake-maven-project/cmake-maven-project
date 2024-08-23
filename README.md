@@ -143,6 +143,7 @@ By default, Maven will activate the right profile based on your JVM:
 * windows-arm_64
 * linux-x86_64
 * linux-arm_32
+* linux-arm_64
 * mac-x86_64
 * mac-arm_64
 
