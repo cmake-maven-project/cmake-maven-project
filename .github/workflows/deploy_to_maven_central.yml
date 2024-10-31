@@ -7,6 +7,10 @@ on:
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
+permissions:
+  contents: write
+  id-token: write
+
 env:
   STAGING_HOST: "oss.sonatype.org"
   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
@@ -14,6 +18,7 @@ env:
   MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 jobs:
   open-release:
+    name: Open release
     runs-on: ubuntu-latest
     outputs:
       INITIAL_REF_POSITION: ${{ steps.create-tag.outputs.INITIAL_REF_POSITION }}
@@ -25,8 +30,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-          fetch-depth: 0
-          token: ${{ secrets.WORKFLOW_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -41,10 +44,7 @@ jobs:
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:
-          # Avoid caching generated artifacts
-          path: |
-            ~/.m2/repository/*
-            !~/.m2/repository/com/googlecode/cmake-maven-project
+          path: ~/.m2/repository/*
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
 
       - name: Configure Git User
@@ -132,8 +132,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.open-release.outputs.TAG }}
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-      - uses: actions/setup-java@v4
+          fetch-depth: 0
+
+      - name: Install Java
+        uses: actions/setup-java@v4
         with:
           distribution: zulu
           java-version: 8
@@ -147,10 +149,7 @@ jobs:
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:
-          # Avoid caching generated artifacts
-          path: |
-            ~/.m2/repository/*
-            !~/.m2/repository/com/googlecode/cmake-maven-project
+          path: ~/.m2/repository/*
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
 
       - name: Add platform-specific options
@@ -174,16 +173,17 @@ jobs:
           ./mvnw --batch-mode -V -e
           -Dstaging_repository_id=${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}
           -Dstaging_host="${{ env.STAGING_HOST }}"
-          deploy -P release
+          -P release
+          deploy
 
   close-release:
+    name: Close release
     needs: [ open-release, deploy ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.open-release.outputs.TAG }}
-          token: ${{ secrets.WORKFLOW_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -198,10 +198,7 @@ jobs:
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:
-          # Avoid caching generated artifacts
-          path: |
-            ~/.m2/repository/*
-            !~/.m2/repository/com/googlecode/cmake-maven-project
+          path: ~/.m2/repository/*
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
 
       - name: Close staging repository
@@ -213,6 +210,7 @@ jobs:
 
   # Cleanup on failure: https://stackoverflow.com/a/74562058/14731
   on-failure:
+    name: On failure
     needs: [ open-release, deploy, close-release ]
     runs-on: ubuntu-latest
     if: ${{ failure() || cancelled() }}
@@ -221,8 +219,8 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-      - uses: actions/setup-java@v4
+      - name: Install Java
+        uses: actions/setup-java@v4
         with:
           distribution: zulu
           java-version: 8
@@ -233,15 +231,6 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Cache Dependencies
-        uses: actions/cache@v4
-        with:
-          # Avoid caching generated artifacts
-          path: |
-            ~/.m2/repository/*
-            !~/.m2/repository/com/googlecode/cmake-maven-project
-          key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
-
       - name: Drop staging repository
         if: needs.open-release.outputs.STAGING_REPOSITORY_ID != '' && needs.open-release.outputs.STAGING_PROFILE_ID != ''
         run: >
@@ -249,11 +238,6 @@ jobs:
           -H "Content-Type:application/json"
           -d '{"data": {"stagedRepositoryId": "${{ needs.open-release.outputs.STAGING_REPOSITORY_ID }}", "description": "Dropping repository"}}'
           'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ needs.open-release.outputs.STAGING_PROFILE_ID }}/drop'
-
-      - name: Configure Git User
-        run: |
-          git config user.email "cowwoc2020@gmail.com"
-          git config user.name "Gili Tzabari"
 
       - name: Restore the workflow ref to its original position
         if: needs.open-release.outputs.INITIAL_REF_POSITION != ''
