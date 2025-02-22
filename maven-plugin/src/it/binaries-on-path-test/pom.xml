@@ -4,7 +4,7 @@
     https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.cmaketest</groupId>
+	<groupId>com.github.cmake-maven-plugin</groupId>
 	<artifactId>binaries-on-path-test</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>

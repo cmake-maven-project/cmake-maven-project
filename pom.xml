@@ -10,7 +10,7 @@
 	<name>CMake</name>
 	<description>Builds native code using the CMake makefile generator</description>
 
-	<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
+	<url>https://github.com/cmake-maven-plugin/cmake-maven-plugin</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -20,9 +20,9 @@
 	</licenses>
 
 	<scm>
-		<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
-		<connection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git</connection>
-		<developerConnection>scm:git:https://github.com/cmake-maven-project/cmake-maven-project.git
+		<url>https://github.com/cmake-maven-plugin/cmake-maven-plugin</url>
+		<connection>scm:git:https://github.com/cmake-maven-plugin/cmake-maven-plugin.git</connection>
+		<developerConnection>scm:git:https://github.com/cmake-maven-plugin/cmake-maven-plugin.git
 		</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
@@ -53,10 +53,10 @@
 	</distributionManagement>
 
 	<modules>
-		<module>cmake-common</module>
-		<module>cmake-binaries</module>
-		<module>cmake-binaries-plugin</module>
-		<module>cmake-maven-plugin</module>
+		<module>common</module>
+		<module>binaries</module>
+		<module>binaries-plugin</module>
+		<module>maven-plugin</module>
 	</modules>
 
 	<properties>

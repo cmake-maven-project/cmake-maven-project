@@ -293,7 +293,7 @@ public final class Platform
 			{
 				// Maven converts empty properties to null and Linux does not support null values,
 				// so we convert them back to empty strings:
-				// https://github.com/cmake-maven-project/cmake-maven-project/issues/11
+				// https://github.com/cmake-maven-plugin/cmake-maven-plugin/issues/11
 				value = "";
 			}
 			String name = entry.getKey();

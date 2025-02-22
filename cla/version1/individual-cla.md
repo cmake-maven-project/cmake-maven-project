@@ -1,7 +1,7 @@
 # Individual Contributor License Agreement
 
 In order to clarify the intellectual property license granted with Contributions from any person or entity,
-the owners of https://github.com/cmake-maven-project/ ("The Owners") must have a Contributor License
+the owners of https://github.com/cmake-maven-plugin/ ("The Owners") must have a Contributor License
 Agreement ("CLA") on file that has been signed by each Contributor, indicating agreement to the license terms
 below. This license is for your protection as a Contributor as well as the protection of The Owners; it does
 not change your rights to use your own Contributions for any other purpose.

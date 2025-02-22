@@ -1,4 +1,4 @@
-# CMake-Maven-Project [![build-status](../../workflows/Build/badge.svg)](../../actions?query=workflow%3ABuild)
+# CMake-Maven-Plugin [![build-status](../../workflows/Build/badge.svg)](../../actions?query=workflow%3ABuild)
 
 ## Introduction
 
@@ -28,7 +28,7 @@ migrated to GitHub (and Git) after Google Code shut down.
           <!-- The directory containing CMakeLists -->
         </sourcePath>
         <targetPath>
-          <!-- The directory write the project files to -->
+          <!-- The directory to write the project files to -->
         </targetPath>
         <generator>
           <!--
@@ -167,4 +167,4 @@ That's it! To learn more about CMake itself, consult the [CMake.org](https://cma
 
 ### License
 
-CMake-Maven-Project is released under an [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+CMake-Maven-Plugin is released under an [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)

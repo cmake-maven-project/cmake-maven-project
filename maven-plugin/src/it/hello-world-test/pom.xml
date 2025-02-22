@@ -4,7 +4,7 @@
     https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.cmaketest</groupId>
+	<groupId>com.github.cmake-maven-plugin</groupId>
 	<artifactId>hello-world-test</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>
@@ -12,48 +12,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<cmake.download>true</cmake.download>
 	</properties>
 
 	<profiles>
-		<profile>
-			<id>windows-x86_64</id>
-			<activation>
-				<os>
-					<family>windows</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Visual Studio 17 2022</generator>
-				<cmake.download>true</cmake.download>
-			</properties>
-		</profile>
-		<profile>
-			<id>windows-arm_64</id>
-			<activation>
-				<os>
-					<family>windows</family>
-					<arch>aarch64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Visual Studio 17 2022</generator>
-				<cmake.download>true</cmake.download>
-			</properties>
-		</profile>
-		<profile>
-			<id>linux-x86_64</id>
-			<activation>
-				<os>
-					<family>unix</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Unix Makefiles</generator>
-				<cmake.download>true</cmake.download>
-			</properties>
-		</profile>
 		<profile>
 			<id>linux-arm_32</id>
 			<activation>
@@ -63,34 +25,7 @@
 				</os>
 			</activation>
 			<properties>
-				<generator>Unix Makefiles</generator>
 				<cmake.download>false</cmake.download>
-			</properties>
-		</profile>
-		<profile>
-			<id>mac-x86_64</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Unix Makefiles</generator>
-				<cmake.download>true</cmake.download>
-			</properties>
-		</profile>
-		<profile>
-			<id>mac-arm_64</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<arch>aarch64</arch>
-				</os>
-			</activation>
-			<properties>
-				<generator>Unix Makefiles</generator>
-				<cmake.download>true</cmake.download>
 			</properties>
 		</profile>
 	</profiles>
@@ -110,7 +45,6 @@
 						<configuration>
 							<sourcePath>${project.basedir}</sourcePath>
 							<targetPath>${project.build.directory}</targetPath>
-							<generator>${generator}</generator>
 						</configuration>
 					</execution>
 					<execution>

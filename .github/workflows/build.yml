@@ -33,7 +33,7 @@ jobs:
           # Avoid caching generated artifacts
           path: |
             ~/.m2/repository/*
-            !~/.m2/repository/com/googlecode/cmake-maven-project
+            !~/.m2/repository/com/googlecode/cmake-maven-plugin
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
 
       # Maven command-line options:
@@ -70,7 +70,7 @@ jobs:
           # Avoid caching generated artifacts
           path: |
             ~/.m2/repository/*
-            !~/.m2/repository/com/googlecode/cmake-maven-project
+            !~/.m2/repository/com/googlecode/cmake-maven-plugin
           key: "${{ runner.OS }}-maven-${{ hashFiles('**/pom.xml') }}"
 
       - name: Build

@@ -4,11 +4,11 @@
     https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.cmaketest</groupId>
-	<artifactId>hello-world-test</artifactId>
+	<groupId>com.github.cmake-maven-plugin</groupId>
+	<artifactId>dashboard-test</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>
-	<name>Hello World Test for CMake Maven Plugin</name>
+	<name>Dashboard Test for CMake Maven Plugin</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -63,6 +63,8 @@
 						</goals>
 						<configuration>
 							<buildDirectory>${project.build.directory}</buildDirectory>
+							<ignoreTestFailure>true</ignoreTestFailure>
+							<dashboard>Experimental</dashboard>
 						</configuration>
 					</execution>
 				</executions>
