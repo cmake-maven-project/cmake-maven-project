@@ -81,7 +81,7 @@ jobs:
         run: >
           echo "STAGING_PROFILE_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
           -H 'Accept:application/json'
-          'https://${{ env.STAGING_HOST }}/service/local/staging/profile_evaluate?t=maven2&g=com.googlecode.cmake-maven-project&a=anything&v=anything')"
+          'https://${{ env.STAGING_HOST }}/service/local/staging/profile_evaluate?t=maven2&g=com.github.cmake-maven-plugin&a=anything&v=anything')"
           >> "$GITHUB_OUTPUT"
 
       - name: Parse the staging profile id
@@ -95,7 +95,7 @@ jobs:
           echo "STAGING_REPOSITORY_ID=$(curl -u '${{ secrets.OSSRH_USERNAME}}:${{ secrets.OSSRH_TOKEN }}'
           -H 'Accept: application/json'
           -H 'Content-type: application/json'
-          -X POST -d '{"data": {"description": "com.googlecode.cmake-maven-project:${{ steps.create-tag.outputs.VERSION }}"}}'
+          -X POST -d '{"data": {"description": "com.github.cmake-maven-plugin:${{ steps.create-tag.outputs.VERSION }}"}}'
           'https://${{ env.STAGING_HOST }}/service/local/staging/profiles/${{ steps.parse-profile-id.outputs.STAGING_PROFILE_ID }}/start')"
           >> "$GITHUB_OUTPUT"
 
