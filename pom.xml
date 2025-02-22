@@ -5,10 +5,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
-	<version>3.30.2-b2-SNAPSHOT</version>
+	<version>3.31.5-b1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>CMake</name>
-	<description>Builds native code using CMake makefile generator</description>
+	<description>Builds native code using the CMake makefile generator</description>
 
 	<url>https://github.com/cmake-maven-project/cmake-maven-project</url>
 	<licenses>
@@ -39,6 +39,9 @@
 	</developers>
 
 	<distributionManagement>
+		<relocation>
+			<groupId>com.github.cmake-maven-plugin</groupId>
+		</relocation>
 		<snapshotRepository>
 			<id>maven-central-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
