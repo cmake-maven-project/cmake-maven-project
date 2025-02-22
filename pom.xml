@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cmake-maven-project</groupId>
 	<artifactId>cmake</artifactId>
@@ -213,6 +214,34 @@
 							<!-- Based on https://gist.github.com/cstamas/69e6365bbb70521923020d68369bf8e5 -->
 							maven-central-releases::https://${staging_host}/service/local/staging/deployByRepositoryId/${staging_repository_id}
 						</altReleaseDeploymentRepository>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>2.18.0</version>
+					<configuration>
+						<ruleSet>
+							<rules>
+								<rule>
+									<groupId>org.apache.maven.plugins</groupId>
+									<ignoreVersions>
+										<ignoreVersion>
+											<type>regex</type>
+											<version>.+(-|\.)(alpha|beta).+|.+-rc(-|\.).*</version>
+										</ignoreVersion>
+									</ignoreVersions>
+								</rule>
+								<rule>
+									<ignoreVersions>
+										<ignoreVersion>
+											<type>regex</type>
+											<version>(?i)(.+-snapshot|.+(-|\.)M\d|.+(-|\.)(alpha|beta).+)|.+-rc(-|\.|\d).*</version>
+										</ignoreVersion>
+									</ignoreVersions>
+								</rule>
+							</rules>
+						</ruleSet>
 					</configuration>
 				</plugin>
 			</plugins>
